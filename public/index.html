@@ -1,0 +1,1890 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>学语言 - 用户系统</title>
+    <style>
+        /* ========== CSS Variables & Reset ========== */
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        :root {
+            --pri: #4a7dff;
+            --pri-dk: #3a6ae8;
+            --pri-light: #eef2ff;
+            --bg: #f5f7fa;
+            --dk: #1a1a2e;
+            --gray: #6b7280;
+            --gray-light: #9ca3af;
+            --border: #e5e7eb;
+            --ok: #22c55e;
+            --warn: #f59e0b;
+            --err: #ef4444;
+            --purple: #8b5cf6;
+            --pink: #ec4899;
+            --sidebar-w: 200px;
+            --radius: 12px;
+            --radius-sm: 8px;
+            --shadow: 0 1px 3px rgba(0,0,0,.06);
+            --shadow-lg: 0 8px 30px rgba(0,0,0,.1);
+        }
+        body { font-family: -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"PingFang SC","Microsoft YaHei",sans-serif; background: var(--bg); color: var(--dk); overflow-x: hidden; }
+
+        /* ========== Login / Register Overlay ========== */
+        .auth-overlay {
+            position: fixed; inset: 0; z-index: 9999; display: flex; align-items: center; justify-content: center;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        .auth-overlay.hidden { display: none; }
+        .auth-box {
+            width: 420px; background: #fff; border-radius: 20px; padding: 40px 36px; box-shadow: var(--shadow-lg);
+            position: relative; animation: authIn .4s ease;
+        }
+        @keyframes authIn { from{opacity:0;transform:translateY(20px)scale(.97)} to{opacity:1;transform:none} }
+        .auth-logo { text-align: center; margin-bottom: 28px; }
+        .auth-logo-icon { width:48px;height:48px;background:var(--pri);border-radius:14px;display:inline-flex;align-items:center;justify-content:center;color:#fff;font-size:22px;font-weight:bold;margin-bottom:10px; }
+        .auth-logo h2 { font-size: 22px; color: var(--dk); }
+        .auth-logo p { font-size: 13px; color: var(--gray); margin-top: 4px; }
+        .auth-tabs { display: flex; border-bottom: 2px solid var(--border); margin-bottom: 24px; }
+        .auth-tab { flex:1;text-align:center;padding:10px 0;font-size:15px;font-weight:600;color:var(--gray);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-2px;transition:.2s; }
+        .auth-tab.on { color: var(--pri); border-bottom-color: var(--pri); }
+        .form-group { margin-bottom: 18px; }
+        .form-label { display: block; font-size: 13px; font-weight: 600; color: var(--dk); margin-bottom: 6px; }
+        .form-input { width:100%;padding:11px 14px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-size:14px;transition:.2s;outline:none; }
+        .form-input:focus { border-color: var(--pri); box-shadow: 0 0 0 3px rgba(74,125,255,.1); }
+        .form-input.error { border-color: var(--err); box-shadow: 0 0 0 3px rgba(239,68,68,.1); }
+        .form-row { display: flex; gap: 10px; }
+        .form-row .form-input { flex: 1; }
+        .code-btn { white-space:nowrap;padding:11px 16px;background:var(--pri-light);color:var(--pri);border:1.5px solid var(--pri);border-radius:var(--radius-sm);font-size:13px;font-weight:600;cursor:pointer;transition:.2s; }
+        .code-btn:hover { background: var(--pri); color: #fff; }
+        .code-btn.disabled { opacity: .5; cursor: not-allowed; }
+        .form-check { display:flex;align-items:center;gap:6px;font-size:12px;color:var(--gray);margin-bottom:16px; }
+        .form-check input { accent-color: var(--pri); }
+        .form-check a { color: var(--pri); text-decoration: none; }
+        .btn-auth { width:100%;padding:13px;border-radius:var(--radius-sm);font-size:16px;font-weight:700;cursor:pointer;border:none;transition:.25s; }
+        .btn-login { background:linear-gradient(135deg,var(--pri),#6366f1);color:#fff;box-shadow:0 4px 15px rgba(74,125,255,.35); }
+        .btn-login:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(74,125,255,.45); }
+        .btn-login:active { transform: translateY(0); }
+        .divider { display:flex;align-items:center;gap:12px;margin:20px 0;color:var(--gray-light);font-size:12px; }
+        .divider::before,.divider::after { content:'';flex:1;height:1px;background:var(--border); }
+        .social-login { display:flex;justify-content:center;gap:16px; }
+        .social-btn { width:48px;height:48px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:22px;cursor:pointer;border:1.5px solid var(--border);transition:.2s;background:#fff; }
+        .social-btn:hover { transform: translateY(-3px); box-shadow: 0 4px 12px rgba(0,0,0,.1); }
+        .social-wechat { color: #07c160; } .social-qq { color: #12b7f5; } .social-weibo { color: #e6162d; }
+        .auth-footer { text-align:center;margin-top:18px;font-size:13px;color:var(--gray); }
+        .auth-footer a { color: var(--pri); cursor: pointer; font-weight: 600; }
+        .auth-link { text-align:center;margin-top:12px;font-size:13px; }
+        .auth-link a { color: var(--pri); cursor: pointer; }
+        .toast { position:fixed;top:20px;left:50%;transform:translateX(-50%);padding:10px 24px;border-radius:10px;font-size:14px;font-weight:500;z-index:10000;animation:toastIn .3s ease; }
+        .toast-ok { background:#dcfce7;color:#166534;border:1px solid #86efac; }
+        .toast-err { background:#fee2e2;color:#991b1b;border:1px solid #fca5a5; }
+        @keyframes toastIn{from{opacity:0;transform:translateX(-50%)translateY(-10px)}to{opacity:1;transform:translateX(-50%)translateY(0)} }
+
+        /* ========== App Shell (after login) ========== */
+        .app { display:none; height:100vh; width:100vw; }
+        .app.active { display:flex; }
+
+        /* Sidebar */
+        .side { width:var(--sidebar-w);background:#fff;border-right:1px solid var(--border);display:flex;flex-direction:column;flex-shrink:0; }
+        .side-hd { padding:14px 16px;display:flex;align-items:center;gap:10px;border-bottom:1px solid var(--border);cursor:pointer; }
+        .side-logo { width:32px;height:32px;background:var(--pri);border-radius:9px;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:bold;font-size:13px; }
+        .side-title { font-size:15px;font-weight:700; }
+        .side-nav { flex:1;overflow-y:auto;padding:8px 0; }
+        .nav-group { padding: 6px 12px; margin-top: 4px; }
+        .nav-group-label { font-size:11px; color: var(--gray-light); font-weight: 600; padding: 4px 8px; text-transform: uppercase; letter-spacing: .5px; }
+        .navi { display:flex;align-items:center;gap:9px;padding:9px 14px;margin:1px 6px;border-radius:8px;cursor:pointer;transition:.2s;color:var(--gray);font-size:13px; }
+        .navi:hover { background:#f3f4f6;color:var(--dk); }
+        .navi.on { background:var(--pri-light);color:var(--pri);font-weight:600; }
+        .navi-ic { font-size:16px;width:20px;text-align:center;flex-shrink:0; }
+        .navi-badge { margin-left:auto;background:var(--err);color:#fff;font-size:10px;padding:1px 6px;border-radius:10px;font-weight:600; }
+        .side-ft { padding:12px 14px;border-top:1px solid var(--border); }
+        .user-card { display:flex;align-items:center;gap:10px;padding:8px;border-radius:10px;cursor:pointer;transition:.2s; }
+        .user-card:hover { background: #f3f4f6; }
+        .u-avatar { width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;font-size:13px;font-weight:bold;flex-shrink:0; }
+        .u-info { flex:1;min-width:0; }
+        .u-name { font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis; }
+        .u-lv { font-size:11px;color:var(--gray); }
+        .vip-tag { font-size:9px;background:linear-gradient(135deg,#f59e0b,#ef4444);color:#fff;padding:1px 5px;border-radius:4px;font-weight:700;vertical-align:middle;margin-left:4px; }
+
+        /* Main Content */
+        .main { flex:1;overflow-y:auto;position:relative;background:var(--bg); }
+        .pg { display:none; animation:pgIn .3s ease; min-height:100%; }
+        .pg.on { display:block; }
+        @keyframes pgIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none} }
+
+        /* Common Components */
+        .btn { padding:8px 20px;border-radius:var(--radius-sm);font-size:13px;font-weight:600;cursor:pointer;border:none;transition:.2s;display:inline-flex;align-items:center;gap:5px;white-space:nowrap; }
+        .btn-pri { background:var(--pri);color:#fff; }.btn-pri:hover{background:var(--pri-dk);transform:translateY(-1px);box-shadow:0 4px 12px rgba(74,125,255,.3); }
+        .btn-warn { background:var(--warn);color:#fff; }.btn-warn:hover{background:#d97706; }
+        .btn-outline { background:transparent;color:var(--pri);border:1.5px solid var(--pri); }
+        .btn-danger { background:transparent;color:var(--err);border:1.5px solid #fecaca; }
+        .btn-sm { padding:5px 14px;font-size:12px;border-radius:6px; }
+        .btn-lg { padding:12px 28px;font-size:15px;border-radius:10px; }
+        .tag { display:inline-flex;align-items:center;gap:3px;padding:3px 8px;border-radius:5px;font-size:11px;font-weight:600; }
+        .tag-pri { background:var(--pri-light);color:var(--pri); }
+        .tag-ok { background:#dcfce7;color:#166534; }
+        .tag-warn { background:#fef3c7;color:#92400e; }
+        .tag-err { background:#fee2e2;color:#991b1b; }
+        .tag-purple { background:#ede9fe;color:#6d28d9; }
+        .card { background:#fff;border-radius:var(--radius);padding:20px;box-shadow:var(--shadow);margin-bottom:16px; }
+        .card-hd { display:flex;align-items:center;justify-content:space-between;margin-bottom:14px; }
+        .card-tit { font-size:15px;font-weight:600;display:flex;align-items:center;gap:6px; }
+        .page-header { padding:20px 28px 0;max-width:1200px;margin:0 auto; }
+        .page-title { font-size:20px;font-weight:700;display:flex;align-items:center;gap:8px; }
+        .page-body { padding:20px 28px 40px;max-width:1200px;margin:0 auto; }
+
+        /* ===== Profile Page ===== */
+        .prof-layout { display:flex;gap:20px; }
+        .prof-main { flex:1;min-width:0; }
+        .prof-side { width:300px;flex-shrink:0; }
+        .prof-avatar-row { display:flex;align-items:center;gap:16px;margin-bottom:24px; }
+        .prof-avatar-wrap { position:relative; }
+        .prof-avatar { width:80px;height:80px;border-radius:50%;object-fit:cover;border:3px solid #fff;box-shadow:0 2px 10px rgba(0,0,0,.1); }
+        .avatar-badge { position:absolute;bottom:0;right:0;width:24px;height:24px;background:var(--pri);border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;font-size:11px;border:2px solid #fff;cursor:pointer; }
+        .prof-basic h3 { font-size:18px;font-weight:700; }
+        .prof-basic p { font-size:13px;color:var(--gray);margin-top:2px; }
+        .edit-btn { font-size:12px;color:var(--pri);cursor:pointer;font-weight:600; }
+        .info-grid { display:grid;grid-template-columns:1fr 1fr;gap:12px; }
+        .info-item { display:flex;justify-content:space-between;align-items:center;padding:12px 14px;background:var(--bg);border-radius:8px; }
+        .info-label { font-size:13px;color:var(--gray); }
+        .info-value { font-size:13px;font-weight:600;display:flex;align-items:center;gap:6px; }
+        .sect { margin-bottom:20px; }
+        .sect-tit { font-size:15px;font-weight:600;display:flex;align-items:center;gap:6px;margin-bottom:12px;padding-bottom:8px;border-bottom:1px solid var(--border); }
+        .security-item { display:flex;align-items:center;justify-content:space-between;padding:14px 0;border-bottom:1px solid var(--border); }
+        .security-item:last-child { border-bottom: none; }
+        .sec-icon { width:36px;height:36px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:16px;background:var(--pri-light);margin-right:12px;flex-shrink:0; }
+        .sec-info h4 { font-size:14px;font-weight:600; }
+        .sec-info p { font-size:12px;color:var(--gray);margin-top:2px; }
+
+        /* VIP Panel */
+        .vip-panel { background:linear-gradient(135deg,#667eea,#764ba2);border-radius:var(--radius);padding:20px;color:#fff;margin-bottom:16px;position:relative;overflow:hidden; }
+        .vip-panel::after { content:'';position:absolute;top:-30px;right:-30px;width:120px;height:120px;background:rgba(255,255,255,.08);border-radius:50%; }
+        .vip-hd { display:flex;align-items:center;justify-content:space-between;margin-bottom:14px; }
+        .vip-level { font-size:13px;opacity:.85; }
+        .vip-badge-pill { background:rgba(255,255,255,.2);padding:3px 10px;border-radius:20px;font-size:11px;font-weight:600; }
+        .vip-stat { display:flex;align-items:baseline;gap:4px;margin-bottom:16px; }
+        .vip-num { font-size:32px;font-weight:800; }
+        .vip-unit { font-size:13px;opacity:.75; }
+        .vip-limit { font-size:12px;opacity:.7;margin-bottom:16px; }
+        .vip-features { margin-bottom:16px; }
+        .vf-item { display:flex;align-items:center;gap:8px;font-size:12px;margin-bottom:8px;opacity:.9; }
+        .vf-check { width:16px;height:16px;background:rgba(255,255,255,.25);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px; }
+        .vf-lock { opacity:.45; }
+        .vf-check.locked { background:rgba(255,255,255,.1); }
+        .btn-upgrade { width:100%;padding:12px;background:rgba(255,255,255,.2);border:1.5px solid rgba(255,255,255,.4);border-radius:10px;color:#fff;font-size:14px;font-weight:700;cursor:pointer;transition:.2s;text-align:center; }
+        .btn-upgrade:hover { background:rgba(255,255,255,.3); }
+        .logout-btn { width:100%;padding:10px;background:transparent;border:1.5px solid rgba(255,255,255,.3);border-radius:10px;color:rgba(255,255,255,.8);font-size:13px;cursor:pointer;transition:.2s;text-align:center;margin-top:8px; }
+        .logout-btn:hover { background:rgba(255,255,255,.1);color:#fff; }
+
+        /* ===== Membership Page ===== */
+        .pricing-hero { text-align:center;padding:40px 20px 30px; }
+        .pricing-hero h2 { font-size:26px;font-weight:800;margin-bottom:8px; }
+        .pricing-hero p { color:var(--gray);font-size:14px; }
+        .pricing-highlight { color:var(--pri);font-weight:700; }
+        .pricing-cards { display:grid;grid-template-columns:repeat(3,1fr);gap:18px;margin-bottom:30px; }
+        .price-card { background:#fff;border-radius:16px;padding:28px 22px;box-shadow:var(--shadow);position:relative;transition:.25s;border:2px solid transparent; }
+        .price-card:hover { transform:translateY(-6px);box-shadow:var(--shadow-lg); }
+        .price-card.featured { border-color:var(--pri);transform:scale(1.03);z-index:1; }
+        .price-card.featured:hover { transform:scale(1.03) translateY(-6px); }
+        .popular-badge { position:absolute;top:-12px;left:50%;transform:translateX(-50%);background:linear-gradient(135deg,var(--pri),#6366f1);color:#fff;padding:4px 16px;border-radius:20px;font-size:11px;font-weight:700;white-space:nowrap; }
+        .pc-tier { font-size:13px;color:var(--gray);font-weight:600;margin-bottom:4px; }
+        .pc-name { font-size:18px;font-weight:800;margin-bottom:4px; }
+        .pc-desc { font-size:12px;color:var(--gray);margin-bottom:18px; }
+        .pc-price { display:flex;align-items:baseline;gap:4px;margin-bottom:18px; }
+        .pc-currency { font-size:18px;font-weight:700; }
+        .pc-amount { font-size:40px;font-weight:900; }
+        .pc-period { font-size:13px;color:var(--gray); }
+        .pc-unit { font-size:14px;color:var(--gray); }
+        .pc-btn { width:100%;padding:12px;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer;border:none;transition:.2s; }
+        .pc-btn-free { background:var(--bg);color:var(--dk);border:1.5px solid var(--border); }
+        .pc-btn-free:hover { border-color:var(--pri);color:var(--pri); }
+        .pc-btn-pro { background:linear-gradient(135deg,var(--pri),#6366f1);color:#fff;box-shadow:0 4px 15px rgba(74,125,255,.35); }
+        .pc-btn-pro:hover { transform:translateY(-2px);box-shadow:0 6px 20px rgba(74,125,255,.45); }
+        .pc-btn-partner { background:linear-gradient(135deg,#f59e0b,#ef4444);color:#fff;box-shadow:0 4px 15px rgba(245,158,11,.35); }
+        .pc-btn-partner:hover { transform:translateY(-2px);box-shadow:0 6px 20px rgba(245,158,11,.45); }
+        .pc-features { list-style:none; }
+        .pc-features li { display:flex;align-items:flex-start;gap:8px;font-size:13px;padding:7px 0;border-bottom:1px solid #f3f4f6; }
+        .pc-features li:last-child { border-bottom:none; }
+        .pf-icon { flex-shrink:0;margin-top:2px; }
+        .pf-no { color:var(--gray-light); }
+        .compare-table { background:#fff;border-radius:var(--radius);overflow:hidden;box-shadow:var(--shadow); }
+        .ct-head { display:grid;grid-template-columns:1.5fr repeat(3,1fr);background:var(--bg);padding:14px 20px;font-size:13px;font-weight:700; }
+        .ct-row { display:grid;grid-template-columns:1.5fr repeat(3,1fr);padding:12px 20px;font-size:13px;border-bottom:1px solid var(--border);align-items:center; }
+        .ct-row:last-child { border-bottom:none; }
+        .ct-row:nth-child(even) { background:#fafbfc; }
+        .ct-yes { color:var(--ok);font-weight:600; }
+        .ct-no { color:var(--gray-light); }
+        .ct-limit { color:var(--warn);font-weight:600; }
+
+        /* ===== Dashboard / Stats Page ===== */
+        .stats-grid { display:grid;grid-template-columns:repeat(6,1fr);gap:14px;margin-bottom:20px; }
+        .stat-card { background:#fff;border-radius:var(--radius);padding:18px;box-shadow:var(--shadow);text-align:center;transition:.2s; }
+        .stat-card:hover { transform:translateY(-3px);box-shadow:0 6px 20px rgba(0,0,0,.08); }
+        .stat-num { font-size:28px;font-weight:900;line-height:1.2; }
+        .stat-label { font-size:12px;color:var(--gray);margin-top:4px; }
+        .stat-card.highlight { background:linear-gradient(135deg,var(--pri),#6366f1);color:#fff; }
+        .stat-card.highlight .stat-label { opacity:.8; }
+        .stats-row { display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px; }
+        .dark-card { background:var(--dk);border-radius:var(--radius);padding:20px;color:#fff; }
+        .dc-stats { display:grid;grid-template-columns:repeat(3,1fr);gap:16px;text-align:center; }
+        .dc-num { font-size:32px;font-weight:900; }
+        .dc-label { font-size:12px;opacity:.6;margin-top:2px; }
+        .progress-bar { height:8px;background:rgba(255,255,255,.15);border-radius:4px;overflow:hidden;margin-top:12px; }
+        .progress-fill { height:100%;border-radius:4px;transition:width .6s ease; }
+        .heatmap { display:grid;grid-template-columns:repeat(7,1fr);gap:3px;margin-top:12px; }
+        .hm-cell { aspect-ratio:1;border-radius:3px;background:rgba(255,255,255,.06); }
+        .hm-cell.l1 { background:rgba(74,125,255,.2); }
+        .hm-cell.l2 { background:rgba(74,125,255,.4); }
+        .hm-cell.l3 { background:rgba(74,125,255,.65); }
+        .hm-cell.l4 { background:rgba(74,125,255,.9); }
+
+        /* ===== Check-in / Points Page ===== */
+        .checkin-card { background:linear-gradient(135deg,#f59e0b,#ef4444);border-radius:var(--radius);padding:24px;color:#fff;margin-bottom:20px;position:relative;overflow:hidden; }
+        .checkin-card::before { content:'🔥';position:absolute;top:10px;right:16px;font-size:40px;opacity:.3; }
+        .ci-head { display:flex;align-items:center;justify-content:space-between;margin-bottom:16px; }
+        .ci-streak { display:flex;align-items:center;gap:8px; }
+        .ci-fire { font-size:28px; }
+        .ci-days { font-size:24px;font-weight:900; }
+        .ci-sub { font-size:12px;opacity:.8; }
+        .ci-calendar { display:grid;grid-template-columns:repeat(7,1fr);gap:6px;margin-bottom:16px; }
+        .ci-day { aspect-ratio:1;border-radius:8px;display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:11px;background:rgba(255,255,255,.15); }
+        .ci-day.done { background:rgba(255,255,255,.35);font-weight:700; }
+        .ci-day.today { border:2px solid #fff;font-weight:700; }
+        .ci-day-name { font-size:9px;opacity:.6;margin-top:1px; }
+        .btn-checkin { width:100%;padding:14px;background:rgba(255,255,255,.25);border:2px solid rgba(255,255,255,.5);border-radius:12px;color:#fff;font-size:16px;font-weight:800;cursor:pointer;transition:.2s;text-align:center; }
+        .btn-checkin:hover { background:rgba(255,255,255,.35);transform:scale(1.02); }
+        .points-overview { display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:20px; }
+        .po-card { background:#fff;border-radius:var(--radius);padding:18px;box-shadow:var(--shadow);text-align:center; }
+        .po-num { font-size:26px;font-weight:900; }
+        .po-label { font-size:12px;color:var(--gray);margin-top:4px; }
+        .level-bar { margin-top:12px; }
+        .lb-track { height:10px;background:var(--bg);border-radius:5px;overflow:hidden; }
+        .lb-fill { height:100%;border-radius:5px;background:linear-gradient(90deg,var(--pri),#8b5cf6);transition:width .6s; }
+        .lb-text { display:flex;justify-content:space-between;font-size:11px;color:var(--gray);margin-top:4px; }
+        .achievements { display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:12px; }
+        .ach-card { background:#fff;border-radius:var(--radius);padding:16px;box-shadow:var(--shadow);text-align:center;transition:.2s; }
+        .ach-card:hover { transform:translateY(-3px); }
+        .ach-card.locked { opacity:.5;filter:grayscale(.8); }
+        .ach-icon { font-size:36px;margin-bottom:8px; }
+        .ach-name { font-size:13px;font-weight:600;margin-bottom:2px; }
+        .ach-desc { font-size:11px;color:var(--gray); }
+        .ach-unlock { font-size:10px;color:var(--ok);font-weight:600;margin-top:4px; }
+
+        /* ===== Activity Log ===== */
+        .log-list { }
+        .log-item { display:flex;align-items:flex-start;gap:12px;padding:14px 0;border-bottom:1px solid var(--border); }
+        .log-time { font-size:11px;color:var(--gray-light);min-width:60px;flex-shrink:0;padding-top:2px; }
+        .log-icon { width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0; }
+        .log-body { flex:1; }
+        .log-text { font-size:13px;line-height:1.5; }
+        .log-detail { font-size:12px;color:var(--gray);margin-top:2px; }
+
+        /* ===== Settings / Privacy ===== */
+        .settings-section { margin-bottom:24px; }
+        .setting-item { display:flex;align-items:center;justify-content:space-between;padding:14px 0;border-bottom:1px solid var(--border); }
+        .setting-left { display:flex;align-items:center;gap:12px; }
+        .set-icon { width:36px;height:36px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:16px;background:var(--pri-light); }
+        .set-info h4 { font-size:14px;font-weight:600; }
+        .set-info p { font-size:12px;color:var(--gray);margin-top:1px; }
+        .toggle { width:44px;height:24px;background:#ddd;border-radius:12px;position:relative;cursor:pointer;transition:.2s; }
+        .toggle.on { background:var(--pri); }
+        .toggle::after { content:'';position:absolute;top:2px;left:2px;width:20px;height:20px;background:#fff;border-radius:50%;transition:.2s;box-shadow:0 1px 3px rgba(0,0,0,.2); }
+        .toggle.on::after { left:22px; }
+
+        /* Modal */
+        .modal-overlay { position:fixed;inset:0;z-index:8888;background:rgba(0,0,0,.5);display:flex;align-items:center;justify-content:center; }
+        .modal-overlay.hidden { display:none; }
+        .modal { background:#fff;border-radius:16px;padding:28px;width:480px;max-width:90vw;box-shadow:var(--shadow-lg);animation:modalIn .3s ease; }
+        @keyframes modalIn{from{opacity:0;transform:scale(.95)}to{opacity:1;transform:none} }
+        .modal-hd { display:flex;align-items:center;justify-content:space-between;margin-bottom:18px; }
+        .modal-hd h3 { font-size:17px;font-weight:700; }
+        .modal-close { cursor:pointer;font-size:20px;color:var(--gray);line-height:1; }
+
+        /* Responsive */
+        @media(max-width:1024px) {
+            .pricing-cards { grid-template-columns:1fr; }
+            .stats-grid { grid-template-columns:repeat(3,1fr); }
+            .prof-layout { flex-direction:column; }
+            .prof-side { width:100%; }
+            .stats-row { grid-template-columns:1fr; }
+            .points-overview { grid-template-columns:repeat(2,1fr); }
+        }
+    .biz-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:16px;}
+    .biz-grid.sm{grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:14px;}
+    .u-input{padding:10px 14px;border:1px solid var(--border);border-radius:10px;font-size:14px;outline:none;width:100%;box-sizing:border-box;transition:.2s;}
+    .u-input:focus{border-color:var(--pri);box-shadow:0 0 0 3px rgba(74,144,226,.12);}
+
+    /* 课程详情页 */
+    .cd-hero{display:flex;gap:20px;align-items:center;padding:24px;border-radius:16px;background:linear-gradient(135deg,#667eea,#764ba2);color:#fff;margin-bottom:18px;}
+    .cd-cover{font-size:60px;width:96px;height:96px;display:flex;align-items:center;justify-content:center;background:rgba(255,255,255,.15);border-radius:16px;flex-shrink:0;}
+    .cd-tags{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px;}
+    .cd-tag{font-size:12px;background:rgba(255,255,255,.2);padding:3px 10px;border-radius:12px;}
+    .cd-lesson{display:flex;gap:12px;align-items:center;padding:14px 16px;border:1px solid var(--border);border-radius:12px;margin-bottom:10px;transition:.2s;}
+    .cd-lesson:hover{border-color:var(--pri);background:#fafbff;}
+    .cd-lesson .seq{width:30px;height:30px;border-radius:50%;background:#eef2ff;color:var(--pri);display:flex;align-items:center;justify-content:center;font-weight:700;flex-shrink:0;}
+    .cd-lesson .play-ic{margin-left:auto;color:var(--pri);font-size:18px;}
+    .btn-ghost{background:transparent;border:1px solid var(--border);color:var(--txt);padding:8px 14px;border-radius:8px;cursor:pointer;font-size:14px;font-weight:600;}
+    .btn-ghost:hover{background:#f3f4f8;}
+
+    /* 句子练习（深色主题） */
+    .practice-wrap{background:#171b22;min-height:calc(100vh - 120px);padding:28px 20px;box-sizing:border-box;}
+    .gram-chips{display:flex;flex-wrap:wrap;gap:14px 16px;justify-content:center;margin:6px 0 6px;}
+    .gram-item{display:flex;flex-direction:column;align-items:center;gap:5px;}
+    .gram-tag{font-size:10px;padding:2px 8px;border-radius:8px;font-weight:700;color:#fff;}
+    .gram-word{font-size:21px;font-weight:700;color:#eef1f6;letter-spacing:.3px;}
+    .gram-ph{font-size:11px;color:#7e8794;}
+    .practice-card{background:#1f2430;border:1px solid #2c3340;border-radius:16px;padding:26px;max-width:780px;margin:0 auto;}
+    .pa-controls{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin:20px 0 6px;}
+    .pa-btn{background:#2c3340;color:#dfe5ef;border:none;padding:10px 16px;border-radius:10px;cursor:pointer;font-size:14px;font-weight:600;transition:.15s;}
+    .pa-btn.play{background:#4a90e2;color:#fff;}
+    .pa-btn:hover{filter:brightness(1.12);}
+    .pa-btn:active{transform:scale(.96);}
+    .dict-row{display:flex;gap:10px;margin-top:16px;}
+    .dict-input{flex:1;padding:12px 14px;border-radius:10px;border:1px solid #2c3340;background:#15181f;color:#fff;font-size:15px;outline:none;transition:.2s;}
+    .dict-input.ok{border-color:#27ae60;background:#16301f;}
+    .dict-input.bad{border-color:#e74c3c;background:#301818;}
+    .pa-hint{color:#7e8794;font-size:13px;text-align:center;margin-top:10px;}
+    .pa-trans{color:#aeb6c2;text-align:center;margin-top:8px;font-size:15px;line-height:1.6;}
+    .pa-answer{color:#9fe0b0;font-weight:600;}
+    </style>
+</head>
+<body>
+
+<!-- ==================== AUTH OVERLAY (Login/Register) ==================== -->
+<div class="auth-overlay" id="authOverlay">
+    <div class="auth-box">
+        <div class="auth-logo">
+            <div class="auth-logo-icon">学</div>
+            <h2>学语言</h2>
+            <p>学语言 说语言 看世界</p>
+        </div>
+        <div class="auth-tabs">
+            <div class="auth-tab on" data-tab="login" onclick="switchAuthTab('login')">登录</div>
+            <div class="auth-tab" data-tab="register" onclick="switchAuthTab('register')">注册</div>
+        </div>
+
+        <!-- Login Form -->
+        <div id="loginForm">
+            <div class="form-group">
+                <label class="form-label">手机号 / 邮箱</label>
+                <input class="form-input" type="text" id="loginAccount" placeholder="请输入手机号或邮箱" value="138****8885">
+            </div>
+            <div class="form-group">
+                <label class="form-label">密码</label>
+                <input class="form-input" type="password" id="loginPwd" placeholder="请输入密码" value="123456">
+            </div>
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;">
+                <div class="form-check"><input type="checkbox" checked> 记住我</div>
+                <a href="#" style="font-size:12px;color:var(--pri);text-decoration:none;" onclick="showForgotPwd()">忘记密码？</a>
+            </div>
+            <button class="btn-auth btn-login" onclick="doLogin()">登 录</button>
+            <div class="divider">或使用以下方式登录</div>
+            <div class="social-login">
+                <div class="social-btn social-wechat" title="微信登录" onclick="socialLogin('wechat')">&#xe900;</div>
+                <div class="social-btn social-qq" title="QQ登录" onclick="socialLogin('qq')">&#xf1a6;</div>
+                <div class="social-btn social-weibo" title="微博登录" onclick="socialLogin('weibo')">&#xf18a;</div>
+            </div>
+            <div class="auth-footer">还没有账号？<a onclick="switchAuthTab('register')">立即注册</a></div>
+        </div>
+
+        <!-- Register Form -->
+        <div id="registerForm" style="display:none;">
+            <div class="form-group">
+                <label class="form-label">昵称</label>
+                <input class="form-input" type="text" id="regNickname" placeholder="给自己起个名字吧" value="lucky">
+            </div>
+            <div class="form-group">
+                <label class="form-label">手机号</label>
+                <div class="form-row">
+                    <input class="form-input" type="tel" id="regPhone" placeholder="请输入手机号" value="138****8885">
+                    <button class="code-btn" id="sendCodeBtn" onclick="sendCode()">获取验证码</button>
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="form-label">验证码</label>
+                <input class="form-input" type="text" id="regCode" placeholder="请输入6位验证码" value="123456">
+            </div>
+            <div class="form-group">
+                <label class="form-label">设置密码</label>
+                <input class="form-input" type="password" id="regPwd" placeholder="6-20位字母数字组合" value="123456">
+            </div>
+            <div class="form-group">
+                <label class="form-label">确认密码</label>
+                <input class="form-input" type="password" id="regPwd2" placeholder="再次输入密码" value="123456">
+            </div>
+            <div class="form-check"><input type="checkbox" id="agreeCheck" checked> 我已阅读并同意<a href="#">《用户协议》</a>和<a href="#">《隐私政策》</a></div>
+            <button class="btn-auth btn-login" onclick="doRegister()">注 册</button>
+            <div class="auth-footer">已有账号？<a onclick="switchAuthTab('login')">去登录</a></div>
+        </div>
+
+        <!-- Forgot Password Form -->
+        <div id="forgotForm" style="display:none;">
+            <div class="form-group">
+                <label class="form-label">注册手机号</label>
+                <div class="form-row">
+                    <input class="form-input" type="tel" id="forgotPhone" placeholder="请输入注册时的手机号">
+                    <button class="code-btn" onclick="sendCode()">获取验证码</button>
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="form-label">新密码</label>
+                <input class="form-input" type="password" id="newPwd" placeholder="设置新密码（6-20位）">
+            </div>
+            <div class="form-group">
+                <label class="form-label">确认新密码</label>
+                <input class="form-input" type="password" id="newPwd2" placeholder="再次输入新密码">
+            </div>
+            <button class="btn-auth btn-login" onclick="doResetPwd()">重置密码</button>
+            <div class="auth-footer"><a onclick="showLoginForm()">返回登录</a></div>
+        </div>
+    </div>
+</div>
+
+<!-- ==================== APP SHELL (After Login) ==================== -->
+<div class="app" id="appShell">
+
+    <!-- Sidebar -->
+    <aside class="side">
+        <div class="side-hd" onclick="navigateTo('home')">
+            <div class="side-logo">学</div>
+            <span class="side-title">学语言</span>
+        </div>
+        <nav class="side-nav">
+            <div class="nav-group">
+                <div class="navi on" data-page="home" onclick="navigateTo('home')"><span class="navi-ic">🏠</span> 主页</div>
+                <div class="navi" data-page="profile" onclick="navigateTo('profile')"><span class="navi-ic">👤</span> 个人中心</div>
+                <div class="navi" data-page="courses" onclick="navigateTo('courses')"><span class="navi-ic">📚</span> 我的课程</div>
+            </div>
+            <div class="nav-group">
+                <div class="nav-group-label">学习工具</div>
+                <div class="navi" data-page="market" onclick="navigateTo('market')"><span class="navi-ic">🛒</span> 课程市场</div>
+                <div class="navi" data-page="guide" onclick="navigateTo('guide')"><span class="navi-ic">🧭</span> 课程向导</div>
+                <div class="navi" data-page="mistakes" onclick="navigateTo('mistakes')"><span class="navi-ic">❌</span> 错题本</div>
+                <div class="navi" data-page="vocab" onclick="navigateTo('vocab')"><span class="navi-ic">📝</span> 背单词</div>
+                <div class="navi" data-page="lookup" onclick="navigateTo('lookup')"><span class="navi-ic">🔍</span> 查单词</div>
+                <div class="navi" data-page="knowledge" onclick="navigateTo('knowledge')"><span class="navi-ic">💡</span> 知识库</div>
+            </div>
+            <div class="nav-group">
+                <div class="nav-group-label">账户与成长</div>
+                <div class="navi" data-page="dashboard" onclick="navigateTo('dashboard')"><span class="navi-ic">📊</span> 数据面板</div>
+                <div class="navi" data-page="checkin" onclick="navigateTo('checkin')"><span class="navi-ic">🔥</span> 签到积分<span class="navi-badge">3</span></div>
+                <div class="navi" data-page="membership" onclick="navigateTo('membership')"><span class="navi-ic">👑</span> 会员权益</div>
+                <div class="navi" data-page="partner" onclick="navigateTo('partner')"><span class="navi-ic">🤝</span> 合伙人招募</div>
+                <div class="navi" data-page="settings" onclick="navigateTo('settings')"><span class="navi-ic">⚙️</span> 隐私设置</div>
+            </div>
+        </nav>
+        <div class="side-ft">
+            <div class="user-card" onclick="navigateTo('profile')">
+                <div class="u-avatar" id="sidebarAvatar" style="background:linear-gradient(135deg,#667eea,#764ba2)">L</div>
+                <div class="u-info">
+                    <div class="u-name" id="sidebarName">lucky<span class="vip-tag" id="sidebarVipTag">FREE</span></div>
+                    <div class="u-lv">Lv.1 新手 · 120 积分</div>
+                </div>
+            </div>
+        </div>
+    </aside>
+
+    <!-- Main Content Area -->
+    <main class="main">
+
+        <!-- ===== HOME PAGE ===== -->
+        <div class="pg on" id="pg-home">
+            <div class="home" style="padding:28px 32px;max-width:1200px;margin:0 auto;">
+                <div class="hero" style="background:linear-gradient(135deg,var(--pri),#8b5cf6);border-radius:18px;padding:36px 40px;color:#fff;margin-bottom:28px;">
+                    <h2 style="font-size:26px;margin-bottom:6px;">👋 你好，<span id="homeUserName">lucky</span>！</h2>
+                    <p style="opacity:.9;font-size:14px;">今天也要坚持学英语哦～ 已连续签到 <strong>3</strong> 天</p>
+                    <div style="display:flex;gap:12px;margin-top:20px;">
+                        <button class="btn btn-pri" style="background:rgba(255,255,255,.2);border:1px solid rgba(255,255,255,.4);" onclick="navigateTo('checkin')">🔥 每日签到</button>
+                        <button class="btn btn-pri" style="background:rgba(255,255,255,.2);border:1px solid rgba(255,255,255,.4);" onclick="navigateTo('courses')">📚 继续学习</button>
+                        <button class="btn btn-pri" style="background:rgba(255,255,255,.2);border:1px solid rgba(255,255,255,.4);" onclick="navigateTo('membership')">👑 升级VIP</button>
+                    </div>
+                </div>
+                <h3 style="font-size:17px;font-weight:700;margin-bottom:14px;">📌 今日推荐</h3>
+                <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:18px;">
+                    <div class="c-card" style="background:#fff;border-radius:14px;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,.05);cursor:pointer;transition:.2s;" onclick="navigateTo('courses')">
+                        <div style="height:140px;background:linear-gradient(135deg,#4a7dff,#6366f1);display:flex;align-items:center;justify-content:center;color:#fff;font-size:40px;">🦊</div>
+                        <div style="padding:14px;">
+                            <div style="font-size:14px;font-weight:600;margin-bottom:4px;">Little Fox 彼得兔故事</div>
+                            <div style="font-size:11px;color:var(--gray);margin-bottom:8px;">经典动画改编，适合初级学习者</div>
+                            <div style="display:flex;justify-content:space-between;align-items:center;font-size:11px;color:var(--gray);">
+                                <span class="tag tag-g">入门</span><span>4621人学习</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="c-card" style="background:#fff;border-radius:14px;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,.05);cursor:pointer;transition:.2s;" onclick="navigateTo('vocab')">
+                        <div style="height:140px;background:linear-gradient(135deg,#22c55e,#16a34a);display:flex;align-items:center;justify-content:center;color:#fff;font-size:40px;">📖</div>
+                        <div style="padding:14px;">
+                            <div style="font-size:14px;font-weight:600;margin-bottom:4px;">中考必备词汇 1600词</div>
+                            <div style="font-size:11px;color:var(--gray);margin-bottom:8px;">系统化记忆，科学复习曲线</div>
+                            <div style="display:flex;justify-content:space-between;align-items:center;font-size:11px;color:var(--gray);">
+                                <span class="tag tag-y">词汇</span><span>今日新词 4/100</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="c-card" style="background:#fff;border-radius:14px;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,.05);cursor:pointer;transition:.2s;" onclick="navigateTo('mistakes')">
+                        <div style="height:140px;background:linear-gradient(135deg,#ef4444,#dc2626);display:flex;align-items:center;justify-content:center;color:#fff;font-size:40px;">❌</div>
+                        <div style="padding:14px;">
+                            <div style="font-size:14px;font-weight:600;margin-bottom:4px;">错题本 · 待巩固 2 题</div>
+                            <div style="font-size:11px;color:var(--gray);margin-bottom:8px;">智能错因分析，针对性练习</div>
+                            <div style="display:flex;justify-content:space-between;align-items:center;font-size:11px;color:var(--gray);">
+                                <span class="tag tag-r">待巩固</span><span>正确率 0%</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ===== PROFILE PAGE (Personal Center) ===== -->
+        <div class="pg" id="pg-profile">
+            <div class="page-header"><div class="page-title">👤 个人中心</div></div>
+            <div class="page-body">
+                <div class="prof-layout">
+                    <div class="prof-main">
+                        <!-- Basic Info -->
+                        <div class="card">
+                            <div class="sect-tit">📋 基础信息</div>
+                            <div class="prof-avatar-row">
+                                <div class="prof-avatar-wrap">
+                                    <img class="prof-avatar" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 80 80'%3E%3Crect fill='%23667eea' width='80' height='80' rx='40'/%3E%3Ctext x='40' y='50' text-anchor='middle' fill='white' font-size='32' font-weight='bold'%3EL%3C/text%3E%3C/svg%3E" alt="avatar">
+                                    <div class="avatar-badge" title="更换头像">📷</div>
+                                </div>
+                                <div class="prof-basic">
+                                    <h3>lucky <span class="edit-btn" onclick="openEditModal('nickname')">✏️ 编辑</span></h3>
+                                    <p>ID: JY20240725001</p>
+                                </div>
+                            </div>
+                            <div class="info-grid">
+                                <div class="info-item"><span class="info-label">昵称</span><span class="info-value">lucky <span class="edit-btn" onclick="openEditModal('nickname')">编辑</span></span></div>
+                                <div class="info-item"><span class="info-label">性别</span><span class="info-value">男 <span class="edit-btn" onclick="openEditModal('gender')">编辑</span></span></div>
+                                <div class="info-item"><span class="info-label">生日</span><span class="info-value">— <span class="edit-btn" onclick="openEditModal('birthday')">编辑</span></span></div>
+                                <div class="info-item"><span class="info-label">城市</span><span class="info-value">📍 城市 <span class="edit-btn" onclick="openEditModal('city')">编辑</span></span></div>
+                            </div>
+                        </div>
+
+                        <!-- Account & Security -->
+                        <div class="card">
+                            <div class="sect-tit">🔐 账号与安全</div>
+                            <div class="security-item">
+                                <div style="display:flex;align-items:center;"><div class="sec-icon">📱</div><div class="sec-info"><h4>手机号码</h4><p>用于登录和安全验证</p></div></div>
+                                <div style="display:flex;align-items:center;gap:8px;"><span style="font-size:13px;font-weight:600;">138****8885</span><button class="btn btn-sm btn-outline">更改</button></div>
+                            </div>
+                            <div class="security-item">
+                                <div style="display:flex;align-items:center;"><div class="sec-icon">📧</div><div class="sec-info"><h4>电子邮箱</h4><p>用于接收通知和找回密码</p></div></div>
+                                <div style="display:flex;align-items:center;gap:8px;"><span style="font-size:13px;font-weight:600;color:var(--gray);">未绑定</span><button class="btn btn-sm btn-pri">绑定</button></div>
+                            </div>
+                            <div class="security-item">
+                                <div style="display:flex;align-items:center;"><div class="sec-icon">🕐</div><div class="sec-info"><h4>上次登录时间</h4><p>最近一次成功登录</p></div></div>
+                                <span style="font-size:13px;color:var(--gray);">2026-07-25 14:31:49</span>
+                            </div>
+                            <div class="security-item">
+                                <div style="display:flex;align-items:center;"><div class="sec-icon">🌐</div><div class="sec-info"><h4>登录IP地址</h4><p>当前设备网络地址</p></div></div>
+                                <span style="font-size:13px;color:var(--gray);font-family:monospace;">183.241.201.52</span>
+                            </div>
+                            <div class="security-item">
+                                <div style="display:flex;align-items:center;"><div class="sec-icon">🔑</div><div class="sec-info"><h4>登录密码</h4><p>定期修改密码保护账户安全</p></div></div>
+                                <button class="btn btn-sm btn-outline" onclick="showChangePwdModal()">修改密码</button>
+                            </div>
+                        </div>
+
+                        <!-- Payment Info -->
+                        <div class="card">
+                            <div class="sect-tit">💳 支付宝信息</div>
+                            <p style="font-size:13px;color:var(--gray);margin-bottom:12px;">仅限参与推广分佣的用户填写</p>
+                            <div class="info-grid" style="grid-template-columns:1fr 1fr;">
+                                <div class="info-item"><span class="info-label">支付宝账号</span><span class="info-value" style="color:var(--gray);">未填写</span></div>
+                                <div class="info-item"><span class="info-label">支付宝实名</span><span class="info-value" style="color:var(--gray);">未填写</span></div>
+                            </div>
+                        </div>
+
+                        <!-- Orders -->
+                        <div class="card">
+                            <div class="card-hd"><div class="card-tit">🧾 我的订单</div><a href="#" style="font-size:12px;color:var(--pri);text-decoration:none;">全部订单 ›</a></div>
+                            <div style="text-align:center;padding:30px;color:var(--gray);font-size:14px;">暂无订单记录</div>
+                        </div>
+                    </div>
+
+                    <!-- Right Sidebar - VIP Panel -->
+                    <div class="prof-side">
+                        <div class="vip-panel">
+                            <div class="vip-hd">
+                                <span class="vip-level">免费会员</span>
+                                <span class="vip-badge-pill">FREE</span>
+                            </div>
+                            <div class="vip-stat">
+                                <span class="vip-num" id="vipTodayMins">1.37</span>
+                                <span class="vip-unit">/ 30 分钟</span>
+                            </div>
+                            <div class="vip-limit">升级解锁更多学习大功能</div>
+                            <div class="vip-features">
+                                <div class="vf-item"><div class="vf-check">✓</div>基础课程跟读记忆</div>
+                                <div class="vf-item"><div class="vf-check">✓</div>AI 智能跟读评测</div>
+                                <div class="vf-item vf-lock"><div class="vf-check locked">🔒</div>无限制课程学习</div>
+                                <div class="vf-item vf-lock"><div class="vf-check locked">🔒</div>AI 写作批改</div>
+                                <div class="vf-item vf_lock"><div class="vf-check locked">🔒</div>专属学习顾问</div>
+                            </div>
+                            <div class="btn-upgrade" onclick="navigateTo('membership')">⬆ 开通VIP会员</div>
+                            <div style="display:flex;justify-content:space-between;margin-top:12px;font-size:12px;opacity:.7;">
+                                <span>☑ 会员协议</span><span>取消详情 ›</span>
+                            </div>
+                            <div style="margin-top:12px;padding-top:12px;border-top:1px solid rgba(255,255,255,.15);">
+                                <button class="logout-btn" onclick="doLogout()">⟲ 退出登录</button>
+                            </div>
+                        </div>
+                        <div class="card" style="text-align:center;">
+                            <button class="btn btn-outline btn-sm" style="width:100%;" onclick="navigateTo('membership')">🎫 派发优惠券</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ===== DASHBOARD PAGE (Stats & Behavior Tracking) ===== -->
+        <div class="pg" id="pg-dashboard">
+            <div class="page-header"><div class="page-title">📊 数据面板 — 学习行为追踪</div></div>
+            <div class="page-body">
+                <!-- Top Stats Grid -->
+                <div class="stats-grid">
+                    <div class="stat-card highlight"><div class="stat-num">2</div><div class="stat-label">已入课程</div></div>
+                    <div class="stat-card"><div class="stat-num">31</div><div class="stat-label">总课节数</div></div>
+                    <div class="stat-card"><div class="stat-num" style="color:var(--ok);">0</div><div class="stat-label">已完成节</div></div>
+                    <div class="stat-card"><div class="stat-num" style="color:var(--warn);">0</div><div class="stat-label">学习天数</div></div>
+                    <div class="stat-card"><div class="stat-num" style="color:var(--pri);">1</div><div class="stat-label">今日课程</div></div>
+                    <div class="stat-card"><div class="stat-num" style="color:var(--purple);">1分钟</div><div class="stat-label">今日时长</div></div>
+                </div>
+
+                <!-- Dark Stats Cards Row -->
+                <div class="stats-row">
+                    <div class="dark-card">
+                        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
+                            <div style="display:flex;align-items:center;gap:8px;"><span style="font-size:18px;">📝</span><span style="font-size:14px;font-weight:600;">错题本</span><span class="tag" style="background:rgba(34,197,94,.2);color:#4ade80;">已补练</span></div>
+                            <button class="btn btn-sm" style="background:rgba(255,255,255,.15);color:#fff;border:none;">清空</button>
+                        </div>
+                        <div class="dc-stats">
+                            <div><div class="dc-num" style="color:var(--warn);">2</div><div class="dc-label">道错题待查</div></div>
+                            <div><div class="dc-num">0</div><div class="dc-label">已掌握</div></div>
+                        </div>
+                        <div style="margin-top:16px;"><button class="btn btn-pri" style="background:linear-gradient(135deg,#6366f1,var(--pri));width:100%;">⭕ 开始智能练习</button></div>
+                        <p style="font-size:11px;opacity:.5;margin-top:8px;">💡 练习后自动从错题本移除</p>
+                    </div>
+                    <div class="dark-card">
+                        <div style="display:flex;align-items:center;gap:8px;margin-bottom:16px;"><span style="font-size:18px;">📅</span><span style="font-size:14px;font-weight:600;">今日数据</span><span class="tag" style="background:rgba(34,197,94,.2);color:#4ade80;">已答题</span></div>
+                        <div class="dc-stats">
+                            <div><div class="dc-num" style="color:var(--warn);">2</div><div class="dc-label">做题数</div></div>
+                            <div><div class="dc-num">0</div><div class="dc-label">正确数</div></div>
+                            <div><div class="dc-num" style="color:var(--err);">0</div><div class="dc-label">正确率</div></div>
+                        </div>
+                        <div class="progress-bar"><div class="progress-fill" style="width:0%;background:linear-gradient(90deg,var(--err),var(--warn));"></div></div>
+                        <p style="font-size:11px;opacity:.5;margin-top:8px;text-align:right;">正确率: 0%</p>
+                    </div>
+                </div>
+
+                <!-- Activity Log -->
+                <div class="card">
+                    <div class="card-hd"><div class="card-tit">📋 行为事件日志</div><span style="font-size:12px;color:var(--gray);">实时追踪用户行为</span></div>
+                    <div class="log-list">
+                        <div class="log-item"><span class="log-time">15:38</span><div class="log-icon" style="background:#dcfce7;color:#166534;">🔐</div><div class="log-body"><div class="log-text">用户<strong>登录</strong>系统</div><div class="log-detail">方式：密码登录 · IP：183.241.201.52 · 设备：Windows Chrome</div></div></div>
+                        <div class="log-item"><span class="log-time">15:35</span><div class="log-icon" style="background:#fef3c7;color:#92400e;">📖</div><div class="log-body"><div class="log-text">浏览课程：<strong>Little Fox 彼得兔故事 17-32</strong></div><div class="log-detail">停留时长：2分15秒 · 来源：我的课程页</div></div></div>
+                        <div class="log-item"><span class="log-time">15:33</span><div class="log-icon" style="background:#fee2e2;color:#991b1b;">❌</div><div class="log-body"><div class="log-text">听写练习产生<strong>错题</strong></div><div class="log-detail">句子："Tom Kitten was playing outside." · 错误次数：1 · 课程：Little Fox Lesson 1</div></div></div>
+                        <div class="log-item"><span class="log-time">15:30</span><div class="log-icon" style="background:#ede9fe;color:#6d28d9;">🎧</div><div class="log-body"><div class="log-text">播放句子音频：<strong>"My friends are coming for tea later."</strong></div><div class="log-detail">使用 Web Speech API · 语速：正常 · 播放次数：3</div></div></div>
+                        <div class="log-item"><span class="log-time">15:28</span><div class="log-icon" style="background:#eef2ff;color:var(--pri);">📝</div><div class="log-body"><div class="log-text">开始听写练习</div><div class="log-detail">课程：Little Fox---The Tale of Peter Rabbit 17-32 · 当前第 1/4 句</div></div></div>
+                        <div class="log-item"><span class="log-time">15:25</span><div class="log-icon" style="background:#f3f4f6;color:var(--gray);">👁</div><div class="log-body"><div class="log-text">访问页面：<strong>课程详情</strong></div><div class="log-detail">课程ID：f86db2d2-a6b8-48e1-889e-d8a732598da1 · 浏览时长：45秒</div></div></div>
+                        <div class="log-item"><span class="log-time">15:20</span><div class="log-icon" style="background:#dcfce7;color:#166534;">🔥</div><div class="log-body"><div class="log-text">完成每日<strong>签到</strong></div><div class="log-detail">连续签到：3天 · 获得 +20 积分 · 当前等级：Lv.1</div></div></div>
+                        <div class="log-item"><span class="log-time">14:55</span><div class="log-icon" style="background:#eef2ff;color:var(--pri);">📚</div><div class="log-body"><div class="log-text">加入课程：<strong>Little Fox 彼得兔故事 17-32</strong></div><div class="log-detail">课程类型：动画故事 · 难度：初级 · 总课时：32节</div></div></div>
+                        <div class="log-item"><span class="log-time">14:30</span><div class="log-icon" style="background:#fef3c7;color:#92400e;">📝</div><div class="log-body"><div class="log-text">加入课程：<strong>600句小学生英语新课标（二）核心词汇</strong></div><div class="log-detail">课程类型：词汇记忆 · 难度：小学 · 总课时：600句</div></div></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ===== CHECKIN & POINTS PAGE ===== -->
+        <div class="pg" id="pg-checkin">
+            <div class="page-header"><div class="page-title">🔥 签到与积分</div></div>
+            <div class="page-body">
+                <!-- Check-in Card -->
+                <div class="checkin-card">
+                    <div class="ci-head">
+                        <div class="ci-streak">
+                            <span class="ci-fire">🔥</span>
+                            <div><div class="ci-days" id="streakDays">3</div><div class="ci-sub">连续签到天数</div></div>
+                        </div>
+                        <div style="text-align:right;">
+                            <div style="font-size:12px;opacity:.7;">本月已签</div>
+                            <div style="font-size:22px;font-weight:900;" id="monthSignCount">3 / 25</div>
+                        </div>
+                    </div>
+                    <div class="ci-calendar" id="calendarGrid">
+                        <!-- Generated by JS -->
+                    </div>
+                    <button class="btn-checkin" id="checkinBtn" onclick="doCheckin()">✋ 立即签到 +20积分</button>
+                </div>
+
+                <!-- Points Overview -->
+                <div class="points-overview">
+                    <div class="po-card">
+                        <div class="po-num" style="color:var(--pri);">120</div>
+                        <div class="po-label">当前积分</div>
+                        <div class="level-bar"><div class="lb-track"><div class="lb-fill" style="width:12%;"></div></div><div class="lb-text"><span>Lv.1 新手</span><span>80 / 1000 → Lv.2</span></div></div>
+                    </div>
+                    <div class="po-card">
+                        <div class="po-num" style="color:var(--ok);">+320</div>
+                        <div class="po-label">累计获取</div>
+                    </div>
+                    <div class="po-card">
+                        <div class="po-num" style="color:var(--warn);">-200</div>
+                        <div class="po-label">累计消耗</div>
+                    </div>
+                    <div class="po-card">
+                        <div class="po-num" style="color:var(--purple);">#1,234</div>
+                        <div class="po-label">全站排名</div>
+                    </div>
+                </div>
+
+                <!-- Points Rules -->
+                <div class="card">
+                    <div class="card-hd"><div class="card-tit">📜 积分获取规则</div></div>
+                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+                        <div style="display:flex;align-items:center;gap:10px;padding:10px;background:var(--bg);border-radius:8px;"><span style="font-size:20px;">🔥</span><div><div style="font-size:13px;font-weight:600;">每日签到</div><div style="font-size:12px;color:var(--gray);">+20 积分/天，连续7天额外+50</div></div></div>
+                        <div style="display:flex;align-items:center;gap:10px;padding:10px;background:var(--bg);border-radius:8px;"><span style="font-size:20px;">📖</span><div><div style="font-size:13px;font-weight:600;">完成学习</div><div style="font-size:12px;color:var(--gray);">+10 积分/节课</div></div></div>
+                        <div style="display:flex;align-items:center;gap:10px;padding:10px;background:var(--bg);border-radius:8px;"><span style="font-size:20px;">✅</span><div><div style="font-size:13px;font-weight:600;">答对题目</div><div style="font-size:12px;color:var(--gray);">+5 积分/题</div></div></div>
+                        <div style="display:flex;align-items:center;gap:10px;padding:10px;background:var(--bg);border-radius:8px;"><span style="font-size:20px;">📝</span><div><div style="font-size:13px;font-weight:600;">背完单词</div><div style="font-size:12px;color:var(--gray);">+2 积分/词</div></div></div>
+                        <div style="display:flex;align-items:center;gap:10px;padding:10px;background:var(--bg);border-radius:8px;"><span style="font-size:20px;">📤</span><div><div style="font-size:13px;font-weight:600;">分享邀请</div><div style="font-size:12px;color:var(--gray);">+30 积分/次</div></div></div>
+                        <div style="display:flex;align-items:center;gap:10px;padding:10px;background:var(--bg);border-radius:8px;"><span style="font-size:20px;">🏆</span><div><div style="font-size:13px;font-weight:600;">获得成就</div><div style="font-size:12px;color:var(--gray);">+50~200 积分不等</div></div></div>
+                    </div>
+                </div>
+
+                <!-- Achievements -->
+                <div class="card">
+                    <div class="card-hd"><div class="card-tit">🏅 成就徽章</div><span style="font-size:12px;color:var(--gray);">已解锁 2 / 12</span></div>
+                    <div class="achievements">
+                        <div class="ach-card"><div class="ach-icon">🎉</div><div class="ach-name">初来乍到</div><div class="ach-desc">首次登录</div><div class="ach-unlock">✅ 已解锁</div></div>
+                        <div class="ach-card"><div class="ach-icon">🔥</div><div class="ach-name">三日燃灯</div><div class="ach-desc">连续签到3天</div><div class="ach-unlock">✅ 已解锁</div></div>
+                        <div class="ach-card locked"><div class="ach-icon">📚</div><div class="ach-name">学霸养成</div><div class="ach-desc">累计学习10小时</div></div>
+                        <div class="ach-card locked"><div class="ach-icon">🎯</div><div class="ach-name">百发百中</div><div class="ach-desc">单次正确率达95%</div></div>
+                        <div class="ach-card locked"><div class="ach-icon">📖</div><div class="ach-name">词汇大师</div><div class="ach-desc">累计背诵500个单词</div></div>
+                        <div class="ach-card locked"><div class="ach-icon">💎</div><div class="ach-name">钻石会员</div><div class="ach-desc">开通年度VIP</div></div>
+                        <div class="ach-card locked"><div class="ach-icon">🤝</div><div class="ach-name">社交达人</div><div class="ach-desc">邀请5位好友注册</div></div>
+                        <div class="ach-card locked"><div class="ach-icon">⭐</div><div class="ach-name">全勤之星</div><div class="ach-desc">当月签到满25天</div></div>
+                    </div>
+                </div>
+
+                <!-- Level System -->
+                <div class="card">
+                    <div class="card-hd"><div class="card-tit">⬆️ 等级体系</div></div>
+                    <div style="overflow-x:auto;">
+                        <table style="width:100%;border-collapse:collapse;font-size:13px;">
+                            <thead><tr style="background:var(--bg);"><th style="padding:10px;text-align:left;">等级</th><th style="padding:10px;">称号</th><th style="padding:10px;">所需经验</th><th style="padding:10px;">特权</th></tr></thead>
+                            <tbody>
+                                <tr><td style="padding:10px;border-bottom:1px solid var(--border);">Lv.1</td><td style="padding:10px;border-bottom:1px solid var(--border);">🌱 新手</td><td style="padding:10px;border-bottom:1px solid var(--border);">0</td><td style="padding:10px;border-bottom:1px solid var(--border);">基础功能</td></tr>
+                                <tr><td style="padding:10px;border-bottom:1px solid var(--border);">Lv.2</td><td style="padding:10px;border-bottom:1px solid var(--border);">🌿 初级</td><td style="padding:10px;border-bottom:1px solid var(--border);">1,000</td><td style="padding:10px;border-bottom:1px solid var(--border);">解锁自定义头像</td></tr>
+                                <tr><td style="padding:10px;border-bottom:1px solid var(--border);">Lv.3</td><td style="padding:10px;border-bottom:1px solid var(--border);">🌳 中级</td><td style="padding:10px;border-bottom:1px solid var(--border);">3,000</td><td style="padding:10px;border-bottom:1px solid var(--border);">+10%积分加成</td></tr>
+                                <tr><td style="padding:10px;border-bottom:1px solid var(--border);">Lv.4</td><td style="padding:10px;border-bottom:1px solid var(--border);">🌲 高级</td><td style="padding:10px;border-bottom:1px solid var(--border);">8,000</td><td style="padding:10px;border-bottom:1px solid var(--border);">+20%积分、专属主题</td></tr>
+                                <tr><td style="padding:10px;border-bottom:1px solid var(--border);">Lv.5</td><td style="padding:10px;border-bottom:1px solid var(--border);">🏆 大师</td><td style="padding:10px;border-bottom:1px solid var(--border);">20,000</td><td style="padding:10px;border-bottom:1px solid var(--border);">全部特权+VIP体验卡</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ===== MEMBERSHIP PAGE ===== -->
+        <div class="pg" id="pg-membership">
+            <div class="page-body" style="padding-top:28px;">
+                <div class="pricing-hero">
+                    <h2>解锁 <span class="pricing-highlight">学语言</span> 全部潜力</h2>
+                    <p>免费畅玩无门槛 · 畅学享不停不卡顿 · 合伙人边学边赚钱</p>
+                </div>
+                <div class="pricing-cards">
+                    <!-- Free Tier -->
+                    <div class="price-card">
+                        <div class="pc-tier">FREE</div>
+                        <div class="pc-name">免费版</div>
+                        <div class="pc-desc">适合轻度体验和基础学习</div>
+                        <div class="pc-price"><span class="pc-currency">¥</span><span class="pc-amount">0</span><span class="pc-unit">永久</span></div>
+                        <button class="pc-btn pc-btn-free">当前方案</button>
+                        <ul class="pc-features">
+                            <li><span class="pf-icon">✅</span> 每天3句免费跟读</li>
+                            <li><span class="pf-icon">✅</span> 基础课程试学</li>
+                            <li><span class="pf-icon">✅</span> 普通AI朗读（有限次）</li>
+                            <li><span class="pf-icon pf-no">❌</span> 高级 AI 语音评测</li>
+                            <li><span class="pf-icon pf-no">❌</span> 全部课程无限制</li>
+                            <li><span class="pf-icon pf-no">❌</span> AI 写作批改</li>
+                            <li><span class="pf-icon pf-no">❌</span> 广告去除</li>
+                            <li><span class="pf-icon pf-no">❌</span> 推广返佣权益</li>
+                        </ul>
+                    </div>
+                    <!-- Pro Tier (Featured) -->
+                    <div class="price-card featured">
+                        <div class="popular-badge">🔥 最受欢迎</div>
+                        <div class="pc-tier">MONTHLY</div>
+                        <div class="pc-name">畅学版 <span style="font-size:12px;background:var(--pri-light);color:var(--pri);padding:2px 8px;border-radius:4px;">推荐</span></div>
+                        <div class="pc-desc">不限时间，适合自驱型学习者</div>
+                        <div class="pc-price"><span class="pc-currency">¥</span><span class="pc-amount">29</span><span class="pc-period">.00</span><span class="pc-unit">/月</span></div>
+                        <div style="font-size:11px;color:var(--ok);margin-bottom:14px;">✨ 随时可取消 · 无需年付</div>
+                        <button class="pc-btn pc-btn-pro" onclick="simulateUpgrade('pro')">⬆ 开通畅学版</button>
+                        <ul class="pc-features">
+                            <li><span class="pf-icon">✅</span> 每天30句无限跟读</li>
+                            <li><span class="pf-icon">✅</span> 所有课程全部开放</li>
+                            <li><span class="pf-icon">✅</span> 高级AI语音评测</li>
+                            <li><span class="pf-icon">✅</span> AI 写作批改（每月30次）</li>
+                            <li><span class="pf-icon">✅</span> 去除广告</li>
+                            <li><span class="pf-icon">✅</span> 学习数据深度分析</li>
+                            <li><span class="pf-icon pf-no">❌</span> 推广返佣权益</li>
+                            <li><span class="pf-icon pf-no">❌</span> 合伙人专属社群</li>
+                        </ul>
+                    </div>
+                    <!-- Partner Tier -->
+                    <div class="price-card">
+                        <div class="pc-tier">YEARLY</div>
+                        <div class="pc-name">合伙人版 👑</div>
+                        <div class="pc-desc">边学边赚，推广佣金 + 全部功能</div>
+                        <div class="pc-price"><span class="pc-currency">¥</span><span class="pc-amount">699</span><span class="pc-period">.00</span><span class="pc-unit">/年</span></div>
+                        <div style="font-size:11px;color:var(--warn);margin-bottom:14px;">🔥 一价全包，省更多</div>
+                        <button class="pc-btn pc-btn-partner" onclick="simulateUpgrade('partner')">🤝 开启合伙人计划</button>
+                        <ul class="pc-features">
+                            <li><span class="pf-icon">✅</span> 畅学版全部功能</li>
+                            <li><span class="pf-icon">✅</span> 无限句数无上限</li>
+                            <li><span class="pf-icon">✅</span> 合伙人专属社群</li>
+                            <li><span class="pf-icon">✅</span> 推广返佣 30%</li>
+                            <li><span class="pf-icon">✅</span> AI 批改量提升至300/日</li>
+                            <li><span class="pf-icon">✅</span> 广告位展示权（可获20%）</li>
+                            <li><span class="pf-icon">✅</span> 专属客服通道</li>
+                            <li><span class="pf-icon">✅</span> 新功能优先体验</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Detailed Comparison Table -->
+                <h3 style="font-size:17px;font-weight:700;margin:30px 0 14px;">详细功能对比</h3>
+                <div class="compare-table">
+                    <div class="ct-head"><span>功能项</span><span>免费版</span><span>畅学版</span><span>合伙人版</span></div>
+                    <div class="ct-row"><span>价格</span><span>¥0</span><span class="ct-limit">¥29/月</span><span class="ct-limit">¥699/年</span></div>
+                    <div class="ct-row"><span>每日解锁句数</span><span class="ct-limit">3 句</span><span class="ct-yes">30 句</span><span class="ct-yes">∞ 无限</span></div>
+                    <div class="ct-row"><span>AI 朗读次数</span><span class="ct-limit">5 次/天</span><span class="ct-yes">100 次/天</span><span class="ct-yes">∞ 无限</span></div>
+                    <div class="ct-row"><span>课程范围</span><span class="ct-limit">仅免费课</span><span class="ct-yes">全部课程</span><span class="ct-yes">全部+新课抢先</span></div>
+                    <div class="ct-row"><span>AI 语音评测</span><span class="ct-no">✗</span><span class="ct-yes">✓ 高级</span><span class="ct-yes">✓ 专业级</span></div>
+                    <div class="ct-row"><span>AI 写作批改</span><span class="ct-no">✗</span><span class="ct-limit">30次/月</span><span class="ct-yes">300次/日</span></div>
+                    <div class="ct-row"><span>广告</span><span class="ct-yes">有广告</span><span class="ct-yes">无广告</span><span class="ct-yes">无广告+可获利</span></div>
+                    <div class="ct-row"><span>推广返佣</span><span class="ct-no">✗</span><span class="ct-no">✗</span><span class="ct-yes">30% 佣金</span></div>
+                    <div class="ct-row"><span>专属社群</span><span class="ct-no">✗</span><span class="ct-no">✗</span><span class="ct-yes">✓</span></div>
+                    <div class="ct-row"><span>数据分析</span><span class="ct-limit">基础</span><span class="ct-yes">深度</span><span class="ct-yes">专业+导出</span></div>
+                </div>
+                <p style="text-align:center;color:var(--gray);font-size:13px;margin-top:20px;">首购有一分钱，解锁设产品详情页内容与引导的内容持续丰富。感谢您的支持！</p>
+            </div>
+        </div>
+
+        <!-- ===== SETTINGS / PRIVACY PAGE ===== -->
+        <div class="pg" id="pg-settings">
+            <div class="page-header"><div class="page-title">⚙️ 隐私与安全设置</div></div>
+            <div class="page-body">
+                <div class="card">
+                    <div class="sect-tit">🔒 账户安全</div>
+                    <div class="setting-item">
+                        <div class="setting-left"><div class="set-icon">🔑</div><div class="set-info"><h4>修改密码</h4><p>建议每90天更换一次密码</p></div></div>
+                        <button class="btn btn-sm btn-outline" onclick="showChangePwdModal()">修改</button>
+                    </div>
+                    <div class="setting-item">
+                        <div class="setting-left"><div class="set-icon">📱</div><div class="set-info"><h4>两步验证</h4><p>登录时需要额外的短信验证码</p></div></div>
+                        <div class="toggle" onclick="this.classList.toggle('on')"></div>
+                    </div>
+                    <div class="setting-item">
+                        <div class="setting-left"><div class="set-icon">🔔</div><div class="set-info"><h4>登录提醒</h4><p>异常登录时发送邮件/短信通知</p></div></div>
+                        <div class="toggle on" onclick="this.classList.toggle('on')"></div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="sect-tit">🍪 Cookie 与隐私</div>
+                    <div class="setting-item">
+                        <div class="setting-left"><div class="set-icon">📊</div><div class="set-info"><h4>学习数据收集</h4><p>允许收集匿名学习行为以改进产品</p></div></div>
+                        <div class="toggle on" onclick="this.classList.toggle('on')"></div>
+                    </div>
+                    <div class="setting-item">
+                        <div class="setting-left"><div class="set-icon">🎯</div><div class="set-info"><h4>个性化推荐</h4><p>基于学习历史推荐合适课程</p></div></div>
+                        <div class="toggle on" onclick="this.classList.toggle('on')"></div>
+                    </div>
+                    <div class="setting-item">
+                        <div class="setting-left"><div class="set-icon">📧</div><div class="set-info"><h4>营销邮件</h4><p>接收产品更新和学习提醒邮件</p></div></div>
+                        <div class="toggle" onclick="this.classList.toggle('on')"></div>
+                    </div>
+                    <div class="setting-item">
+                        <div class="setting-left"><div class="set-icon">🤖</div><div class="set-info"><h4>第三方分析</h4><p>允许使用匿名统计服务</p></div></div>
+                        <div class="toggle on" onclick="this.classList.toggle('on')"></div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="sect-tit">📄 法律文档</div>
+                    <div class="setting-item">
+                        <div class="setting-left"><div class="set-icon">📜</div><div class="set-info"><h4>用户协议</h4><p>最后更新：2026-07-01</p></div></div>
+                        <button class="btn btn-sm btn-outline">查看</button>
+                    </div>
+                    <div class="setting-item">
+                        <div class="setting-left"><div class="set-icon">🛡️</div><div class="set-info"><h4>隐私政策</h4><p>说明我们如何收集和使用您的数据</p></div></div>
+                        <button class="btn btn-sm btn-outline">查看</button>
+                    </div>
+                    <div class="setting-item">
+                        <div class="setting-left"><div class="set-icon">🍪</div><div class="set-info"><h4>Cookie 政策</h4><p>Cookie 使用说明及管理方式</p></div></div>
+                        <button class="btn btn-sm btn-outline">查看</button>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="sect-tit">⚠️ 危险操作</div>
+                    <div class="setting-item">
+                        <div class="setting-left"><div class="set-icon" style="background:#fee2e2;color:#991b1b;">🗑️</div><div class="set-info"><h4>清除所有学习数据</h4><p>删除所有学习记录、错题本、单词进度（不可恢复）</p></div></div>
+                        <button class="btn btn-sm btn-danger" onclick="if(confirm('确定要清除所有学习数据吗？此操作不可恢复！')) showToast('学习数据已清除','ok')">清除</button>
+                    </div>
+                    <div class="setting-item">
+                        <div class="setting-left"><div class="set-icon" style="background:#fee2e2;color:#991b1b;">❌</div><div class="set-info"><h4>注销账户</h4><p>永久删除账户及所有关联数据</p></div></div>
+                        <button class="btn btn-sm btn-danger" onclick="if(confirm('确定要注销账户吗？此操作不可恢复！')){doLogout();showToast('账户已注销','ok')}">注销</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ===== PLACEHOLDER PAGES (brief) ===== -->
+        <div class="pg" id="pg-courses">
+            <div class="page-header"><div class="page-title">📚 我的课程</div></div>
+            <div class="page-body">
+                <div class="stats-grid" style="grid-template-columns:repeat(6,1fr);margin-bottom:20px;">
+                    <div class="stat-card"><div class="stat-num">2</div><div class="stat-label">已入课程</div></div>
+                    <div class="stat-card"><div class="stat-num">31</div><div class="stat-label">总课节数</div></div>
+                    <div class="stat-card"><div class="stat-num" style="color:var(--ok);">0</div><div class="stat-label">已完成节</div></div>
+                    <div class="stat-card"><div class="stat-num" style="color:var(--warn);">0</div><div class="stat-label">学习天数</div></div>
+                    <div class="stat-card"><div class="stat-num" style="color:var(--pri);">1</div><div class="stat-label">今日课程</div></div>
+                    <div class="stat-card"><div class="stat-num" style="color:var(--purple);">1分钟</div><div class="stat-label">今日时长</div></div>
+                </div>
+                <div class="card"><div class="card-tit">🔄 继续学习</div>
+                    <div style="display:flex;gap:16px;margin-top:14px;">
+                        <div style="flex:1;background:var(--bg);border-radius:12px;padding:16px;display:flex;gap:14px;align-items:center;cursor:pointer;transition:.2s;" onmouseover="this.style.boxShadow='0 4px 12px rgba(0,0,0,.08)'" onmouseout="this.style.boxShadow='none'">
+                            <div style="width:100px;height:70px;background:linear-gradient(135deg,#4a7dff,#6366f1);border-radius:10px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:28px;flex-shrink:0;">🦊</div>
+                            <div style="flex:1;"><div style="font-size:15px;font-weight:700;">Little Fox---The Tale of Peter Rabbit 17-32</div><div style="font-size:12px;color:var(--gray);margin-top:4px;">Lesson 1 · Tom Meets a Frog <span class="tag tag-g">含音视频</span> 1/24 节</div><div style="font-size:12px;color:var(--gray);margin-top:4px;">最近试读</div><div style="margin-top:8px;height:6px;background:#e5e7eb;border-radius:3px;overflow:hidden;"><div style="width:0%;height:100%;background:var(--pri);border-radius:3px;"></div></div></div>
+                            <button class="btn btn-pri btn-sm">▶ 继续</button>
+                        </div>
+                    </div>
+                </div>
+                <h3 style="font-size:16px;font-weight:700;margin:20px 0 12px;">全部课程</h3>
+                <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px;">
+                    <div class="c-card" style="background:#fff;border-radius:14px;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,.05);"><div style="height:130px;background:linear-gradient(135deg,#4a7dff,#6366f1);display:flex;align-items:center;justify-content:center;color:#fff;font-size:36px;">🦊</div><div style="padding:14px;"><div style="font-size:14px;font-weight:600;">Little Fox---The Tale of Peter Rabbit 17-32</div><div style="font-size:11px;color:var(--gray);margin-top:4px;"><span class="tag tag-g">初学</span> 4621人</div><div style="margin-top:8px;height:6px;background:#e5e7eb;border-radius:3px;overflow:hidden;"><div style="width:0%;height:100%;background:var(--pri);border-radius:3px;"></div></div><div style="font-size:11px;color:var(--gray);margin-top:4px;">0%</div></div></div>
+                    <div class="c-card" style="background:#fff;border-radius:14px;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,.05);"><div style="height:130px;background:linear-gradient(135deg,#22c55e,#16a34a);display:flex;align-items:center;justify-content:center;color:#fff;font-size:36px;">📖</div><div style="padding:14px;"><div style="font-size:14px;font-weight:600;">600句小学生英语新课标（二）核心词汇</div><div style="font-size:11px;color:var(--gray);margin-top:4px;"><span class="tag tag-y">新课标</span> 3504人</div><div style="margin-top:8px;height:6px;background:#e5e7eb;border-radius:3px;overflow:hidden;"><div style="width:0%;height:100%;background:var(--ok);border-radius:3px;"></div></div><div style="font-size:11px;color:var(--gray);margin-top:4px;">0%</div></div></div>
+                    <div style="background:#fff;border-radius:14px;padding:40px;text-align:center;color:var(--gray);border:2px dashed var(--border);display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;transition:.2s;" onmouseover="this.style.borderColor='var(--pri)';this.style.color='var(--pri)'" onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--gray)'"><span style="font-size:36px;">+</span><span style="font-size:13px;margin-top:8px;">发现新课程</span></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="pg" id="pg-market"><div class="page-header"><div class="page-title">🛒 课程市场</div></div><div class="page-body">
+            <div class="card" style="margin-bottom:16px;"><input id="courseSearch" class="u-input" placeholder="🔍 搜索课程名称或简介…" oninput="onCourseSearch()"></div>
+            <div id="courseList" class="biz-grid"></div>
+        </div></div>
+        <div class="pg" id="pg-guide"><div class="page-header"><div class="page-title">🧭 课程向导</div></div><div class="page-body"><div class="card"><p style="text-align:center;padding:40px;color:var(--gray);">课程向导 — 按零基础/小学生/初中生等分类推荐系列课程</p></div></div></div>
+        <div class="pg" id="pg-mistakes"><div class="page-header"><div class="page-title">❌ 错题本</div></div><div class="page-body"><div class="card"><p style="text-align:center;padding:40px;color:var(--gray);">错题本 — 深色主题，智能错因分析与针对性练习</p></div></div></div>
+        <div class="pg" id="pg-vocab"><div class="page-header"><div class="page-title">📝 背单词</div></div><div class="page-body">
+            <div class="card" style="margin-bottom:16px;display:flex;gap:12px;align-items:center;flex-wrap:wrap;">
+                <span id="vocabStat" style="font-weight:600;white-space:nowrap;"></span>
+                <input id="wordSearch" class="u-input" style="flex:1;min-width:160px;" placeholder="🔍 搜索单词…" oninput="onWordSearch()">
+                <select id="wordLevel" class="u-input" style="width:auto;" onchange="onWordSearch()"><option value="">全部难度</option><option>小学</option><option>初中</option><option>高中</option></select>
+            </div>
+            <div id="wordList" class="biz-grid sm"></div>
+        </div></div>
+        <div class="pg" id="pg-lookup"><div class="page-header"><div class="page-title">🔍 查单词</div></div><div class="page-body">
+            <div class="card" style="margin-bottom:16px;"><input id="dictSearch" class="u-input" placeholder="🔍 输入单词查询释义、音标、例句…" oninput="onDictSearch()"></div>
+            <div id="dictList" class="biz-grid sm"></div>
+        </div></div>
+        <div class="pg" id="pg-knowledge"><div class="page-header"><div class="page-title">💡 知识库</div></div><div class="page-body">
+            <div id="knowledgeList" class="biz-grid"></div>
+        </div></div>
+        <div class="pg" id="pg-partner"><div class="page-header"><div class="page-title">🤝 合伙人招募</div></div><div class="page-body"><div class="card"><p style="text-align:center;padding:40px;color:var(--gray);">合伙人招募 — CTA、优势介绍、FAQ、目标人群</p></div></div></div>
+
+        <!-- 课程详情页 -->
+        <div class="pg" id="pg-course-detail">
+            <div class="page-header">
+                <button class="btn-ghost" onclick="navigateTo('market')">← 返回市场</button>
+                <div class="page-title">课程详情</div>
+            </div>
+            <div class="page-body" id="courseDetailBody">
+                <div class="card"><p style="text-align:center;padding:40px;color:var(--gray);">加载中…</p></div>
+            </div>
+        </div>
+
+        <!-- 句子听写练习页（深色主题，地道美式发音） -->
+        <div class="pg" id="pg-practice">
+            <div class="page-header" style="background:#1f2430;border-color:#2c3340;">
+                <button class="btn-ghost" style="color:#cfd6e4;" onclick="backFromPractice()">← 返回</button>
+                <div class="page-title" style="color:#fff;" id="practiceTitle">句子听写练习</div>
+                <span id="practiceProgress" style="margin-left:auto;color:#9aa4b2;font-size:13px;"></span>
+            </div>
+            <div class="practice-wrap" id="practiceWrap">
+                <div id="practiceBody"></div>
+            </div>
+        </div>
+
+    </main>
+
+    <div id="articleModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:999;align-items:center;justify-content:center;padding:20px;" onclick="if(event.target===this)closeArticle()">
+        <div style="background:#fff;border-radius:16px;max-width:560px;width:100%;max-height:80vh;overflow:auto;padding:28px;position:relative;">
+            <button onclick="closeArticle()" style="position:absolute;top:14px;right:16px;border:none;background:#f0f0f0;border-radius:50%;width:32px;height:32px;cursor:pointer;font-size:16px;">✕</button>
+            <div id="articleBody"></div>
+        </div>
+    </div>
+</div>
+
+<!-- ===== Change Password Modal ===== -->
+<div class="modal-overlay hidden" id="pwdModal">
+    <div class="modal">
+        <div class="modal-hd"><h3>🔑 修改密码</h3><div class="modal-close" onclick="closePwdModal()">&times;</div></div>
+        <div class="form-group"><label class="form-label">当前密码</label><input class="form-input" type="password" placeholder="输入当前密码"></div>
+        <div class="form-group"><label class="form-label">新密码</label><input class="form-input" type="password" placeholder="6-20位字母数字组合"></div>
+        <div class="form-group"><label class="form-label">确认新密码</label><input class="form-input" type="password" placeholder="再次输入新密码"></div>
+        <button class="btn btn-pri" style="width:100%;padding:12px;" onclick="closePwdModal();showToast('密码修改成功','ok')">确认修改</button>
+    </div>
+</div>
+
+<script>
+// ============================================================
+//  USER SYSTEM STATE (simulated backend)
+// ============================================================
+const AppState = {
+    isLoggedIn: false,
+    currentCourse: null,            // 当前查看的课程详情
+    practice: { courseId: null, sentences: [], idx: 0 },  // 句子练习状态
+    user: {
+        id: 'JY20240725001',
+        nickname: 'lucky',
+        avatar: null,
+        gender: '男',
+        birthday: null,
+        city: null,
+        phone: '138****8885',
+        email: null,
+        role: 'free',          // free | pro | partner
+        level: 1,              // 1-5
+        points: 120,
+        totalPointsEarned: 320,
+        totalPointsSpent: 200,
+        rank: 1234,
+        streak: 3,
+        monthSigned: [22,23,25], // July dates signed
+        todaySigned: true,
+        lastLogin: '2026-07-25 14:31:49',
+        lastIp: '183.241.201.52',
+        registerTime: '2026-07-22 10:15:30',
+        createdAt: '2026-07-22'
+    },
+    courses: [
+        { id:1, title:'Little Fox---The Tale of Peter Rabbit 17-32', progress:0, total:24, category:'story', level:'beginner' },
+        { id:2, title:'600句小学生英语新课标（二）核心词汇', progress:0, total:600, category:'vocab', level:'primary' }
+    ],
+    mistakes: [
+        { id:1, sentence:'Tom Kitten was playing outside.', course:'Little Fox Lesson 1', time:'2026-07-25 14:36:24', wrongCount:1 },
+        { id:2, sentence:'I use a pen to write a letter to my pen pal.', course:'School Things', time:'2026-07-25 14:48:06', wrongCount:1 }
+    ],
+    achievements: [
+        { id:'first_login', name:'初来乍到', icon:'🎉', desc:'首次登录', unlocked:true },
+        { id:'streak_3', name:'三日燃灯', icon:'🔥', desc:'连续签到3天', unlocked:true },
+        { id:'study_10h', name:'学霸养成', icon:'📚', desc:'累计学习10小时', unlocked:false },
+        { id:'accuracy_95', name:'百发百中', icon:'🎯', desc:'单次正确率达95%', unlocked:false },
+        { id:'words_500', name:'词汇大师', icon:'📖', desc:'累计背诵500个单词', unlocked:false },
+        { id:'vip_yearly', name:'钻石会员', icon:'💎', desc:'开通年度VIP', unlocked:false },
+        { id:'invite_5', name:'社交达人', icon:'🤝', desc:'邀请5位好友注册', unlocked:false },
+        { id:'perfect_month', name:'全勤之星', icon:'⭐', desc:'当月签到满25天', unlocked:false }
+    ],
+    activityLog: [
+        { time:'15:38', type:'login', text:'用户登录系统', detail:'方式：密码登录 · IP：183.241.201.52' },
+        { time:'15:35', type:'browse', text:'浏览课程：Little Fox 彼得兔故事', detail:'停留时长：2分15秒' },
+        { time:'15:33', type:'mistake', text:'听写练习产生错题', detail:'句子：Tom Kitten...' },
+        { time:'15:30', type:'audio', text:'播放句子音频', detail:'My friends are coming...' },
+        { time:'15:28', type:'practice', text:'开始听写练习', detail:'Lesson 1 第1/4句' },
+        { time:'15:25', type:'view', text:'访问课程详情页', detail:'课程ID: f86db2d2...' },
+        { time:'15:20', type:'checkin', text:'完成每日签到', detail:'连续3天 · +20积分' },
+        { time:'14:55', type:'enroll', text:'加入课程：Little Fox', detail:'动画故事 · 初级 · 32节' },
+        { time:'14:30', type:'enroll', text:'加入课程：600句新课标词汇', detail:'词汇记忆 · 小学 · 600句' }
+    ]
+};
+
+// ============================================================
+//  AUTH FUNCTIONS
+// ============================================================
+function switchAuthTab(tab) {
+    document.querySelectorAll('.auth-tab').forEach(t => t.classList.remove('on'));
+    document.querySelector(`[data-tab="${tab}"]`).classList.add('on');
+    document.getElementById('loginForm').style.display = tab === 'login' ? '' : 'none';
+    document.getElementById('registerForm').style.display = tab === 'register' ? '' : 'none';
+    document.getElementById('forgotForm').style.display = 'none';
+}
+
+function showForgotPwd() {
+    document.getElementById('loginForm').style.display = 'none';
+    document.getElementById('registerForm').style.display = 'none';
+    document.getElementById('forgotForm').style.display = '';
+    document.querySelectorAll('.auth-tab').forEach(t => t.classList.remove('on'));
+}
+
+function showLoginForm() {
+    switchAuthTab('login');
+}
+
+async function doLogin() {
+    const account = document.getElementById('loginAccount').value.trim();
+    const pwd = document.getElementById('loginPwd').value;
+    if (!account || !pwd) { showToast('请填写完整信息','err'); return; }
+    try {
+        const res = await fetch('/api/login', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ account, pwd })
+        });
+        const data = await res.json();
+        if (!res.ok) { showToast(data.message || '登录失败','err'); return; }
+        localStorage.setItem('juyou_token', data.token);
+        Object.assign(AppState.user, data.user);
+        AppState.isLoggedIn = true;
+        logActivity('login', `用户 ${data.user.nickname} 登录系统`, `方式：密码登录 · IP：${data.user.lastIp || '-'}`);
+        showApp();
+        showToast(`欢迎回来，${data.user.nickname}！`,'ok');
+    } catch (e) {
+        showToast('网络错误，请确认后端服务已启动','err');
+    }
+}
+
+async function doRegister() {
+    const nick = document.getElementById('regNickname').value.trim();
+    const phone = document.getElementById('regPhone').value.trim();
+    const code = document.getElementById('regCode').value.trim();
+    const pwd = document.getElementById('regPwd').value;
+    const pwd2 = document.getElementById('regPwd2').value;
+    const agree = document.getElementById('agreeCheck').checked;
+
+    if (!nick || !phone || !code || !pwd) { showToast('请填写完整信息','err'); return; }
+    if (pwd !== pwd2) { showToast('两次密码不一致','err'); return; }
+    if (!agree) { showToast('请先同意用户协议','err'); return; }
+    if (pwd.length < 6) { showToast('密码至少6位','err'); return; }
+    if (!/^1\d{10}$/.test(phone)) { showToast('手机号格式不正确','err'); return; }
+
+    try {
+        const res = await fetch('/api/register', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ nickname: nick, phone, password: pwd })
+        });
+        const data = await res.json();
+        if (!res.ok) { showToast(data.message || '注册失败','err'); return; }
+        localStorage.setItem('juyou_token', data.token);
+        Object.assign(AppState.user, data.user);
+        AppState.isLoggedIn = true;
+        logActivity('register', `新用户 ${nick} 注册成功`, `手机：${data.user.phone}`);
+        showApp();
+        showToast(`注册成功！欢迎加入学语言，${nick}！`,'ok');
+    } catch (e) {
+        showToast('网络错误，请确认后端服务已启动','err');
+    }
+}
+
+function doResetPwd() {
+    showToast('密码重置成功，请重新登录','ok');
+    setTimeout(() => showLoginForm(), 1500);
+}
+
+function socialLogin(provider) {
+    const names = { wechat:'微信', qq:'QQ', weibo:'微博' };
+    logActivity('login', `用户通过${names[provider]}登录`, `第三方OAuth授权`);
+    AppState.isLoggedIn = true;
+    showApp();
+    showToast(`${names[provider]}登录成功！`,'ok');
+}
+
+function sendCode() {
+    const btn = document.getElementById('sendCodeBtn');
+    btn.textContent = '发送中...';
+    btn.classList.add('disabled');
+    setTimeout(() => {
+        let countdown = 60;
+        btn.textContent = `${countdown}s`;
+        const timer = setInterval(() => {
+            countdown--;
+            if (countdown <= 0) { clearInterval(timer); btn.textContent = '获取验证码'; btn.classList.remove('disabled'); }
+            else btn.textContent = `${countdown}s`;
+        }, 1000);
+    }, 800);
+    showToast('验证码已发送','ok');
+}
+
+function doLogout() {
+    localStorage.removeItem('juyou_token');
+    AppState.isLoggedIn = false;
+    document.getElementById('appShell').classList.remove('active');
+    document.getElementById('authOverlay').classList.remove('hidden');
+    // Reset nav
+    document.querySelectorAll('.navi').forEach(n => n.classList.remove('on'));
+    document.querySelector('[data-page="home"]').classList.add('on');
+    document.querySelectorAll('.pg').forEach(p => p.classList.remove('on'));
+    document.getElementById('pg-home').classList.add('on');
+    showToast('已退出登录','ok');
+}
+
+function showApp() {
+    document.getElementById('authOverlay').classList.add('hidden');
+    document.getElementById('appShell').classList.add('active');
+    updateUIForUser();
+    renderCalendar();
+}
+
+function updateUIForUser() {
+    const u = AppState.user;
+    document.getElementById('homeUserName').textContent = u.nickname;
+    document.getElementById('sidebarAvatar').textContent = u.nickname.charAt(0);
+    document.getElementById('sidebarName').innerHTML = `${u.nickname}<span class="vip-tag">${u.role.toUpperCase()}</span>`;
+    document.getElementById('streakDays').textContent = u.streak;
+    document.getElementById('monthSignCount').textContent = `${u.monthSigned.length} / 25`;
+
+    // Update checkin button state
+    const cb = document.getElementById('checkinBtn');
+    if (u.todaySigned) {
+        cb.textContent = '✅ 今日已签到';
+        cb.style.opacity = '.6';
+        cb.style.cursor = 'default';
+    }
+}
+
+// ============================================================
+//  NAVIGATION
+// ============================================================
+function navigateTo(page) {
+    clearPracticeKey();
+    if (!AppState.isLoggedIn && page !== 'home') { showToast('请先登录','err'); return; }
+    document.querySelectorAll('.navi').forEach(n => n.classList.remove('on'));
+    const targetNavi = document.querySelector(`[data-page="${page}"]`);
+    if (targetNavi) targetNavi.classList.add('on');
+    document.querySelectorAll('.pg').forEach(p => p.classList.remove('on'));
+    const pg = document.getElementById(`pg-${page}`);
+    if (pg) pg.classList.add('on');
+    if (page === 'market') renderCourses();
+    if (page === 'vocab') renderVocab();
+    if (page === 'lookup') renderLookup();
+    if (page === 'knowledge') renderKnowledge();
+    if (page === 'courses') renderMyCourses();
+    if (page === 'mistakes') renderMistakes();
+    if (page === 'course-detail') renderCourseDetail();
+    if (page === 'practice') renderPractice();
+}
+
+// ============================================================
+//  CHECKIN SYSTEM
+// ============================================================
+function renderCalendar() {
+    const grid = document.getElementById('calendarGrid');
+    if (!grid) return;
+    const days = ['一','二','三','四','五','六','日'];
+    let html = '';
+    days.forEach(d => html += `<div class="ci-day" style="background:rgba(255,255,255,.08);"><span>${d}</span></div>`);
+
+    const now = new Date();
+    const today = now.getDate();
+    for (let i = 1; i <= 31; i++) {
+        const isSigned = AppState.user.monthSigned.includes(i);
+        const isToday = i === today;
+        const isFuture = i > today;
+        html += `<div class="ci-day ${isSigned?'done':''} ${isToday?'today':''}" style="${isFuture?'opacity:.4':''}">
+            <span>${i}</span>
+            ${isSigned?'<span class="ci-day-name">✓</span>':(!isFuture?'<span class="ci-day-name">&nbsp;</span>':'')}
+        </div>`;
+    }
+    grid.innerHTML = html;
+}
+
+async function doCheckin() {
+    const token = localStorage.getItem('juyou_token');
+    if (!token) { showToast('请先登录','err'); return; }
+    if (AppState.user.todaySigned) { showToast('今天已经签过了哦～','err'); return; }
+    try {
+        const res = await fetch('/api/checkin', { method:'POST', headers:{ 'Authorization':'Bearer '+token } });
+        const data = await res.json();
+        if (!res.ok) { showToast(data.message || '签到失败','err'); return; }
+        const prev = AppState.user.points;
+        Object.assign(AppState.user, data.user);
+        const gained = data.user.points - prev;
+        logActivity('checkin', `完成每日签到`, `连续${data.user.streak}天 · +${gained}积分`);
+        renderCalendar();
+        updateUIForUser();
+        showToast(`🎉 签到成功！连续${data.user.streak}天，+${gained}积分！`,'ok');
+        if (data.user.streak >= 3) {
+            const ach = AppState.achievements.find(a => a.id === 'streak_3');
+            if (ach && !ach.unlocked) {
+                ach.unlocked = true;
+                setTimeout(() => showToast('🏅 解锁成就：三日燃灯！','ok'), 1500);
+            }
+        }
+    } catch(e) { showToast('网络错误，请确认后端已启动','err'); }
+}
+
+// ============================================================
+//  MEMBERSHIP UPGRADE
+// ============================================================
+async function simulateUpgrade(tier) {
+    const token = localStorage.getItem('juyou_token');
+    if (!token) { showToast('请先登录','err'); return; }
+    const names = { pro:'畅学版', partner:'合伙人版' };
+    try {
+        const res = await fetch('/api/upgrade', { method:'POST', headers:{ 'Authorization':'Bearer '+token, 'Content-Type':'application/json' }, body: JSON.stringify({ tier }) });
+        const data = await res.json();
+        if (!res.ok) { showToast(data.message || '升级失败','err'); return; }
+        Object.assign(AppState.user, data.user);
+        logActivity('upgrade', `用户升级为${names[tier]}`, `套餐：${names[tier]}`);
+        updateUIForUser();
+        if (tier === 'partner') {
+            showToast('🎉 恭喜成为合伙人！全部功能已解锁 + 推广返佣权限已开通','ok');
+        } else {
+            showToast(`🎉 升级${names[tier]}成功！享受全部学习功能！`,'ok');
+        }
+    } catch(e) { showToast('网络错误，请确认后端已启动','err'); }
+}
+
+// ============================================================
+//  ACTIVITY LOGGING
+// ============================================================
+function logActivity(type, text, detail) {
+    const now = new Date();
+    const timeStr = `${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
+    AppState.activityLog.unshift({ time:timeStr, type, text, detail });
+    if (AppState.activityLog.length > 50) AppState.activityLog.pop();
+    // 行为日志上报（best-effort，失败不影响 UI）
+    const token = localStorage.getItem('juyou_token');
+    if (token) {
+        fetch('/api/track', { method:'POST', headers:{ 'Authorization':'Bearer '+token, 'Content-Type':'application/json' }, body: JSON.stringify({ type, text, detail: detail || '' }) }).catch(()=>{});
+    }
+}
+
+// ============================================================
+//  MODALS
+// ============================================================
+function showChangePwdModal() { document.getElementById('pwdModal').classList.remove('hidden'); }
+function closePwdModal() { document.getElementById('pwdModal').classList.add('hidden'); }
+
+async function openEditModal(field) {
+    const labels = { nickname:'昵称', gender:'性别', birthday:'生日', city:'城市' };
+    const newVal = prompt(`修改${labels[field]}：`, AppState.user[field] || '');
+    if (newVal === null) return;
+    const val = newVal.trim();
+    if (!val) return;
+    const token = localStorage.getItem('juyou_token');
+    if (token) {
+        try {
+            const res = await fetch('/api/profile', { method:'PATCH', headers:{ 'Authorization':'Bearer '+token, 'Content-Type':'application/json' }, body: JSON.stringify({ [field]: val }) });
+            const data = await res.json();
+            if (!res.ok) { showToast(data.message || '更新失败','err'); return; }
+            Object.assign(AppState.user, data.user);
+        } catch(e) { showToast('网络错误','err'); return; }
+    } else {
+        AppState.user[field] = val;
+    }
+    if (field === 'nickname') {
+        document.getElementById('homeUserName').textContent = val;
+        document.getElementById('sidebarAvatar').textContent = val.charAt(0);
+        document.getElementById('sidebarName').innerHTML = `${val}<span class="vip-tag">${AppState.user.role.toUpperCase()}</span>`;
+    }
+    showToast(`${labels[field]}已更新`,'ok');
+    logActivity('update', `修改了${labels[field]}`, `新值：${val}`);
+}
+
+// ============================================================
+//  TOAST NOTIFICATION
+// ============================================================
+function showToast(msg, type='ok') {
+    const existing = document.querySelector('.toast');
+    if (existing) existing.remove();
+    const el = document.createElement('div');
+    el.className = `toast toast-${type}`;
+    el.textContent = msg;
+    document.body.appendChild(el);
+    setTimeout(() => el.remove(), 2800);
+}
+
+// ============================================================
+//  MISTAKES RENDER
+// ============================================================
+// 美式发音：优先调用后端 Edge TTS（en-US-AriaNeural 真实美式嗓音），失败回退浏览器 Web Speech 选最优 en-US 嗓音
+function pickAmericanVoice() {
+    const vs = window.speechSynthesis ? window.speechSynthesis.getVoices() : [];
+    const us = vs.filter(v => v.lang && v.lang.toLowerCase().replace('_', '-').startsWith('en-us'));
+    if (!us.length) return null;
+    const prefer = ['Aria', 'Samantha', 'Natural', 'Google US English', 'Microsoft', 'Zira', 'David', 'Female'];
+    for (const name of prefer) {
+        const f = us.find(v => v.name.indexOf(name) >= 0);
+        if (f) return f;
+    }
+    return us[0];
+}
+function speakWeb(text) {
+    if (!window.speechSynthesis) return;
+    const u = new SpeechSynthesisUtterance(text);
+    u.lang = 'en-US';
+    const v = pickAmericanVoice();
+    if (v) u.voice = v;
+    window.speechSynthesis.cancel();
+    window.speechSynthesis.speak(u);
+}
+function speakText(text) {
+    const t = (text || '').trim();
+    if (!t) return;
+    // 先试后端 TTS（地道美式），失败再回退浏览器
+    fetch('/api/tts?text=' + encodeURIComponent(t))
+        .then(r => {
+            if (!r.ok) throw new Error('tts failed');
+            return r.blob();
+        })
+        .then(blob => {
+            const url = URL.createObjectURL(blob);
+            const audio = new Audio(url);
+            audio.play().catch(() => speakWeb(t));
+            audio.onended = () => URL.revokeObjectURL(url);
+        })
+        .catch(() => speakWeb(t));
+}
+function renderMistakes() {
+    const body = document.querySelector('#pg-mistakes .page-body');
+    if (!body) return;
+    if (!AppState.mistakes || !AppState.mistakes.length) {
+        body.innerHTML = '<div class="card"><p style="text-align:center;padding:40px;color:var(--gray);">还没有错题，去练习巩固吧～</p></div>';
+        return;
+    }
+    let html = '<div class="card" style="padding:0;overflow:hidden;">';
+    AppState.mistakes.forEach(m => {
+        const s = (m.sentence || '').replace(/'/g, "\\'");
+        html += `<div style="padding:14px 18px;border-bottom:1px solid #eee;display:flex;justify-content:space-between;align-items:center;gap:12px;">
+            <div style="flex:1;min-width:0;">
+                <div style="font-weight:600;word-break:break-word;">${m.sentence}</div>
+                <div style="font-size:12px;color:var(--gray);margin-top:4px;">${m.course||''} · ${m.time||''} · 错误${m.wrongCount||1}次</div>
+            </div>
+            <button class="btn-audio" style="padding:6px 12px;font-size:13px;flex-shrink:0;" onclick="speakText('${s}')">🔊</button>
+        </div>`;
+    });
+    html += '</div>';
+    body.innerHTML = html;
+}
+
+// ============================================================
+//  BUSINESS PAGES (真实 API)
+// ============================================================
+let _searchTimer;
+function onCourseSearch(){ clearTimeout(_searchTimer); _searchTimer = setTimeout(renderCourses, 250); }
+function onWordSearch(){ clearTimeout(_searchTimer); _searchTimer = setTimeout(renderVocab, 250); }
+function onDictSearch(){ clearTimeout(_searchTimer); _searchTimer = setTimeout(renderLookup, 250); }
+
+async function apiGet(url) {
+    const token = localStorage.getItem('juyou_token');
+    const headers = token ? { 'Authorization': 'Bearer ' + token } : {};
+    const r = await fetch(url, { headers });
+    if (!r.ok) throw new Error('request failed');
+    return r.json();
+}
+async function apiPost(url, body) {
+    const token = localStorage.getItem('juyou_token');
+    const r = await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token }, body: JSON.stringify(body) });
+    const d = await r.json().catch(() => ({}));
+    if (!r.ok) throw new Error(d.message || '操作失败');
+    return d;
+}
+
+async function renderCourses() {
+    const list = document.getElementById('courseList');
+    if (!list) return;
+    list.innerHTML = '<p style="color:var(--gray);padding:20px;">加载中…</p>';
+    try {
+        const q = document.getElementById('courseSearch').value.trim();
+        const data = await apiGet('/api/courses' + (q ? '?q=' + encodeURIComponent(q) : ''));
+        const courses = data.courses || [];
+        if (!courses.length) { list.innerHTML = '<p style="color:var(--gray);padding:20px;">没有找到相关课程</p>'; return; }
+        list.innerHTML = courses.map(c => `
+            <div class="card" style="padding:0;overflow:hidden;cursor:pointer;" onclick="openCourseDetail(${c.id})">
+                <div style="height:92px;background:linear-gradient(135deg,#667eea,#764ba2);display:flex;align-items:center;justify-content:center;font-size:44px;">${c.cover}</div>
+                <div style="padding:14px;">
+                    <div style="font-weight:600;font-size:15px;margin-bottom:6px;">${c.title}</div>
+                    <div style="font-size:12px;color:var(--gray);height:32px;overflow:hidden;">${c.description || ''}</div>
+                    <div style="margin-top:8px;display:flex;gap:6px;flex-wrap:wrap;">
+                        <span style="font-size:11px;background:#eef;color:#556;padding:2px 8px;border-radius:10px;">${c.level}</span>
+                        <span style="font-size:11px;background:#f0f0f0;color:#777;padding:2px 8px;border-radius:10px;">${c.category}</span>
+                    </div>
+                    <div style="margin-top:10px;display:flex;justify-content:space-between;align-items:center;">
+                        <span style="font-size:12px;color:var(--gray);">👁 ${c.views} · ${c.lessons_count}节</span>
+                        <button class="btn-audio" style="padding:6px 14px;font-size:13px;" onclick="event.stopPropagation();joinCourse(${c.id})">${c.price > 0 ? '¥' + c.price : '加入'}</button>
+                    </div>
+                </div>
+            </div>`).join('');
+    } catch (e) { list.innerHTML = '<p style="color:var(--err);padding:20px;">加载失败，请确认后端已启动</p>'; }
+}
+
+async function joinCourse(id) {
+    const token = localStorage.getItem('juyou_token');
+    if (!token) { showToast('请先登录', 'err'); return; }
+    try {
+        await apiPost('/api/course-join', { courseId: id, progress: 0 });
+        showToast('已加入课程，开始学习吧！', 'ok');
+        logActivity('enroll', '加入课程', '课程ID: ' + id);
+    } catch (e) { showToast(e.message || '操作失败', 'err'); }
+}
+
+async function renderVocab() {
+    const list = document.getElementById('wordList');
+    if (!list) return;
+    list.innerHTML = '<p style="color:var(--gray);padding:20px;">加载中…</p>';
+    try {
+        const q = document.getElementById('wordSearch').value.trim();
+        const level = document.getElementById('wordLevel').value;
+        const params = new URLSearchParams();
+        if (q) params.set('q', q);
+        if (level) params.set('level', level);
+        const qs = params.toString();
+        const data = await apiGet('/api/words' + (qs ? '?' + qs : ''));
+        const words = data.words || [];
+        const mastered = words.filter(w => w.status === 2).length;
+        const stEl = document.getElementById('vocabStat');
+        if (stEl) stEl.textContent = `共 ${words.length} 词 · 已掌握 ${mastered}`;
+        if (!words.length) { list.innerHTML = '<p style="color:var(--gray);padding:20px;">没有单词</p>'; return; }
+        list.innerHTML = words.map(w => {
+            const st = w.status || 0;
+            const stText = ['未学', '学习中', '已掌握'][st];
+            const stColor = ['#999', '#f39c12', '#27ae60'][st];
+            const safe = (w.word || '').replace(/'/g, "\\'");
+            return `<div class="card" style="padding:14px;display:flex;gap:12px;align-items:center;">
+                <div style="font-size:40px;width:48px;text-align:center;flex-shrink:0;">${w.image || '📝'}</div>
+                <div style="flex:1;min-width:0;">
+                    <div style="font-weight:700;font-size:17px;">${w.word} <span style="font-size:13px;color:var(--gray);font-weight:400;">${w.phonetic || ''}</span></div>
+                    <div style="color:#e67e22;font-size:14px;">${w.meaning || ''}</div>
+                    <div style="font-size:12px;color:var(--gray);margin-top:3px;">${w.example || ''}</div>
+                </div>
+                <div style="display:flex;flex-direction:column;gap:6px;align-items:flex-end;flex-shrink:0;">
+                    <span style="font-size:11px;color:${stColor};">${stText}</span>
+                    <button class="btn-audio" style="padding:4px 10px;font-size:12px;" onclick="speakText('${safe}')">🔊</button>
+                    <button style="padding:4px 10px;font-size:12px;background:#eee;color:#333;border:none;border-radius:6px;cursor:pointer;" onclick="cycleWordStatus(${w.id}, ${st})">标记</button>
+                </div>
+            </div>`;
+        }).join('');
+    } catch (e) { list.innerHTML = '<p style="color:var(--err);padding:20px;">加载失败</p>'; }
+}
+
+async function cycleWordStatus(id, cur) {
+    const token = localStorage.getItem('juyou_token');
+    if (!token) { showToast('请先登录', 'err'); return; }
+    const next = (cur + 1) % 3;
+    try {
+        await apiPost('/api/word-progress', { wordId: id, status: next });
+        renderVocab();
+        showToast('已更新记忆状态', 'ok');
+    } catch (e) { showToast(e.message || '操作失败', 'err'); }
+}
+
+async function renderLookup() {
+    const list = document.getElementById('dictList');
+    if (!list) return;
+    list.innerHTML = '<p style="color:var(--gray);padding:20px;">输入单词查询…</p>';
+    try {
+        const q = document.getElementById('dictSearch').value.trim();
+        const data = await apiGet('/api/words' + (q ? '?q=' + encodeURIComponent(q) : ''));
+        const words = data.words || [];
+        if (!words.length) { list.innerHTML = '<p style="color:var(--gray);padding:20px;">未找到单词</p>'; return; }
+        list.innerHTML = words.map(w => {
+            const safe = (w.word || '').replace(/'/g, "\\'");
+            return `<div class="card" style="padding:16px;">
+                <div style="display:flex;align-items:center;gap:12px;">
+                    <div style="font-size:40px;flex-shrink:0;">${w.image || '📝'}</div>
+                    <div style="flex:1;min-width:0;">
+                        <div style="font-size:20px;font-weight:700;">${w.word}</div>
+                        <div style="color:var(--gray);font-size:14px;">${w.phonetic || ''}</div>
+                    </div>
+                    <button class="btn-audio" style="margin-left:auto;padding:6px 12px;flex-shrink:0;" onclick="speakText('${safe}')">🔊</button>
+                </div>
+                <div style="margin-top:10px;color:#e67e22;font-weight:600;">${w.meaning || ''}</div>
+                <div style="font-size:13px;color:var(--gray);margin-top:4px;">${w.example || ''}</div>
+            </div>`;
+        }).join('');
+    } catch (e) { list.innerHTML = '<p style="color:var(--err);padding:20px;">加载失败</p>'; }
+}
+
+async function renderKnowledge() {
+    const list = document.getElementById('knowledgeList');
+    if (!list) return;
+    list.innerHTML = '<p style="color:var(--gray);padding:20px;">加载中…</p>';
+    try {
+        const data = await apiGet('/api/knowledge');
+        const arts = data.articles || [];
+        AppState.knowledge = arts;
+        if (!arts.length) { list.innerHTML = '<p style="color:var(--gray);padding:20px;">暂无文章</p>'; return; }
+        list.innerHTML = arts.map(a => `
+            <div class="card" style="padding:0;overflow:hidden;cursor:pointer;" onclick="showArticle(${a.id})">
+                <div style="height:80px;background:linear-gradient(135deg,#f6d365,#fda085);display:flex;align-items:center;justify-content:center;font-size:40px;">${a.cover}</div>
+                <div style="padding:14px;">
+                    <div style="font-weight:600;margin-bottom:6px;">${a.title}</div>
+                    <div style="font-size:13px;color:var(--gray);height:38px;overflow:hidden;">${a.summary || ''}</div>
+                    <span style="font-size:11px;background:#fff3e0;color:#e67e22;padding:2px 8px;border-radius:10px;display:inline-block;margin-top:8px;">${a.tag || ''}</span>
+                </div>
+            </div>`).join('');
+    } catch (e) { list.innerHTML = '<p style="color:var(--err);padding:20px;">加载失败</p>'; }
+}
+
+function showArticle(id) {
+    const a = (AppState.knowledge || []).find(x => x.id === id);
+    if (!a) return;
+    const m = document.getElementById('articleModal');
+    document.getElementById('articleBody').innerHTML = `<div style="font-size:22px;font-weight:700;margin-bottom:8px;">${a.cover} ${a.title}</div><div style="color:var(--gray);font-size:13px;margin-bottom:14px;">${a.tag || ''}</div><div style="line-height:1.7;">${a.content || ''}</div>`;
+    m.style.display = 'flex';
+}
+function closeArticle() { const m = document.getElementById('articleModal'); if (m) m.style.display = 'none'; }
+
+async function renderMyCourses() {
+    const body = document.querySelector('#pg-courses .page-body');
+    if (!body) return;
+    const token = localStorage.getItem('juyou_token');
+    if (!token) { body.innerHTML = '<div class="card"><p style="padding:30px;text-align:center;color:var(--gray);">请先登录后查看我的课程</p></div>'; return; }
+    body.innerHTML = '<div class="card"><p style="padding:30px;text-align:center;color:var(--gray);">加载中…</p></div>';
+    try {
+        const data = await apiGet('/api/my-courses');
+        const courses = data.courses || [];
+        const totalLessons = courses.reduce((s, c) => s + (c.lessons_count || 0), 0);
+        const doneLessons = courses.reduce((s, c) => s + Math.round((c.progress || 0) / 100 * (c.lessons_count || 0)), 0);
+        let html = `<div class="stats-grid" style="grid-template-columns:repeat(6,1fr);margin-bottom:20px;">
+            <div class="stat-card"><div class="stat-num">${courses.length}</div><div class="stat-label">已入课程</div></div>
+            <div class="stat-card"><div class="stat-num">${totalLessons}</div><div class="stat-label">总课节数</div></div>
+            <div class="stat-card"><div class="stat-num" style="color:var(--ok);">${doneLessons}</div><div class="stat-label">已完成节</div></div>
+            <div class="stat-card"><div class="stat-num" style="color:var(--warn);">0</div><div class="stat-label">学习天数</div></div>
+            <div class="stat-card"><div class="stat-num" style="color:var(--pri);">0</div><div class="stat-label">今日课程</div></div>
+            <div class="stat-card"><div class="stat-num" style="color:var(--purple);">0</div><div class="stat-label">今日时长</div></div>
+        </div>`;
+        if (!courses.length) {
+            html += '<div class="card"><p style="padding:30px;text-align:center;color:var(--gray);">还没有加入课程，去课程市场看看吧～</p></div>';
+        } else {
+            html += '<h3 style="font-size:16px;font-weight:700;margin:20px 0 12px;">全部课程</h3><div class="biz-grid">';
+            html += courses.map(c => `
+                <div class="card" style="padding:0;overflow:hidden;">
+                    <div style="height:80px;background:linear-gradient(135deg,#667eea,#764ba2);display:flex;align-items:center;justify-content:center;font-size:40px;">${c.cover}</div>
+                    <div style="padding:14px;">
+                        <div style="font-weight:600;">${c.title}</div>
+                        <div style="font-size:12px;color:var(--gray);margin-top:4px;">${c.lessons_count}节</div>
+                        <div style="margin-top:8px;background:#eee;border-radius:8px;height:8px;overflow:hidden;"><div style="width:${c.progress || 0}%;background:#4a90e2;height:100%;transition:.3s;"></div></div>
+                        <div style="font-size:12px;color:var(--gray);margin-top:4px;">进度 ${c.progress || 0}%</div>
+                    </div>
+                </div>`).join('');
+            html += '</div>';
+        }
+        body.innerHTML = html;
+    } catch (e) { body.innerHTML = '<div class="card"><p style="padding:30px;text-align:center;color:var(--err);">加载失败，请确认后端已启动</p></div>'; }
+}
+
+// ============================================================
+//  课程详情 + 句子练习（真实 API，地道美式发音）
+// ============================================================
+const GRAM_COLORS = {
+  '主语': '#e74c3c', '谓语': '#27ae60', '宾语': '#3498db', '定语': '#9b59b6',
+  '状语': '#e67e22', '代词': '#1abc9c', '系动词': '#16a085', '连词': '#f39c12',
+  '冠词': '#95a5a6', '形容词': '#fd79a8', '间接宾语': '#3498db', '直接宾语': '#2980b9'
+};
+function gramColor(tag) { return GRAM_COLORS[tag] || '#7f8c8d'; }
+
+let practiceKeyHandler = null;
+function clearPracticeKey() {
+  if (practiceKeyHandler) { document.removeEventListener('keydown', practiceKeyHandler); practiceKeyHandler = null; }
+}
+
+async function openCourseDetail(id) {
+    AppState.currentCourse = { id };
+    navigateTo('course-detail');
+}
+async function renderCourseDetail() {
+    const body = document.getElementById('courseDetailBody');
+    const cid = AppState.currentCourse && AppState.currentCourse.id;
+    if (!body || !cid) return;
+    body.innerHTML = '<div class="card"><p style="text-align:center;padding:40px;color:var(--gray);">加载中…</p></div>';
+    try {
+        const data = await apiGet('/api/courses/' + cid);
+        const c = data.course, lessons = data.lessons || [];
+        const tags = JSON.parse(c.tags || '[]');
+        const tagHtml = tags.concat([c.level, c.category]).map(t => `<span class="cd-tag">${t}</span>`).join('');
+        const lessonHtml = lessons.map(l => `
+            <div class="cd-lesson" onclick="startPractice(${c.id})">
+                <div class="seq">${l.seq}</div>
+                <div style="flex:1;min-width:0;">
+                    <div style="font-weight:600;">${l.title}</div>
+                    <div style="font-size:12px;color:var(--gray);margin-top:2px;">${l.subtitle || ''}</div>
+                </div>
+                <div class="play-ic">▶</div>
+            </div>`).join('');
+        body.innerHTML = `
+            <div class="cd-hero">
+                <div class="cd-cover">${c.cover}</div>
+                <div style="flex:1;min-width:0;">
+                    <div style="font-size:22px;font-weight:800;">${c.title}</div>
+                    <div class="cd-tags">${tagHtml}</div>
+                    <div style="font-size:13px;opacity:.9;margin-top:10px;">${c.author || ''} · 👁 ${c.views} 人在学 · ${c.lessons_count} 节</div>
+                </div>
+            </div>
+            <div style="display:flex;gap:12px;margin-bottom:20px;">
+                <button class="pa-btn play" style="background:var(--pri);color:#fff;padding:12px 22px;font-size:15px;" onclick="startPractice(${c.id})">▶ 开始学习</button>
+                <button class="btn-ghost" onclick="joinCourse(${c.id})">${c.price > 0 ? ('¥' + c.price + ' 解锁') : '加入课程'}</button>
+            </div>
+            <div class="card" style="padding:20px;">
+                <h3 style="font-size:16px;margin:0 0 10px;">课程介绍</h3>
+                <p style="color:#555;line-height:1.7;">${c.description || ''}</p>
+            </div>
+            <h3 style="font-size:16px;margin:22px 0 12px;">章节目录（${lessons.length}）</h3>
+            <div>${lessonHtml || '<p style="color:var(--gray);">暂无章节</p>'}</div>
+        `;
+    } catch (e) {
+        body.innerHTML = '<div class="card"><p style="text-align:center;padding:40px;color:var(--err);">加载失败，请确认后端已启动</p></div>';
+    }
+}
+
+async function startPractice(courseId) {
+    const token = localStorage.getItem('juyou_token');
+    if (!token) { showToast('请先登录', 'err'); return; }
+    try { await apiPost('/api/course-join', { courseId, progress: 0 }); } catch (e) {}
+    AppState.practice.courseId = courseId;
+    AppState.practice.idx = 0;
+    navigateTo('practice');
+    await loadPractice(courseId);
+}
+async function loadPractice(courseId) {
+    try {
+        const data = await apiGet('/api/practice?courseId=' + courseId);
+        AppState.practice.sentences = data.sentences || [];
+        AppState.practice.idx = 0;
+        renderPractice();
+    } catch (e) {
+        const wrap = document.getElementById('practiceBody');
+        if (wrap) wrap.innerHTML = '<p style="color:#e74c3c;text-align:center;padding:40px;">加载失败，请确认后端已启动</p>';
+    }
+}
+function backFromPractice() {
+    if (AppState.practice.courseId && AppState.currentCourse) navigateTo('course-detail');
+    else navigateTo('market');
+}
+function renderPractice() {
+    const wrap = document.getElementById('practiceBody');
+    const titleEl = document.getElementById('practiceTitle');
+    const progEl = document.getElementById('practiceProgress');
+    if (!wrap) return;
+    const list = AppState.practice.sentences || [];
+    const i = AppState.practice.idx;
+    const c = AppState.currentCourse;
+    if (titleEl && c) titleEl.textContent = '句子听写 · ' + (c.title || '');
+    if (!list.length) {
+        wrap.innerHTML = '<p style="color:#9aa4b2;text-align:center;padding:40px;">本课程暂无练习句子</p>';
+        if (progEl) progEl.textContent = '';
+        return;
+    }
+    const s = list[i];
+    if (progEl) progEl.textContent = (i + 1) + ' / ' + list.length;
+    const chips = (s.tokens || []).map(t =>
+        `<div class="gram-item">
+            <span class="gram-tag" style="background:${gramColor(t.tag)}">${t.tag}</span>
+            <span class="gram-word">${t.w}</span>
+        </div>`).join('');
+    wrap.innerHTML = `
+        <div class="practice-card">
+            <div class="gram-chips">${chips}</div>
+            <div class="pa-trans">${s.translation}</div>
+            <div class="pa-controls">
+                <button class="pa-btn play" onclick="playPractice()">🔊 美式发音</button>
+                <button class="pa-btn" onclick="showAnswer()">👁 显示答案</button>
+                <button class="pa-btn" onclick="practicePrev()">◀ 上一句</button>
+                <button class="pa-btn" onclick="practiceNext()">下一句 ▶</button>
+                <button class="pa-btn" onclick="collectMistake()">⭐ 收藏错题</button>
+            </div>
+            <div class="dict-row">
+                <input class="dict-input" id="dictInput" placeholder="听写输入：把刚才的句子写下来…" onkeydown="if(event.key==='Enter')checkDictation()" />
+                <button class="pa-btn play" onclick="checkDictation()">提交</button>
+            </div>
+            <div class="pa-hint" id="dictHint">按 空格 听发音 · 回车 提交 · 正确自动跳下一句</div>
+        </div>`;
+    // 空格键播放美式发音（输入框内不拦截，保留空格输入）
+    clearPracticeKey();
+    practiceKeyHandler = (e) => {
+        if (e.code === 'Space' && e.target && e.target.id !== 'dictInput') {
+            e.preventDefault();
+            playPractice();
+        }
+    };
+    document.addEventListener('keydown', practiceKeyHandler);
+}
+function playPractice() {
+    const list = AppState.practice.sentences || [];
+    const s = list[AppState.practice.idx];
+    if (s) speakText(s.sentence);
+}
+function showAnswer() {
+    const list = AppState.practice.sentences || [];
+    const s = list[AppState.practice.idx];
+    const hint = document.getElementById('dictHint');
+    const inp = document.getElementById('dictInput');
+    if (s && hint) hint.innerHTML = '参考答案：<span class="pa-answer">' + s.sentence + '</span>';
+    if (s && inp) inp.value = s.sentence;
+}
+function normalize(s) {
+    return (s || '').toLowerCase().replace(/[^a-z0-9 ]/g, ' ').replace(/\s+/g, ' ').trim();
+}
+function checkDictation() {
+    const list = AppState.practice.sentences || [];
+    const s = list[AppState.practice.idx];
+    const inp = document.getElementById('dictInput');
+    const hint = document.getElementById('dictHint');
+    if (!s || !inp) return;
+    const ok = normalize(inp.value) === normalize(s.sentence);
+    inp.classList.remove('ok', 'bad');
+    inp.classList.add(ok ? 'ok' : 'bad');
+    if (ok) {
+        hint.innerHTML = '🎉 正确！<span class="pa-answer">' + s.sentence + '</span>';
+        if (AppState.isLoggedIn) logActivity('practice', '听写正确', s.sentence);
+        setTimeout(() => practiceNext(), 900);
+    } else {
+        hint.textContent = '再试试，注意大小写和标点～';
+        if (AppState.isLoggedIn) logActivity('practice', '听写错误', s.sentence);
+    }
+}
+function practicePrev() {
+    if (AppState.practice.idx > 0) { AppState.practice.idx--; renderPractice(); }
+}
+function practiceNext() {
+    const list = AppState.practice.sentences || [];
+    if (AppState.practice.idx < list.length - 1) { AppState.practice.idx++; renderPractice(); }
+    else { showToast('已是最后一句 🎉', 'ok'); }
+}
+async function collectMistake() {
+    const token = localStorage.getItem('juyou_token');
+    if (!token) { showToast('请先登录', 'err'); return; }
+    const list = AppState.practice.sentences || [];
+    const s = list[AppState.practice.idx];
+    if (!s) return;
+    try {
+        await apiPost('/api/mistakes', { sentence: s.sentence, course: AppState.currentCourse ? AppState.currentCourse.title : '' });
+        showToast('已加入错题本 ⭐', 'ok');
+    } catch (e) { showToast(e.message || '操作失败', 'err'); }
+}
+
+// ============================================================
+//  INIT
+// ============================================================
+document.addEventListener('DOMContentLoaded', () => {
+    // 用 token 拉取真实用户资料，恢复登录态
+    const token = localStorage.getItem('juyou_token');
+    if (token) {
+        fetch('/api/profile', { headers: { 'Authorization': 'Bearer ' + token } })
+            .then(r => r.ok ? r.json() : Promise.reject())
+            .then(data => {
+                Object.assign(AppState.user, data.user);
+                AppState.isLoggedIn = true;
+                showApp();
+                // 拉取真实错题并渲染
+                fetch('/api/mistakes', { headers: { 'Authorization': 'Bearer ' + token } })
+                    .then(r => r.ok ? r.json() : Promise.reject())
+                    .then(md => { AppState.mistakes = md.mistakes || []; renderMistakes(); })
+                    .catch(() => {});
+            })
+            .catch(() => { localStorage.removeItem('juyou_token'); });
+    }
+
+    // Keyboard shortcuts
+    document.addEventListener('keydown', e => {
+        if (e.key === 'Escape') closePwdModal();
+    });
+});
+</script>
+
+</body>
+</html>

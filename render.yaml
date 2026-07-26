@@ -1,0 +1,18 @@
+# Render 部署配置（免费版）
+# 文档：https://render.com/docs/deploy-node-express-app
+# 在 Render 后台 New -> Web Service 关联 GitHub 仓库后会自动读取本文件
+services:
+  - type: web
+    name: xueyuyan
+    runtime: node
+    plan: free
+    branch: main
+    buildCommand: npm install
+    startCommand: npm start
+    healthCheckPath: /api/health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      # 云端无 Python 环境，TTS 会回退为浏览器发音，留空即可
+      - key: TTS_PY
+        value: ""
