@@ -664,6 +664,7 @@
                 <div class="navi" data-page="mistakes" onclick="navigateTo('mistakes')"><span class="navi-ic">❌</span> 错题本</div>
                 <div class="navi" data-page="lookup" onclick="navigateTo('lookup')"><span class="navi-ic">🔍</span> 查单词</div>
                 <div class="navi" data-page="knowledge" onclick="navigateTo('knowledge')"><span class="navi-ic">💡</span> 知识库</div>
+                <div class="navi" data-page="admin" onclick="navigateTo('admin')"><span class="navi-ic">🛠</span> 内容管理</div>
             </div>
             <div class="nav-group">
                 <div class="nav-group-label">账户与成长</div>
@@ -1249,6 +1250,12 @@
         </div>
 
         <!-- 句子听写练习页（深色主题，地道美式发音） -->
+        <div class="pg" id="pg-admin">
+            <div class="page-header"><div class="page-title">🛠 内容管理</div></div>
+            <div class="page-body" id="adminBody">
+                <div class="card"><p style="text-align:center;padding:40px;color:var(--gray);">加载中…</p></div>
+            </div>
+        </div>
         <div class="pg" id="pg-practice">
             <div class="page-header" style="background:#1f2430;border-color:#2c3340;">
                 <button class="btn-ghost" style="color:#cfd6e4;" onclick="backFromPractice()">← 返回</button>
@@ -1557,6 +1564,7 @@ function navigateTo(page) {
     if (page === 'market') renderCourses();
     if (page === 'lookup') renderLookup();
     if (page === 'knowledge') renderKnowledge();
+    if (page === 'admin') renderAdmin();
     if (page === 'guide') renderGuide();
     if (page === 'courses') renderMyCourses();
     if (page === 'mistakes') renderMistakes();
@@ -2012,6 +2020,110 @@ function showArticle(id) {
     m.style.display = 'flex';
 }
 function closeArticle() { const m = document.getElementById('articleModal'); if (m) m.style.display = 'none'; }
+function escHtml(s){ if(s===undefined||s===null) return ''; return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+let adminTab = 'course';
+async function renderAdmin() {
+  const body = document.getElementById('adminBody');
+  if (!body) return;
+  if (!AppState.isLoggedIn) { body.innerHTML = '<div class="card"><p style="padding:30px;text-align:center;color:var(--gray);">请先登录后再管理内容</p></div>'; return; }
+  let courseOpts = '';
+  try {
+    const data = await apiGet('/api/courses');
+    (data.courses || []).forEach(c => { courseOpts += '<option value="' + c.id + '">' + escHtml(c.title) + '</option>'; });
+  } catch (e) {}
+  const fr = 'margin-bottom:12px;';
+  const lb = 'display:block;font-size:13px;color:var(--gray);margin-bottom:5px;';
+  body.innerHTML = `
+    <div style="display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap;">
+      <button class="mk-ftab ${adminTab==='course'?'on':''}" onclick="setAdminTab('course')">📚 添加课程</button>
+      <button class="mk-ftab ${adminTab==='lesson'?'on':''}" onclick="setAdminTab('lesson')">📝 添加章节</button>
+      <button class="mk-ftab ${adminTab==='knowledge'?'on':''}" onclick="setAdminTab('knowledge')">💡 添加知识库</button>
+    </div>
+    <div class="card" style="padding:18px;">
+      ${adminTab==='course' ? `
+        <div style="font-weight:700;margin-bottom:14px;">新增一门课程</div>
+        <div style="${fr}"><label style="${lb}">课程标题</label><input id="acTitle" class="form-input" placeholder="如：外贸商务英语开口沟通实战"></div>
+        <div style="${fr}"><label style="${lb}">封面 Emoji</label><input id="acCover" class="form-input" value="📘"></div>
+        <div style="${fr}"><label style="${lb}">语言</label><select id="acLang" class="form-input"><option value="en">英语</option><option value="zh">中文</option></select></div>
+        <div style="${fr}"><label style="${lb}">级别</label><input id="acLevel" class="form-input" value="职场" placeholder="零基础/小学/初中/高中/大学/实用/职场/雅思/综合"></div>
+        <div style="${fr}"><label style="${lb}">分类</label><input id="acCat" class="form-input" value="商务" placeholder="教材同步/口语/语法/写作/商务..."></div>
+        <div style="${fr}"><label style="${lb}">标签（逗号分隔）</label><input id="acTags" class="form-input" placeholder="外贸,商务"></div>
+        <div style="${fr}"><label style="${lb}">价格（0=免费）</label><input id="acPrice" class="form-input" value="0" type="number"></div>
+        <div style="${fr}"><label style="${lb}">简介</label><textarea id="acDesc" class="form-input" rows="3" placeholder="课程简介"></textarea></div>
+        <button class="btn-primary" onclick="addAdminCourse()">＋ 创建课程</button>
+      ` : ''}
+      ${adminTab==='lesson' ? `
+        <div style="font-weight:700;margin-bottom:14px;">给课程添加章节（每周 / 每课）</div>
+        <div style="${fr}"><label style="${lb}">选择课程</label><select id="alCourse" class="form-input">${courseOpts}</select></div>
+        <div style="${fr}"><label style="${lb}">章节标题</label><input id="alTitle" class="form-input" placeholder="如：第一周：商务沟通开场"></div>
+        <div style="${fr}"><label style="${lb}">章节副标题</label><input id="alSub" class="form-input" placeholder="一句话描述"></div>
+        <div style="${fr}"><label style="${lb}">核心词汇（每行一个）<br><span style="font-size:11px;color:var(--gray)">格式：英文 | 音标 | 中文 | 词性 | 短语1;短语2</span></label><textarea id="alVocab" class="form-input" rows="6" placeholder="inquiry|/ɪnˈkwaɪəri/|询盘|名词|Thanks for your inquiry."></textarea></div>
+        <div style="${fr}"><label style="${lb}">对话 / 例句（每行一个）<br><span style="font-size:11px;color:var(--gray)">格式：英文 ||| 中文</span></label><textarea id="alDialogue" class="form-input" rows="5" placeholder="Hello, nice to meet you.|||您好，很高兴认识您。"></textarea></div>
+        <div style="${fr}"><label style="${lb}">语法 / 技巧点</label><textarea id="alGrammar" class="form-input" rows="3" placeholder="本周沟通技巧"></textarea></div>
+        <div style="${fr}"><label style="${lb}">学习提示</label><textarea id="alTip" class="form-input" rows="2" placeholder="学习建议"></textarea></div>
+        <button class="btn-primary" onclick="addAdminLesson()">＋ 添加章节</button>
+      ` : ''}
+      ${adminTab==='knowledge' ? `
+        <div style="font-weight:700;margin-bottom:14px;">新增知识库文章</div>
+        <div style="${fr}"><label style="${lb}">标题</label><input id="akTitle" class="form-input" placeholder="文章标题"></div>
+        <div style="${fr}"><label style="${lb}">封面 Emoji</label><input id="akCover" class="form-input" value="💡"></div>
+        <div style="${fr}"><label style="${lb}">标签</label><input id="akTag" class="form-input" placeholder="语法图解/学习方法..."></div>
+        <div style="${fr}"><label style="${lb}">摘要</label><input id="akSummary" class="form-input" placeholder="一句话摘要"></div>
+        <div style="${fr}"><label style="${lb}">正文</label><textarea id="akContent" class="form-input" rows="5" placeholder="文章内容"></textarea></div>
+        <button class="btn-primary" onclick="addAdminKnowledge()">＋ 发布文章</button>
+      ` : ''}
+    </div>
+    <p style="font-size:12px;color:var(--gray);margin-top:14px;">提示：添加后立即可在「课程市场 / 知识库」看到。词汇与对话请按上方格式填写，一行一条。</p>
+  `;
+}
+function setAdminTab(t) { adminTab = t; renderAdmin(); }
+function elVal(id) { const el = document.getElementById(id); return el ? el.value : ''; }
+function parseAdminVocab(text) {
+  const out = [];
+  (text || '').split('\n').forEach(function (line) {
+    line = line.trim(); if (!line) return;
+    const p = line.split('|');
+    if (p.length < 3) return;
+    out.push({ w: p[0].trim(), ph: (p[1]||'').trim(), zh: (p[2]||'').trim(), pos: (p[3]||'名词').trim(), phrases: (p[4]||'').split(';').map(function(s){return s.trim();}).filter(Boolean) });
+  });
+  return out;
+}
+function parseAdminDialogue(text) {
+  const out = [];
+  (text || '').split('\n').forEach(function (line) {
+    line = line.trim(); if (!line) return;
+    const p = line.split('|||');
+    if (p.length < 2) return;
+    out.push({ en: p[0].trim(), zh: p[1].trim() });
+  });
+  return out;
+}
+async function addAdminCourse() {
+  const body = {
+    title: elVal('acTitle'), cover: elVal('acCover') || '📘', lang: elVal('acLang'),
+    level: elVal('acLevel') || '综合', category: elVal('acCat') || '其他',
+    tags: (elVal('acTags') || '').split(',').map(function(s){return s.trim();}).filter(Boolean),
+    price: Number(elVal('acPrice')) || 0, description: elVal('acDesc') || ''
+  };
+  if (!body.title) { showToast('请填写课程标题','err'); return; }
+  try { const r = await apiPost('/api/admin/course', body); showToast('课程已创建：' + (r.title || ''),'ok'); } catch (e) { showToast('创建失败','err'); }
+}
+async function addAdminLesson() {
+  const cid = elVal('alCourse');
+  const body = {
+    courseId: Number(cid), title: elVal('alTitle'), subtitle: elVal('alSub') || '',
+    vocab: parseAdminVocab(elVal('alVocab')), dialogue: parseAdminDialogue(elVal('alDialogue')),
+    grammar: elVal('alGrammar') || '', tip: elVal('alTip') || ''
+  };
+  if (!body.title) { showToast('请填写章节标题','err'); return; }
+  try { await apiPost('/api/admin/lesson', body); showToast('章节已添加','ok'); } catch (e) { showToast('添加失败','err'); }
+}
+async function addAdminKnowledge() {
+  const body = { title: elVal('akTitle'), cover: elVal('akCover') || '💡', tag: elVal('akTag') || '', summary: elVal('akSummary') || '', content: elVal('akContent') || '' };
+  if (!body.title) { showToast('请填写文章标题','err'); return; }
+  try { await apiPost('/api/admin/knowledge', body); showToast('文章已发布','ok'); } catch (e) { showToast('发布失败','err'); }
+}
+
 
 async function renderMyCourses() {
     const body = document.querySelector('#pg-courses .page-body');

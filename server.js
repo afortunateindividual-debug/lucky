@@ -269,11 +269,944 @@ const COURSE_THEMES = {
     vocab: [{ w: '我', ph: 'wǒ', zh: '我', en: 'I', pos: '代词', phrases: ['我是学生。Wǒ shì xuéshēng.'] }, { w: '是', ph: 'shì', zh: '是', en: 'be', pos: '动词', phrases: ['这是书。Zhè shì shū.'] }, { w: '学习', ph: 'xuéxí', zh: '学习', en: 'study', pos: '动词', phrases: ['我学习汉语。Wǒ xuéxí hànyǔ.'] }, { w: '老师', ph: 'lǎoshī', zh: '老师', en: 'teacher', pos: '名词', phrases: ['老师好！Lǎoshī hǎo!'] }, { w: '中国', ph: 'Zhōngguó', zh: '中国', en: 'China', pos: '名词', phrases: ['我是中国人。Wǒ shì Zhōngguó rén.'] }],
     grammar: '"是"字句：A 是 B。否定用"不是"。"很"表程度：很有意思。',
     tip: 'HSK1 需掌握 150 词、基本句式，配合笔画书写记忆更牢。'
-  }
+  },
+'外贸商务英语开口沟通实战陪跑': {
+  "dialogues": [],
+  "vocab": [],
+  "grammar": "课程设计原则：短、重复、可模仿、可立刻用。学习核心标准：学员是否真的在和外国客户进行实际沟通。",
+  "tip": "12 周从「不敢开口」到「独立完成外贸全流程英语沟通」，每周一个实战主题，照模板练就能用。",
+  "weeks": [
+    {
+      "t": "第一周：商务沟通开场万能模板",
+      "s": "见面寒暄 · 名片 · 展会 · 线上 · 视频 · 电话开场",
+      "dialogue": [
+        {
+          "en": "Hello, I am from Sunrise Trading Company. Nice to meet you.",
+          "zh": "您好，我来自旭日贸易公司，很高兴认识您。"
+        },
+        {
+          "en": "Here is my business card. May I have your contact information?",
+          "zh": "这是我的名片，方便留一下您的联系方式吗？"
+        },
+        {
+          "en": "Could you tell me a little about your business?",
+          "zh": "能简单介绍一下您的业务吗？"
+        }
+      ],
+      "vocab": [
+        {
+          "w": "business card",
+          "ph": "/ˈbɪznəs kɑːd/",
+          "zh": "名片",
+          "pos": "名词",
+          "phrases": [
+            "Here is my business card.",
+            "May I have your business card?"
+          ]
+        },
+        {
+          "w": "introduce",
+          "ph": "/ˌɪntrəˈdjuːs/",
+          "zh": "介绍",
+          "pos": "动词",
+          "phrases": [
+            "Let me introduce my company.",
+            "Allow me to introduce myself."
+          ]
+        },
+        {
+          "w": "company",
+          "ph": "/ˈkʌmpəni/",
+          "zh": "公司",
+          "pos": "名词",
+          "phrases": [
+            "I work for a trading company."
+          ]
+        },
+        {
+          "w": "customer",
+          "ph": "/ˈkʌstəmə(r)/",
+          "zh": "客户",
+          "pos": "名词",
+          "phrases": [
+            "We serve global customers."
+          ]
+        },
+        {
+          "w": "product",
+          "ph": "/ˈprɒdʌkt/",
+          "zh": "产品",
+          "pos": "名词",
+          "phrases": [
+            "This is our new product."
+          ]
+        },
+        {
+          "w": "contact",
+          "ph": "/ˈkɒntækt/",
+          "zh": "联系方式",
+          "pos": "名词",
+          "phrases": [
+            "Please keep in contact."
+          ]
+        }
+      ],
+      "grammar": "三句式开场模板：①自我介绍（I am from...）②说明来意（I am here to...）③索要联系方式（May I have your...）。准备一套通用模板，见客户前念熟即可不冷场。",
+      "tip": "把三句话写在小卡片上，见客户前默念三遍，紧张时照着说就不会尴尬。"
+    },
+    {
+      "t": "第二周：询盘处理（第一轮沟通）",
+      "s": "接询盘 · 问需求 · 轻跟进 · 展会后闭环",
+      "dialogue": [
+        {
+          "en": "Thanks for your inquiry. Could you tell me your specific requirements?",
+          "zh": "感谢您的询盘，能告诉我您的具体需求吗？"
+        },
+        {
+          "en": "What specifications, usage and quantity do you need?",
+          "zh": "您需要什么规格、用途和数量？"
+        },
+        {
+          "en": "Just a gentle follow-up on my last email. Are you still interested?",
+          "zh": "顺便跟进一下上封邮件，您还有兴趣吗？"
+        }
+      ],
+      "vocab": [
+        {
+          "w": "inquiry",
+          "ph": "/ɪnˈkwaɪəri/",
+          "zh": "询盘",
+          "pos": "名词",
+          "phrases": [
+            "Thanks for your inquiry.",
+            "We received an inquiry from a new client."
+          ]
+        },
+        {
+          "w": "requirement",
+          "ph": "/rɪˈkwaɪəmənt/",
+          "zh": "需求",
+          "pos": "名词",
+          "phrases": [
+            "Please list your requirements."
+          ]
+        },
+        {
+          "w": "specification",
+          "ph": "/ˌspesɪfɪˈkeɪʃn/",
+          "zh": "规格",
+          "pos": "名词",
+          "phrases": [
+            "What are the specifications?"
+          ]
+        },
+        {
+          "w": "quantity",
+          "ph": "/ˈkwɒntəti/",
+          "zh": "数量",
+          "pos": "名词",
+          "phrases": [
+            "What quantity do you need?"
+          ]
+        },
+        {
+          "w": "follow up",
+          "ph": "/ˈfɒləʊ ʌp/",
+          "zh": "跟进",
+          "pos": "短语",
+          "phrases": [
+            "I will follow up with the client."
+          ]
+        },
+        {
+          "w": "reply",
+          "ph": "/rɪˈplaɪ/",
+          "zh": "回复",
+          "pos": "动词",
+          "phrases": [
+            "Please reply at your earliest convenience."
+          ]
+        }
+      ],
+      "grammar": "接询盘三句式：感谢询盘→明确需求→给出初步回应。一次性问全规格/用途/数量，可显著提升客户回复意愿；客户不回时用轻跟进模板，频率建议 3-5 天一次。",
+      "tip": "收到询盘 1 小时内回复，客户感受最专业；展会后 24 小时跟进转化率最高。"
+    },
+    {
+      "t": "第三周：产品介绍万能模板",
+      "s": "产品定义 · 特点 · 优势 · 用途 · 对比",
+      "dialogue": [
+        {
+          "en": "This is our best-selling product. Its main feature is energy saving.",
+          "zh": "这是我们最畅销的产品，主要特点是节能。"
+        },
+        {
+          "en": "It is widely used in hospitals and laboratories.",
+          "zh": "它广泛用于医院和实验室。"
+        },
+        {
+          "en": "Compared with the old model, this one is 30% lighter.",
+          "zh": "相比旧款，这款轻了 30%。"
+        }
+      ],
+      "vocab": [
+        {
+          "w": "product",
+          "ph": "/ˈprɒdʌkt/",
+          "zh": "产品",
+          "pos": "名词",
+          "phrases": [
+            "Our product sells well."
+          ]
+        },
+        {
+          "w": "feature",
+          "ph": "/ˈfiːtʃə(r)/",
+          "zh": "特点",
+          "pos": "名词",
+          "phrases": [
+            "What is the key feature?"
+          ]
+        },
+        {
+          "w": "advantage",
+          "ph": "/ədˈvɑːntɪdʒ/",
+          "zh": "优势",
+          "pos": "名词",
+          "phrases": [
+            "The main advantage is low cost."
+          ]
+        },
+        {
+          "w": "application",
+          "ph": "/ˌæplɪˈkeɪʃn/",
+          "zh": "用途",
+          "pos": "名词",
+          "phrases": [
+            "What is the application?"
+          ]
+        },
+        {
+          "w": "model",
+          "ph": "/ˈmɒdl/",
+          "zh": "型号",
+          "pos": "名词",
+          "phrases": [
+            "Which model do you prefer?"
+          ]
+        },
+        {
+          "w": "compare",
+          "ph": "/kəmˈpeə(r)/",
+          "zh": "比较",
+          "pos": "动词",
+          "phrases": [
+            "Let me compare the two models."
+          ]
+        }
+      ],
+      "grammar": "30 秒产品介绍结构：产品定义→核心特点→目标客户。模板可适配任意行业，照着填空即可；对比竞品时保持中立、突出自家优势。",
+      "tip": "用「定义+特点+客户」三段式，每天练一次，30 秒开口就有条理。"
+    },
+    {
+      "t": "第四周：报价与谈价",
+      "s": "报价格式 · 贸易条款 · 价格异议 · 折扣",
+      "dialogue": [
+        {
+          "en": "Our quotation is USD 12 per unit, FOB Shanghai.",
+          "zh": "我们的报价是每件 12 美元，上海离岸价。"
+        },
+        {
+          "en": "Could you share your target price?",
+          "zh": "能告知您的目标价格吗？"
+        },
+        {
+          "en": "The price is reasonable because of the superior material.",
+          "zh": "这个价格合理，因为材料更优。"
+        }
+      ],
+      "vocab": [
+        {
+          "w": "quotation",
+          "ph": "/ˌkwəʊtˈeɪʃn/",
+          "zh": "报价",
+          "pos": "名词",
+          "phrases": [
+            "Here is our quotation.",
+            "Please send your quotation."
+          ]
+        },
+        {
+          "w": "price",
+          "ph": "/praɪs/",
+          "zh": "价格",
+          "pos": "名词",
+          "phrases": [
+            "The price is negotiable."
+          ]
+        },
+        {
+          "w": "FOB",
+          "ph": "/ef əʊ biː/",
+          "zh": "离岸价",
+          "pos": "名词",
+          "phrases": [
+            "The price is FOB Shanghai."
+          ]
+        },
+        {
+          "w": "CIF",
+          "ph": "/siː aɪ ef/",
+          "zh": "到岸价",
+          "pos": "名词",
+          "phrases": [
+            "We can quote CIF if needed."
+          ]
+        },
+        {
+          "w": "discount",
+          "ph": "/ˈdɪskaʊnt/",
+          "zh": "折扣",
+          "pos": "名词",
+          "phrases": [
+            "We can offer a small discount."
+          ]
+        },
+        {
+          "w": "negotiate",
+          "ph": "/nɪˈɡəʊʃieɪt/",
+          "zh": "谈判",
+          "pos": "动词",
+          "phrases": [
+            "Let us negotiate the price."
+          ]
+        }
+      ],
+      "grammar": "专业报价格式：单价 + 贸易条款（FOB/CIF/EXW）。客户说「太贵了」时先确认原因，再解释价值，不要立刻降价；折扣要给得有理由、不伤利润。",
+      "tip": "报价时一定写清包含什么（运费/税费/包装），避免后续扯皮。"
+    },
+    {
+      "t": "第五周：样品沟通与寄样",
+      "s": "问样品 · 样品费 · 快递 · 寄样跟进",
+      "dialogue": [
+        {
+          "en": "Would you like a sample? The sample fee is refundable.",
+          "zh": "需要样品吗？样品费可退。"
+        },
+        {
+          "en": "We will send the sample by express within two days.",
+          "zh": "我们两天内快递寄出样品。"
+        },
+        {
+          "en": "The sample is slightly different from mass production.",
+          "zh": "样品与大货略有差异。"
+        }
+      ],
+      "vocab": [
+        {
+          "w": "sample",
+          "ph": "/ˈsɑːmpl/",
+          "zh": "样品",
+          "pos": "名词",
+          "phrases": [
+            "We can provide a free sample."
+          ]
+        },
+        {
+          "w": "sample fee",
+          "ph": "/ˈsɑːmpl fiː/",
+          "zh": "样品费",
+          "pos": "短语",
+          "phrases": [
+            "The sample fee is USD 20."
+          ]
+        },
+        {
+          "w": "express",
+          "ph": "/ɪkˈspres/",
+          "zh": "快递",
+          "pos": "名词",
+          "phrases": [
+            "We will ship by express."
+          ]
+        },
+        {
+          "w": "shipping",
+          "ph": "/ˈʃɪpɪŋ/",
+          "zh": "运输",
+          "pos": "名词",
+          "phrases": [
+            "The shipping cost is on us."
+          ]
+        },
+        {
+          "w": "mass production",
+          "ph": "/mæs prəˈdʌkʃn/",
+          "zh": "大货",
+          "pos": "短语",
+          "phrases": [
+            "Mass production starts next week."
+          ]
+        },
+        {
+          "w": "refundable",
+          "ph": "/rɪˈfʌndəbl/",
+          "zh": "可退的",
+          "pos": "形容词",
+          "phrases": [
+            "The fee is refundable."
+          ]
+        }
+      ],
+      "grammar": "样品费说明原则：明确是否可退、运费由谁承担、可退政策如何执行。寄样后 3 天内跟进，询问客户是否收到、有无疑问。",
+      "tip": "样品是建立信任的关键一步，寄出后主动发快递单号并跟进。"
+    },
+    {
+      "t": "第六周：订单确认与合同沟通",
+      "s": "PI要素 · 付款方式 · 交期 · 改单",
+      "dialogue": [
+        {
+          "en": "Please confirm the Proforma Invoice before payment.",
+          "zh": "付款前请确认形式发票。"
+        },
+        {
+          "en": "We accept T/T and L/C as payment terms.",
+          "zh": "我们接受电汇和信用证付款。"
+        },
+        {
+          "en": "The lead time is about 30 days after deposit.",
+          "zh": "收到定金后交期约 30 天。"
+        }
+      ],
+      "vocab": [
+        {
+          "w": "order",
+          "ph": "/ˈɔːdə(r)/",
+          "zh": "订单",
+          "pos": "名词",
+          "phrases": [
+            "We received a big order."
+          ]
+        },
+        {
+          "w": "Proforma Invoice",
+          "ph": "/prəˈfɔːmə ˈɪnvɔɪs/",
+          "zh": "形式发票(PI)",
+          "pos": "名词",
+          "phrases": [
+            "Please confirm the PI."
+          ]
+        },
+        {
+          "w": "payment",
+          "ph": "/ˈpeɪmənt/",
+          "zh": "付款",
+          "pos": "名词",
+          "phrases": [
+            "What is the payment term?"
+          ]
+        },
+        {
+          "w": "T/T",
+          "ph": "/tiː tiː/",
+          "zh": "电汇",
+          "pos": "名词",
+          "phrases": [
+            "We prefer T/T payment."
+          ]
+        },
+        {
+          "w": "L/C",
+          "ph": "/el siː/",
+          "zh": "信用证",
+          "pos": "名词",
+          "phrases": [
+            "L/C is safer for large orders."
+          ]
+        },
+        {
+          "w": "lead time",
+          "ph": "/liːd taɪm/",
+          "zh": "交期",
+          "pos": "短语",
+          "phrases": [
+            "The lead time is 30 days."
+          ]
+        }
+      ],
+      "grammar": "让客户确认 PI 是付款前必要步骤；清晰说明付款方式（TT/LC/PayPal）与交期，主动回应下单前客户常见顾虑，降低其风险感。",
+      "tip": "下单前主动列出客户可能的顾虑并逐一回应，能大幅减少后续纠纷。"
+    },
+    {
+      "t": "第七周：生产跟进与进度沟通",
+      "s": "进度更新 · 催进度 · 延期 · 包装确认",
+      "dialogue": [
+        {
+          "en": "Production is 50% complete. We will finish by this Friday.",
+          "zh": "生产已完成 50%，本周五前完工。"
+        },
+        {
+          "en": "Sorry for the delay; the new delivery date is next Monday.",
+          "zh": "抱歉延期，新的发货日是下周一。"
+        },
+        {
+          "en": "Please confirm the packaging method you prefer.",
+          "zh": "请确认您偏好的包装方式。"
+        }
+      ],
+      "vocab": [
+        {
+          "w": "production",
+          "ph": "/prəˈdʌkʃn/",
+          "zh": "生产",
+          "pos": "名词",
+          "phrases": [
+            "Production is on schedule."
+          ]
+        },
+        {
+          "w": "progress",
+          "ph": "/ˈprəʊɡres/",
+          "zh": "进度",
+          "pos": "名词",
+          "phrases": [
+            "Here is the latest progress."
+          ]
+        },
+        {
+          "w": "delay",
+          "ph": "/dɪˈleɪ/",
+          "zh": "延期",
+          "pos": "名词",
+          "phrases": [
+            "Sorry for the delay."
+          ]
+        },
+        {
+          "w": "packaging",
+          "ph": "/ˈpækɪdʒɪŋ/",
+          "zh": "包装",
+          "pos": "名词",
+          "phrases": [
+            "We use export cartons."
+          ]
+        },
+        {
+          "w": "update",
+          "ph": "/ʌpˈdeɪt/",
+          "zh": "更新",
+          "pos": "动词",
+          "phrases": [
+            "I will update you weekly."
+          ]
+        },
+        {
+          "w": "reassure",
+          "ph": "/ˌriːəˈʃʊə(r)/",
+          "zh": "安抚",
+          "pos": "动词",
+          "phrases": [
+            "We reassure the client promptly."
+          ]
+        }
+      ],
+      "grammar": "进度更新模板：当前完成度→预计完工日→辅助图片/视频。遇延期坦诚说明原因并给新交期，比隐瞒更得信任。",
+      "tip": "主动更新进度比客户来催更显专业，能显著降低客户的焦虑感。"
+    },
+    {
+      "t": "第八周：品质沟通与验货",
+      "s": "质量标准 · 验货 · 质量担忧 · 安心发货",
+      "dialogue": [
+        {
+          "en": "We have strict quality standards for every batch.",
+          "zh": "我们对每批货都有严格质量标准。"
+        },
+        {
+          "en": "Sure, we can arrange a third-party inspection.",
+          "zh": "当然，我们可以安排第三方验货。"
+        },
+        {
+          "en": "We can accept or decline based on your requirement.",
+          "zh": "根据您的要求我们可以接受或拒绝。"
+        }
+      ],
+      "vocab": [
+        {
+          "w": "quality",
+          "ph": "/ˈkwɒləti/",
+          "zh": "质量",
+          "pos": "名词",
+          "phrases": [
+            "Quality comes first."
+          ]
+        },
+        {
+          "w": "inspection",
+          "ph": "/ɪnˈspekʃn/",
+          "zh": "验货",
+          "pos": "名词",
+          "phrases": [
+            "We arrange final inspection."
+          ]
+        },
+        {
+          "w": "standard",
+          "ph": "/ˈstændəd/",
+          "zh": "标准",
+          "pos": "名词",
+          "phrases": [
+            "Our standard is very strict."
+          ]
+        },
+        {
+          "w": "concern",
+          "ph": "/kənˈsɜːn/",
+          "zh": "担忧",
+          "pos": "名词",
+          "phrases": [
+            "We understand your concern."
+          ]
+        },
+        {
+          "w": "solution",
+          "ph": "/səˈluːʃn/",
+          "zh": "解决方案",
+          "pos": "名词",
+          "phrases": [
+            "We have a good solution."
+          ]
+        },
+        {
+          "w": "complain",
+          "ph": "/kəmˈpleɪn/",
+          "zh": "投诉",
+          "pos": "动词",
+          "phrases": [
+            "No client complained yet."
+          ]
+        }
+      ],
+      "grammar": "回应质量担忧原则：先共情→解释标准→给出方案。让客户知道你重视品质，自然安心等待发货。",
+      "tip": "把质检报告主动发给客户，比等他问更有说服力。"
+    },
+    {
+      "t": "第九周：物流发货与运输沟通",
+      "s": "发货通知 · 运输方式 · 运费 · 清关",
+      "dialogue": [
+        {
+          "en": "Your goods are ready for shipping by sea.",
+          "zh": "您的货物已备好，走海运。"
+        },
+        {
+          "en": "Here is the tracking number for your shipment.",
+          "zh": "这是您货物的运单号。"
+        },
+        {
+          "en": "Please prepare the customs clearance documents in advance.",
+          "zh": "请提前准备好清关文件。"
+        }
+      ],
+      "vocab": [
+        {
+          "w": "shipping",
+          "ph": "/ˈʃɪpɪŋ/",
+          "zh": "发货",
+          "pos": "名词",
+          "phrases": [
+            "Shipping starts tomorrow."
+          ]
+        },
+        {
+          "w": "sea freight",
+          "ph": "/siː freɪt/",
+          "zh": "海运",
+          "pos": "短语",
+          "phrases": [
+            "Sea freight is cheaper."
+          ]
+        },
+        {
+          "w": "air freight",
+          "ph": "/eə freɪt/",
+          "zh": "空运",
+          "pos": "短语",
+          "phrases": [
+            "Air freight is faster."
+          ]
+        },
+        {
+          "w": "tracking",
+          "ph": "/ˈtrækɪŋ/",
+          "zh": "追踪",
+          "pos": "名词",
+          "phrases": [
+            "Here is the tracking number."
+          ]
+        },
+        {
+          "w": "customs",
+          "ph": "/ˈkʌstəmz/",
+          "zh": "清关",
+          "pos": "名词",
+          "phrases": [
+            "Customs may take a few days."
+          ]
+        },
+        {
+          "w": "delivery",
+          "ph": "/dɪˈlɪvəri/",
+          "zh": "送达",
+          "pos": "名词",
+          "phrases": [
+            "Delivery takes two weeks."
+          ]
+        }
+      ],
+      "grammar": "运输方式说明（海运/空运/快递）+ 提醒客户配合清关。货物发出后主动给运单号，客户问「货在哪」时给出最新物流状态。",
+      "tip": "发货当天就发通知 + 运单号，客户体验最好。"
+    },
+    {
+      "t": "第十周：售后与投诉沟通",
+      "s": "安抚 · 取证 · 方案 · 关系维护",
+      "dialogue": [
+        {
+          "en": "Sorry to hear that. Could you send a photo of the issue?",
+          "zh": "很抱歉，能发一张问题照片吗？"
+        },
+        {
+          "en": "We can offer a replacement or refund for this case.",
+          "zh": "这种情况我们可以换货或退款。"
+        },
+        {
+          "en": "Thank you for your understanding. We value your trust.",
+          "zh": "感谢理解，我们珍视您的信任。"
+        }
+      ],
+      "vocab": [
+        {
+          "w": "after-sales",
+          "ph": "/ˈɑːftə seɪlz/",
+          "zh": "售后",
+          "pos": "形容词",
+          "phrases": [
+            "We have good after-sales service."
+          ]
+        },
+        {
+          "w": "issue",
+          "ph": "/ˈɪʃuː/",
+          "zh": "问题",
+          "pos": "名词",
+          "phrases": [
+            "There is a quality issue."
+          ]
+        },
+        {
+          "w": "evidence",
+          "ph": "/ˈevɪdəns/",
+          "zh": "证据",
+          "pos": "名词",
+          "phrases": [
+            "Please provide evidence."
+          ]
+        },
+        {
+          "w": "replacement",
+          "ph": "/rɪˈpleɪsmənt/",
+          "zh": "换货",
+          "pos": "名词",
+          "phrases": [
+            "We send a free replacement."
+          ]
+        },
+        {
+          "w": "refund",
+          "ph": "/ˈriːfʌnd/",
+          "zh": "退款",
+          "pos": "名词",
+          "phrases": [
+            "We processed your refund."
+          ]
+        },
+        {
+          "w": "maintain",
+          "ph": "/meɪnˈteɪn/",
+          "zh": "维护",
+          "pos": "动词",
+          "phrases": [
+            "We maintain good relations."
+          ]
+        }
+      ],
+      "grammar": "投诉处理四步：安抚情绪→确认问题→给方案（换货/补发/退款）→追踪进度。售后结束仍要维护关系，避免客户流失。",
+      "tip": "客户投诉是留住他的机会，态度比赔偿更重要。"
+    },
+    {
+      "t": "第十一周：长期合作与客户维护",
+      "s": "定期联系 · 节日问候 · 推新品 · 提醒补货",
+      "dialogue": [
+        {
+          "en": "We would like to build a long-term partnership with you.",
+          "zh": "我们希望与您建立长期合作关系。"
+        },
+        {
+          "en": "We just launched a new product; here is the catalog.",
+          "zh": "我们刚推出新品，这是目录。"
+        },
+        {
+          "en": "It is time to reorder; we can reserve stock for you.",
+          "zh": "该补货了，我们可以为您预留库存。"
+        }
+      ],
+      "vocab": [
+        {
+          "w": "long-term",
+          "ph": "/ˈlɒŋ tɜːm/",
+          "zh": "长期的",
+          "pos": "形容词",
+          "phrases": [
+            "We seek long-term clients."
+          ]
+        },
+        {
+          "w": "partnership",
+          "ph": "/ˈpɑːtnəʃɪp/",
+          "zh": "合作",
+          "pos": "名词",
+          "phrases": [
+            "Let us build a partnership."
+          ]
+        },
+        {
+          "w": "reorder",
+          "ph": "/ˌriːˈɔːdə(r)/",
+          "zh": "补货",
+          "pos": "动词",
+          "phrases": [
+            "Please reorder soon."
+          ]
+        },
+        {
+          "w": "new product",
+          "ph": "/njuː ˈprɒdʌkt/",
+          "zh": "新品",
+          "pos": "短语",
+          "phrases": [
+            "Check our new product."
+          ]
+        },
+        {
+          "w": "festival",
+          "ph": "/ˈfestɪvl/",
+          "zh": "节日",
+          "pos": "名词",
+          "phrases": [
+            "Happy Mid-Autumn Festival."
+          ]
+        },
+        {
+          "w": "loyal",
+          "ph": "/ˈlɔɪəl/",
+          "zh": "忠实的",
+          "pos": "形容词",
+          "phrases": [
+            "We value loyal clients."
+          ]
+        }
+      ],
+      "grammar": "客户维护原则：定期联系但不打扰，借节日问候，主动推新品 / 提醒补货，把普通客户升级为长期合作伙伴。",
+      "tip": "老客户复购成本最低，节日一句问候胜过千言广告。"
+    },
+    {
+      "t": "第十二周：展会与客户拜访全流程实战",
+      "s": "展会开场 · 产品介绍 · 需求记录 · 工厂参观 · 演练",
+      "dialogue": [
+        {
+          "en": "Welcome to our booth! Let me introduce our products.",
+          "zh": "欢迎来到我们的展位！我给您介绍产品。"
+        },
+        {
+          "en": "Would you like to visit our factory nearby?",
+          "zh": "想参观我们附近的工厂吗？"
+        },
+        {
+          "en": "Let us do a full simulation of the trade process.",
+          "zh": "我们来做一次全流程实战演练。"
+        }
+      ],
+      "vocab": [
+        {
+          "w": "exhibition",
+          "ph": "/ˌeksɪˈbɪʃn/",
+          "zh": "展会",
+          "pos": "名词",
+          "phrases": [
+            "We join the Canton Fair."
+          ]
+        },
+        {
+          "w": "booth",
+          "ph": "/buːð/",
+          "zh": "展位",
+          "pos": "名词",
+          "phrases": [
+            "Our booth is in Hall 3."
+          ]
+        },
+        {
+          "w": "visit",
+          "ph": "/ˈvɪzɪt/",
+          "zh": "拜访",
+          "pos": "动词",
+          "phrases": [
+            "We visit clients abroad."
+          ]
+        },
+        {
+          "w": "factory",
+          "ph": "/ˈfæktri/",
+          "zh": "工厂",
+          "pos": "名词",
+          "phrases": [
+            "Welcome to our factory."
+          ]
+        },
+        {
+          "w": "tour",
+          "ph": "/tʊə(r)/",
+          "zh": "参观",
+          "pos": "名词",
+          "phrases": [
+            "We give a factory tour."
+          ]
+        },
+        {
+          "w": "simulation",
+          "ph": "/ˌsɪmjuˈleɪʃn/",
+          "zh": "演练",
+          "pos": "名词",
+          "phrases": [
+            "Let us run a simulation."
+          ]
+        }
+      ],
+      "grammar": "展会全流程：见面开场→产品介绍→问需求并记录→展后跟进；客户拜访含工厂参观开场与生产流程简洁介绍。最后做完整流程串联与真实场景复盘。",
+      "tip": "展会后 24 小时内跟进，客户记忆最清晰，转化率最高。"
+    }
+  ]
+}
 };
 
 // 由主题生成 6 章真实内容
 function buildLessons(theme) {
+  if (theme.weeks && theme.weeks.length) {
+    return theme.weeks.map(function (w, i) {
+      return {
+        t: w.t,
+        s: w.s || ('第' + (i + 1) + '周'),
+        content: { dialogue: w.dialogue || [], vocab: w.vocab || [], grammar: w.grammar || '', tip: w.tip || '' }
+      };
+    });
+  }
   const d = theme.dialogues || [];
   const v = theme.vocab || [];
   const titles = [
@@ -314,10 +1247,14 @@ function seedIfEmpty() {
     { title: '日常英语听力训练', cover: '🎧', level: '综合', category: '听力', lang: 'en', description: '慢速到常速渐进，磨出英语耳朵。', tags: ['听力', '综合'], price: 0, views: 1340, author: '外籍考官Tom', lessons: 6 },
     { title: '旅游汉语轻松说', cover: '🏯', level: '入门', category: '场景', lang: 'zh', description: '出国旅游、景点购物、餐厅点单，最常用的汉语开口就说。', tags: ['汉语', '旅游'], price: 0, views: 860, author: '学语言教研', lessons: 6 },
     { title: '日常中文口语', cover: '💬', level: '入门', category: '口语', lang: 'zh', description: '从打招呼到约朋友，老外也能聊的中文日常对话。', tags: ['汉语', '口语'], price: 0, views: 1102, author: 'Lucky老师', lessons: 6 },
-    { title: 'HSK1汉字与语法基础', cover: '🀄', level: 'HSK1', category: '基础', lang: 'zh', description: '系统学150核心词与基本句式，打好汉语根基。', tags: ['HSK', '基础'], price: 29, views: 540, author: '学语言教研', lessons: 6 }
+    { title: 'HSK1汉字与语法基础', cover: '🀄', level: 'HSK1', category: '基础', lang: 'zh', description: '系统学150核心词与基本句式，打好汉语根基。', tags: ['HSK', '基础'], price: 29, views: 540, author: '学语言教研', lessons: 6 },
+    { title: '外贸商务英语开口沟通实战陪跑', cover: '💼', level: '职场', category: '商务', lang: 'en', description: '为零基础外贸新人打造的12周开口陪跑：从第一次见客户到独立完成外贸全流程英语沟通。', tags: ['外贸','商务'], price: 2980, views: 320, author: '学语言教研', lessons: 12 }
   ];
   const insC = db.prepare('INSERT INTO courses (title, cover, level, category, lang, description, tags, price, views, author, lessons_count) VALUES (?,?,?,?,?,?,?,?,?,?,?)');
-  courses.forEach(c => insC.run(c.title, c.cover, c.level, c.category, c.lang, c.description, JSON.stringify(c.tags), c.price, c.views, c.author, c.lessons));
+  courses.forEach(c => {
+    const ex = db.prepare('SELECT COUNT(*) c FROM courses WHERE title=?').get(c.title);
+    if (ex.c === 0) insC.run(c.title, c.cover, c.level, c.category, c.lang, c.description, JSON.stringify(c.tags), c.price, c.views, c.author, c.lessons);
+  });
 
   const words = [
     { word: 'Apple', phonetic: '/ˈæpl/', meaning: '苹果', example: 'I eat an apple every day.', image: '🍎', level: '小学', lang: 'en' },
@@ -369,6 +1306,7 @@ function seedContent() {
     const courses = db.prepare('SELECT id, title FROM courses ORDER BY id').all();
     const insL = db.prepare('INSERT INTO course_lessons (course_id, seq, title, subtitle, content) VALUES (?,?,?,?,?)');
     courses.forEach(c => {
+      if (db.prepare('SELECT COUNT(*) c FROM course_lessons WHERE course_id=?').get(c.id).c > 0) return;
       const theme = COURSE_THEMES[c.title];
       const lessons = theme ? buildLessons(theme) : [
         { t: '词汇与发音', s: '掌握本课核心词汇与地道发音', content: { dialogue: [], vocab: [], grammar: '', tip: '' } },
@@ -832,6 +1770,38 @@ app.get('/api/health', (req, res) => {
 });
 
 // ---------- 启动 ----------
+
+// ---------- 内容管理：登录用户自助上传（附加功能） ----------
+app.post('/api/admin/course', (req, res) => {
+  const uid = getUid(req);
+  if (!uid) return res.status(401).json({ error: '请先登录' });
+  const b = req.body || {};
+  if (!b.title) return res.status(400).json({ error: '缺少课程标题' });
+  const tags = Array.isArray(b.tags) ? b.tags : String(b.tags || '').split(',').map(x => x.trim()).filter(Boolean);
+  const info = db.prepare("INSERT INTO courses (title, cover, level, category, lang, description, tags, price, views, author, lessons_count) VALUES (?,?,?,?,?,?,?,?,?,?,?)")
+    .run(b.title, b.cover || '📘', b.level || '综合', b.category || '其他', b.lang || 'en', b.description || '', JSON.stringify(tags), Number(b.price) || 0, 0, '我', 0);
+  res.json({ id: info.lastInsertRowid, title: b.title });
+});
+app.post('/api/admin/lesson', (req, res) => {
+  const uid = getUid(req);
+  if (!uid) return res.status(401).json({ error: '请先登录' });
+  const b = req.body || {};
+  if (!b.courseId || !b.title) return res.status(400).json({ error: '缺少课程或章节标题' });
+  const seq = db.prepare('SELECT COALESCE(MAX(seq),0)+1 m FROM course_lessons WHERE course_id=?').get(b.courseId).m;
+  const content = JSON.stringify({ dialogue: b.dialogue || [], vocab: b.vocab || [], grammar: b.grammar || '', tip: b.tip || '' });
+  db.prepare('INSERT INTO course_lessons (course_id, seq, title, subtitle, content) VALUES (?,?,?,?,?)').run(b.courseId, seq, b.title, b.subtitle || '', content);
+  db.prepare('UPDATE courses SET lessons_count=? WHERE id=?').run(seq, b.courseId);
+  res.json({ ok: true, seq });
+});
+app.post('/api/admin/knowledge', (req, res) => {
+  const uid = getUid(req);
+  if (!uid) return res.status(401).json({ error: '请先登录' });
+  const b = req.body || {};
+  if (!b.title) return res.status(400).json({ error: '缺少文章标题' });
+  db.prepare('INSERT INTO knowledge (title, summary, cover, tag, content) VALUES (?,?,?,?,?)').run(b.title, b.summary || '', b.cover || '💡', b.tag || '', b.content || '');
+  res.json({ ok: true });
+});
+
 app.listen(PORT, '0.0.0.0', () => {
   console.log(`学语言后端已启动： http://0.0.0.0:${PORT}`);
 });

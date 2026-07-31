@@ -1,0 +1,9 @@
+node_modules/
+*.db
+*.db-shm
+*.db-wal
+*.db.bak
+tts_cache/
+tts_cache_bak/
+_seedtest/
+.DS_Store
