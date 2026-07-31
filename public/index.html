@@ -1805,6 +1805,13 @@ async function apiPost(url, body) {
     if (!r.ok) throw new Error(d.message || '操作失败');
     return d;
 }
+async function apiDelete(url) {
+    const token = localStorage.getItem('juyou_token');
+    const r = await fetch(url, { method: 'DELETE', headers: { 'Authorization': 'Bearer ' + token } });
+    const d = await r.json().catch(() => ({}));
+    if (!r.ok) throw new Error(d.error || '操作失败');
+    return d;
+}
 
 async function renderHome() {
     const list = document.getElementById('homeRecList');
@@ -2072,9 +2079,51 @@ async function renderAdmin() {
         <div style="${fr}"><label style="${lb}">正文</label><textarea id="akContent" class="form-input" rows="5" placeholder="文章内容"></textarea></div>
         <button class="btn-primary" onclick="addAdminKnowledge()">＋ 发布文章</button>
       ` : ''}
+      <div id="adminManage" style="margin-top:20px;border-top:1px dashed #e5e7eb;padding-top:16px;"></div>
     </div>
     <p style="font-size:12px;color:var(--gray);margin-top:14px;">提示：添加后立即可在「课程市场 / 知识库」看到。词汇与对话请按上方格式填写，一行一条。</p>
   `;
+  renderAdminManage();
+}
+async function renderAdminManage() {
+  const box = document.getElementById('adminManage');
+  if (!box) return;
+  const delBtn = (id) => '<button style="border:1px solid #f3c0c0;background:#fff0f0;color:#c0392b;border-radius:8px;padding:4px 12px;font-size:12px;cursor:pointer;" onclick="delAdmin(\'' + id.kind + '\',' + id.id + ')">删除</button>';
+  if (adminTab === 'course') {
+    box.innerHTML = '<div style="font-weight:700;margin-bottom:10px;color:#c0392b;">🗑 管理已有课程（点击删除）</div>';
+    try {
+      const d = await apiGet('/api/courses');
+      const cs = d.courses || [];
+      if (!cs.length) { box.innerHTML += '<p style="color:var(--gray);font-size:13px;">暂无课程</p>'; return; }
+      box.innerHTML += cs.map(c => '<div style="display:flex;align-items:center;justify-content:space-between;padding:8px 10px;border:1px solid #eee;border-radius:8px;margin-bottom:6px;"><span>' + c.cover + ' ' + escHtml(c.title) + '</span>' + delBtn({ kind: 'course', id: c.id }) + '</div>').join('');
+    } catch (e) { box.innerHTML += '<p style="color:var(--gray);">加载失败</p>'; }
+  } else if (adminTab === 'knowledge') {
+    box.innerHTML = '<div style="font-weight:700;margin-bottom:10px;color:#c0392b;">🗑 管理已有知识库（点击删除）</div>';
+    try {
+      const d = await apiGet('/api/knowledge');
+      const ks = d.articles || [];
+      if (!ks.length) { box.innerHTML += '<p style="color:var(--gray);font-size:13px;">暂无文章</p>'; return; }
+      box.innerHTML += ks.map(k => '<div style="display:flex;align-items:center;justify-content:space-between;padding:8px 10px;border:1px solid #eee;border-radius:8px;margin-bottom:6px;"><span>' + escHtml(k.title) + '</span>' + delBtn({ kind: 'knowledge', id: k.id }) + '</div>').join('');
+    } catch (e) { box.innerHTML += '<p style="color:var(--gray);">加载失败</p>'; }
+  } else if (adminTab === 'lesson') {
+    box.innerHTML = '<div style="font-weight:700;margin-bottom:10px;color:#c0392b;">🗑 管理课程章节（点击删除）</div>';
+    const sel = document.getElementById('alCourse');
+    if (!sel || !sel.value) { box.innerHTML += '<p style="color:var(--gray);font-size:13px;">请先在上方选择课程</p>'; return; }
+    try {
+      const d = await apiGet('/api/courses/' + sel.value);
+      const ls = d.lessons || [];
+      if (!ls.length) { box.innerHTML += '<p style="color:var(--gray);font-size:13px;">该课程暂无章节</p>'; return; }
+      box.innerHTML += ls.map(l => '<div style="display:flex;align-items:center;justify-content:space-between;padding:8px 10px;border:1px solid #eee;border-radius:8px;margin-bottom:6px;"><span>' + l.seq + '. ' + escHtml(l.title) + '</span>' + delBtn({ kind: 'lesson', id: l.id }) + '</div>').join('');
+    } catch (e) { box.innerHTML += '<p style="color:var(--gray);">加载失败</p>'; }
+  }
+}
+async function delAdmin(kind, id) {
+  if (!confirm('确定删除？此操作不可恢复')) return;
+  try {
+    await apiDelete('/api/admin/' + kind + '?id=' + id);
+    showToast('已删除', 'ok');
+    renderAdminManage();
+  } catch (e) { showToast('删除失败：' + (e.message || ''), 'err'); }
 }
 function setAdminTab(t) { adminTab = t; renderAdmin(); }
 function elVal(id) { const el = document.getElementById(id); return el ? el.value : ''; }

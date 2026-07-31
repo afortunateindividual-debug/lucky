@@ -1802,6 +1802,41 @@ app.post('/api/admin/knowledge', (req, res) => {
   res.json({ ok: true });
 });
 
+// ---------- 内容管理：删除（需登录） ----------
+app.delete('/api/admin/course', (req, res) => {
+  const uid = getUid(req);
+  if (!uid) return res.status(401).json({ error: '请先登录' });
+  const id = Number(req.query.id);
+  if (!id) return res.status(400).json({ error: '缺少课程id' });
+  db.prepare('DELETE FROM course_lessons WHERE course_id=?').run(id);
+  db.prepare('DELETE FROM user_courses WHERE course_id=?').run(id);
+  db.prepare('DELETE FROM courses WHERE id=?').run(id);
+  res.json({ ok: true });
+});
+app.delete('/api/admin/lesson', (req, res) => {
+  const uid = getUid(req);
+  if (!uid) return res.status(401).json({ error: '请先登录' });
+  const id = Number(req.query.id);
+  if (!id) return res.status(400).json({ error: '缺少章节id' });
+  const row = db.prepare('SELECT course_id, seq FROM course_lessons WHERE id=?').get(id);
+  if (!row) return res.status(404).json({ error: '章节不存在' });
+  db.prepare('DELETE FROM course_lessons WHERE id=?').run(id);
+  // 重排后续章节序号并回写 lessons_count
+  const lessons = db.prepare('SELECT id, seq FROM course_lessons WHERE course_id=? ORDER BY seq').all(row.course_id);
+  lessons.forEach((l, i) => { if (l.seq !== i + 1) db.prepare('UPDATE course_lessons SET seq=? WHERE id=?').run(i + 1, l.id); });
+  const cnt = db.prepare('SELECT COUNT(*) c FROM course_lessons WHERE course_id=?').get(row.course_id).c;
+  db.prepare('UPDATE courses SET lessons_count=? WHERE id=?').run(cnt, row.course_id);
+  res.json({ ok: true });
+});
+app.delete('/api/admin/knowledge', (req, res) => {
+  const uid = getUid(req);
+  if (!uid) return res.status(401).json({ error: '请先登录' });
+  const id = Number(req.query.id);
+  if (!id) return res.status(400).json({ error: '缺少知识库id' });
+  db.prepare('DELETE FROM knowledge WHERE id=?').run(id);
+  res.json({ ok: true });
+});
+
 app.listen(PORT, '0.0.0.0', () => {
   console.log(`学语言后端已启动： http://0.0.0.0:${PORT}`);
 });
