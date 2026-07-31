@@ -428,7 +428,7 @@
     .cg-cyan{background:linear-gradient(135deg,#22d3ee,#06b6d4);}
     .cg-lime{background:linear-gradient(135deg,#a3e635,#84cc16);}
     /* 快捷入口 */
-    .quick-entry-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:28px;}
+    .quick-entry-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px;margin-bottom:28px;}
     @media(max-width:640px){.quick-entry-grid{grid-template-columns:1fr;}}
     .quick-entry{border-radius:16px;padding:24px 18px;cursor:pointer;transition:.25s;display:flex;flex-direction:column;align-items:center;text-align:center;gap:10px;position:relative;overflow:hidden;}
     .quick-entry:hover{transform:translateY(-3px);box-shadow:0 8px 24px rgba(0,0,0,.12);}
@@ -436,7 +436,6 @@
     .quick-entry-title{font-size:16px;font-weight:700;color:#111827;}
     .quick-entry-desc{font-size:12px;color:#6b7280;line-height:1.5;}
     .quick-entry-count{font-size:12px;font-weight:600;color:#fff;background:rgba(0,0,0,.15);padding:2px 10px;border-radius:10px;}
-    .qe-vocab{background:linear-gradient(135deg,#818cf8,#6366f1);color:#fff;}
     .qe-grammar{background:linear-gradient(135deg,#f472b6,#ec4899);color:#fff;}
     .qe-mistake{background:linear-gradient(135deg,#fb923c,#f97316);color:#fff;}
 
@@ -663,7 +662,6 @@
                 <div class="navi" data-page="market" onclick="navigateTo('market')"><span class="navi-ic">🛒</span> 课程市场</div>
                 <div class="navi" data-page="guide" onclick="navigateTo('guide')"><span class="navi-ic">🧭</span> 课程向导</div>
                 <div class="navi" data-page="mistakes" onclick="navigateTo('mistakes')"><span class="navi-ic">❌</span> 错题本</div>
-                <div class="navi" data-page="vocab" onclick="navigateTo('vocab')"><span class="navi-ic">📝</span> 背单词</div>
                 <div class="navi" data-page="lookup" onclick="navigateTo('lookup')"><span class="navi-ic">🔍</span> 查单词</div>
                 <div class="navi" data-page="knowledge" onclick="navigateTo('knowledge')"><span class="navi-ic">💡</span> 知识库</div>
             </div>
@@ -1163,7 +1161,6 @@
             </div>
             <div class="mk-filter-row" id="mkCatFilter">
                 <button class="mk-ftab ${AppState.mkCat==='all'?'on':''}" data-mkcat="all" onclick="setMkCat('all')">全部</button>
-                <button class="mk-ftab ${AppState.mkCat==='vocab'?'on':''}" data-mkcat="vocab" onclick="setMkCat('vocab')">📝 核心词汇</button>
                 <button class="mk-ftab ${AppState.mkCat==='grammar'?'on':''}" data-mkcat="grammar" onclick="setMkCat('grammar')">📐 句型语法</button>
                 <button class="mk-ftab ${AppState.mkCat==='mistake'?'on':''}" data-mkcat="mistake" onclick="setMkCat('mistake')">❌ 易错词句</button>
             </div>
@@ -1183,11 +1180,6 @@
             </div>
             <div class="mk-stats" id="mkStats">共找到 <b>0</b> 门课程</div>
             <div class="quick-entry-grid" id="quickEntries">
-                <div class="quick-entry qe-vocab" onclick="navigateTo('vocab');setVocabMode('course');">
-                    <div class="quick-entry-ic">📝</div><div class="quick-entry-title">重点核心词汇</div>
-                    <div class="quick-entry-desc">课程核心词汇三语对照<br>常用短语+词性标注</div>
-                    <div class="quick-entry-count" id="qvCount">-- 词</div>
-                </div>
                 <div class="quick-entry qe-grammar" onclick="navigateTo('knowledge')">
                     <div class="quick-entry-ic">📐</div><div class="quick-entry-title">各类句型语法点</div>
                     <div class="quick-entry-desc">语法图解·发音技巧<br>文化知识·学习方法</div>
@@ -1203,24 +1195,6 @@
         </div></div>
         <div class="pg" id="pg-guide"><div class="page-header"><div class="page-title">🧭 课程向导</div></div><div class="page-body" id="guideBody"><div class="card"><p style="text-align:center;padding:40px;color:var(--gray);">加载中…</p></div></div></div>
         <div class="pg" id="pg-mistakes"><div class="page-header"><div class="page-title">❌ 错题本</div></div><div class="page-body"><div class="card"><p style="text-align:center;padding:40px;color:var(--gray);">错题本 — 深色主题，智能错因分析与针对性练习</p></div></div></div>
-        <div class="pg" id="pg-vocab"><div class="page-header"><div class="page-title">📝 背单词</div></div><div class="page-body">
-            <div style="display:flex;gap:10px;margin-bottom:16px;flex-wrap:wrap;">
-                <button class="mk-tab ${AppState.vocabMode==='bank'?'on':''}" data-vmode="bank" onclick="setVocabMode('bank')">🗂 词库</button>
-                <button class="mk-tab ${AppState.vocabMode==='course'?'on':''}" data-vmode="course" onclick="setVocabMode('course')">📚 课程核心词汇</button>
-            </div>
-            <div id="vocabBankView">
-                <div class="card" style="margin-bottom:16px;display:flex;gap:12px;align-items:center;flex-wrap:wrap;">
-                    <span id="vocabStat" style="font-weight:600;white-space:nowrap;"></span>
-                    <input id="wordSearch" class="u-input" style="flex:1;min-width:160px;" placeholder="🔍 搜索单词…" oninput="onWordSearch()">
-                    <select id="wordLevel" class="u-input" style="width:auto;" onchange="onWordSearch()"><option value="">全部难度</option><option>小学</option><option>初中</option><option>高中</option></select>
-                </div>
-                <div id="wordList" class="biz-grid sm"></div>
-            </div>
-            <div id="vocabCourseView" style="display:none;">
-                <div id="vocabCoursePicker" class="biz-grid sm"></div>
-                <div id="vocabCourseList"></div>
-            </div>
-        </div></div>
         <div class="pg" id="pg-lookup"><div class="page-header"><div class="page-title">🔍 查单词</div></div><div class="page-body">
             <div class="card" style="margin-bottom:16px;"><input id="dictSearch" class="u-input" placeholder="🔍 输入单词查询释义、音标、例句…" oninput="onDictSearch()"></div>
             <div id="dictList" class="biz-grid sm"></div>
@@ -1364,9 +1338,8 @@ const AppState = {
     currentLessons: null,           // 当前课程章节列表（含 content）
     currentLessonId: null,          // 当前打开查看的章节 id
     marketLang: 'all',              // 课程市场语言筛选：all/en/zh
-    mkCat: 'all',                     // 市场类目筛选：all/vocab/grammar/mistake
+    mkCat: 'all',                     // 市场类目筛选：all/grammar/mistake
     mkLevel: '',                     // 市场难度筛选：空=全部
-    vocabMode: 'bank',              // 背单词页模式：bank(词库) / course(课程核心词汇)
     vocabCourseId: null,            // 当前选中的课程（course 模式）
     practice: { courseId: null, sentences: [], idx: 0, mode: 'dictation', quizzes: [], quizIdx: 0 },  // 句子练习状态（mode: dictation/choice/listen）
     user: {
@@ -1582,7 +1555,6 @@ function navigateTo(page) {
     if (pg) pg.classList.add('on');
     if (page === 'home') renderHome();
     if (page === 'market') renderCourses();
-    if (page === 'vocab') { if (AppState.vocabMode === 'course') renderVocabCoursePicker(); else renderVocab(); }
     if (page === 'lookup') renderLookup();
     if (page === 'knowledge') renderKnowledge();
     if (page === 'guide') renderGuide();
@@ -1809,7 +1781,6 @@ function renderMistakes() {
 // ============================================================
 let _searchTimer;
 function onCourseSearch(){ clearTimeout(_searchTimer); _searchTimer = setTimeout(renderCourses, 250); }
-function onWordSearch(){ clearTimeout(_searchTimer); _searchTimer = setTimeout(renderVocab, 250); }
 function onDictSearch(){ clearTimeout(_searchTimer); _searchTimer = setTimeout(renderLookup, 250); }
 
 async function apiGet(url) {
@@ -1883,9 +1854,7 @@ async function renderCourses() {
         var courses = data.courses || [];
 
         // 类目筛选（前端过滤）
-        if (AppState.mkCat === 'vocab') {
-            courses = courses.filter(function(c) { return c.category === '词汉' || c.tags.indexOf('词汉') >= 0 || c.title.indexOf('词汉') >= 0; });
-        } else if (AppState.mkCat === 'grammar') {
+        if (AppState.mkCat === 'grammar') {
             courses = courses.filter(function(c) { return c.category === '语法' || c.category === '拼读' || c.tags.indexOf('语法') >= 0; });
         } else if (AppState.mkCat === 'mistake') {
             courses = courses.filter(function(c) { return c.category === '应试' || c.tags.indexOf('技巧') >= 0 || c.tags.indexOf('应试') >= 0; });
@@ -1931,12 +1900,9 @@ async function renderCourses() {
 // Fetch counts for quick entries
 async function fetchQuickCounts() {
     try {
-        var wData = await apiGet('/api/words');
-        var qvEl = document.getElementById('qvCount');
-        if (qvEl) qvEl.textContent = (wData.words || []).length + ' \u8bcd';
         var kData = await apiGet('/api/knowledge');
         var qgEl = document.getElementById('qgCount');
-        if (qgEl) qgEl.textContent = (kData.items || []).length + ' \u7bc7';
+        if (qgEl) qgEl.textContent = (kData.articles || []).length + ' \u7bc7';
         var qmEl = document.getElementById('qmCount');
         if (qmEl) qmEl.textContent = '-- \u9898';
     } catch(e) {}
@@ -1957,126 +1923,6 @@ async function joinCourse(id) {
         showToast('已加入课程，开始学习吧！', 'ok');
         logActivity('enroll', '加入课程', '课程ID: ' + id);
     } catch (e) { showToast(e.message || '操作失败', 'err'); }
-}
-
-async function renderVocab() {
-    const list = document.getElementById('wordList');
-    if (!list) return;
-    list.innerHTML = '<p style="color:var(--gray);padding:20px;">加载中…</p>';
-    try {
-        const q = document.getElementById('wordSearch').value.trim();
-        const level = document.getElementById('wordLevel').value;
-        const params = new URLSearchParams();
-        if (q) params.set('q', q);
-        if (level) params.set('level', level);
-        const qs = params.toString();
-        const data = await apiGet('/api/words' + (qs ? '?' + qs : ''));
-        const words = data.words || [];
-        const mastered = words.filter(w => w.status === 2).length;
-        const stEl = document.getElementById('vocabStat');
-        if (stEl) stEl.textContent = `共 ${words.length} 词 · 已掌握 ${mastered}`;
-        if (!words.length) { list.innerHTML = '<p style="color:var(--gray);padding:20px;">没有单词</p>'; return; }
-        list.innerHTML = words.map(w => {
-            const st = w.status || 0;
-            const stText = ['未学', '学习中', '已掌握'][st];
-            const stColor = ['#999', '#f39c12', '#27ae60'][st];
-            const safe = (w.word || '').replace(/'/g, "\\'");
-            return `<div class="card" style="padding:14px;display:flex;gap:12px;align-items:center;">
-                <div style="font-size:40px;width:48px;text-align:center;flex-shrink:0;">${w.image || '📝'}</div>
-                <div style="flex:1;min-width:0;">
-                    <div style="font-weight:700;font-size:17px;">${w.word} <span style="font-size:13px;color:var(--gray);font-weight:400;">${w.phonetic || ''}</span></div>
-                    <div style="color:#e67e22;font-size:14px;">${w.meaning || ''}</div>
-                    <div style="font-size:12px;color:var(--gray);margin-top:3px;">${w.example || ''}</div>
-                </div>
-                <div style="display:flex;flex-direction:column;gap:6px;align-items:flex-end;flex-shrink:0;">
-                    <span style="font-size:11px;color:${stColor};">${stText}</span>
-                    <button class="btn-audio" style="padding:4px 10px;font-size:12px;" onclick="speakText('${safe}')">🔊</button>
-                    <button style="padding:4px 10px;font-size:12px;background:#eee;color:#333;border:none;border-radius:6px;cursor:pointer;" onclick="cycleWordStatus(${w.id}, ${st})">标记</button>
-                </div>
-            </div>`;
-        }).join('');
-    } catch (e) { list.innerHTML = '<p style="color:var(--err);padding:20px;">加载失败</p>'; }
-}
-
-async function cycleWordStatus(id, cur) {
-    const token = localStorage.getItem('juyou_token');
-    if (!token) { showToast('请先登录', 'err'); return; }
-    const next = (cur + 1) % 3;
-    try {
-        await apiPost('/api/word-progress', { wordId: id, status: next });
-        renderVocab();
-        showToast('已更新记忆状态', 'ok');
-    } catch (e) { showToast(e.message || '操作失败', 'err'); }
-}
-
-async function setVocabMode(mode) {
-    AppState.vocabMode = mode;
-    const bank = document.getElementById('vocabBankView');
-    const course = document.getElementById('vocabCourseView');
-    if (bank) bank.style.display = (mode === 'bank') ? '' : 'none';
-    if (course) course.style.display = (mode === 'course') ? '' : 'none';
-    document.querySelectorAll('#pg-vocab .mk-tab').forEach(t => t.classList.toggle('on', t.dataset.vmode === mode));
-    if (mode === 'bank') renderVocab();
-    else renderVocabCoursePicker();
-}
-
-// 课程核心词汇：从课程章节聚合 vocab，用三语卡片展示
-async function renderVocabCoursePicker() {
-    const picker = document.getElementById('vocabCoursePicker');
-    const list = document.getElementById('vocabCourseList');
-    if (list) list.innerHTML = '';
-    if (!picker) return;
-    picker.innerHTML = '<p style="color:var(--gray);padding:8px 4px;">选择一门课程，查看它的核心词汇（三语对照 + 常用短语）</p>';
-    try {
-        const data = await apiGet('/api/courses');
-        const courses = data.courses || [];
-        if (!courses.length) { picker.innerHTML = '<p style="color:var(--gray);padding:20px;">暂无课程</p>'; return; }
-        picker.innerHTML = courses.map(c => `<div class="card course-pick" style="cursor:pointer;display:flex;align-items:center;gap:10px;padding:12px;" onclick="loadVocabCourse(${c.id})">
-            <div style="font-size:26px;flex-shrink:0;">${c.cover || '📘'}</div>
-            <div style="flex:1;min-width:0;">
-                <div style="font-weight:600;font-size:14px;">${c.title}</div>
-                <div style="font-size:12px;color:var(--gray);">${c.level || ''} · ${c.lang === 'zh' ? '中文' : '英语'}</div>
-            </div>
-            <span class="tag ${c.lang === 'zh' ? 'tag-purple' : 'tag-pri'}">${c.lang === 'zh' ? '中文' : '英语'}</span>
-        </div>`).join('');
-    } catch (e) { picker.innerHTML = '<p style="color:var(--err);padding:20px;">加载失败</p>'; }
-}
-
-async function loadVocabCourse(courseId) {
-    AppState.vocabCourseId = courseId;
-    const list = document.getElementById('vocabCourseList');
-    if (!list) return;
-    list.innerHTML = '<p style="color:var(--gray);padding:20px;">加载中…</p>';
-    try {
-        const data = await apiGet('/api/courses/' + courseId);
-        const course = data.course || {};
-        const lang = course.lang === 'zh' ? 'zh' : 'en';
-        const seen = new Set();
-        const vocab = [];
-        (data.lessons || []).forEach(l => {
-            const ct = (l.content && typeof l.content === 'object') ? l.content : {};
-            (ct.vocab || []).forEach(v => { if (!seen.has(v.w)) { seen.add(v.w); vocab.push(v); } });
-        });
-        if (!vocab.length) { list.innerHTML = '<p style="color:var(--gray);padding:20px;">该课程暂无核心词汇</p>'; return; }
-        list.innerHTML = `<h3 style="font-size:16px;margin:10px 0 12px;">📚 《${course.title}》核心词汇 <span style="font-size:12px;font-weight:400;color:var(--gray);">三语对照 · 拼音/中文/英语</span></h3><div style="display:flex;flex-direction:column;gap:12px;">` +
-            vocab.map(v => {
-                const safe = (v.w || '').replace(/'/g, "\\'");
-                const top = v.ph || '';
-                const mid = v.w || '';
-                const bot = (lang === 'zh') ? (v.en || v.zh || '') : (v.zh || '');
-                const phrases = v.phrases || [];
-                return `<div class="card vocab-card">
-                    <div class="vocab-head">
-                        ${v.pos ? `<span class="vocab-pos">${v.pos}</span>` : '<span></span>'}
-                        <button class="btn-audio" style="padding:6px 12px;font-size:13px;" onclick="speakByLang('${safe}','${lang}')">🔊</button>
-                    </div>
-                    <div class="vocab-top">${top}</div>
-                    <div class="vocab-mid">${mid}</div>
-                    <div class="vocab-bot">${bot}</div>
-                    ${phrases.length ? `<div class="vocab-ph"><b>🔗 常用短语</b><br>${phrases.map(p => '· ' + p).join('<br>')}</div>` : ''}
-                </div>`;
-            }).join('') + `</div>`;
-    } catch (e) { list.innerHTML = '<p style="color:var(--err);padding:20px;">加载失败</p>'; }
 }
 
 async function renderLookup() {
