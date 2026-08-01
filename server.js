@@ -1802,6 +1802,117 @@ app.post('/api/admin/knowledge', (req, res) => {
   res.json({ ok: true });
 });
 
+// ---------- 内容管理：AI 拆解上传文本 ----------
+function decomposeText(text, suggestedTitle) {
+  const CN_NUM = ['零', '一', '二', '三', '四', '五', '六', '七', '八', '九', '十'];
+  function cnNum(n) { if (n <= 10) return CN_NUM[n]; if (n < 20) return '十' + CN_NUM[n - 10]; return String(n); }
+  const lines = String(text || '').replace(/\r\n/g, '\n').split('\n');
+  const headingRe = /^\s*(#{1,6}\s+.+|第\s*[0-9零一二三四五六七八九十百千]+\s*[章节课部分单元讲篇]|chapter\s*\d+|unit\s*\d+|lesson\s*\d+|\s*([0-9零一二三四五六七八九十]+)[.、．。]\s+\S)/i;
+  const sections = [];
+  let cur = null;
+  for (const raw of lines) {
+    const line = raw.trim();
+    if (!line) continue;
+    if (headingRe.test(line)) {
+      if (cur && cur.body.join('').trim()) sections.push(cur);
+      cur = { title: line.replace(/^#+\s*/, '').trim(), body: [] };
+    } else {
+      if (!cur) cur = { title: '', body: [] };
+      cur.body.push(line);
+    }
+  }
+  if (cur && cur.body.join('').trim()) sections.push(cur);
+  if (!sections.length) {
+    const paras = String(text || '').split(/\n\s*\n/).map(s => s.trim()).filter(Boolean);
+    let i = 0;
+    for (const p of paras) sections.push({ title: '第' + cnNum(++i) + '部分', body: [p] });
+  }
+  const secs = sections.slice(0, 40);
+  const EN_STOP = new Set('the a an and or but of to in on at for with without is are was were be been being this that these those it its as by from we you they he she i my your our their his her will would can could should may might must do does did have has had not no yes if then than so such same other another'.split(' '));
+  const lessons = secs.map(function (s, idx) {
+    const bodyText = s.body.join('\n');
+    const subtitle = (s.body[0] || '').slice(0, 40);
+    const vocabMap = {};
+    const pairRe = /([A-Za-z][A-Za-z'\-]{3,})\s*[（(]\s*([一-龥A-Za-z][一-龥A-Za-z\s\/]{0,30}?)\s*[）)]/g;
+    let m;
+    while ((m = pairRe.exec(bodyText))) {
+      const w = m[1].trim().toLowerCase();
+      if (!vocabMap[w]) vocabMap[w] = { w: m[1].trim(), ph: '', zh: m[2].trim(), pos: '名词', phrases: [] };
+    }
+    const wordRe = /[A-Za-z][A-Za-z'\-]{4,}/g;
+    const freq = {};
+    let wm;
+    while ((wm = wordRe.exec(bodyText))) { const w = wm[0].toLowerCase(); if (!EN_STOP.has(w)) freq[w] = (freq[w] || 0) + 1; }
+    Object.keys(freq).sort(function (a, b) { return freq[b] - freq[a]; }).slice(0, 12).forEach(function (w) {
+      if (!vocabMap[w]) vocabMap[w] = { w: w, ph: '', zh: '', pos: '名词', phrases: [] };
+    });
+    const vocab = Object.values(vocabMap).slice(0, 12);
+    const dialogue = [];
+    const dlRe = /[“"‘']([^”"'’]{4,})[”"'’]/g; let dm;
+    while ((dm = dlRe.exec(bodyText)) && dialogue.length < 6) dialogue.push({ en: dm[1].trim(), zh: '' });
+    if (dialogue.length === 0) {
+      const sentences = bodyText.split(/[。.!?！？\n]/).map(function (s) { return s.trim(); }).filter(function (s) { return s.length >= 6; }).slice(0, 3);
+      sentences.forEach(function (s) { dialogue.push({ en: s, zh: '' }); });
+    }
+    return {
+      title: s.title || ('第' + cnNum(idx + 1) + '部分'),
+      subtitle: subtitle || '',
+      vocab: vocab,
+      dialogue: dialogue.slice(0, 6),
+      grammar: '',
+      tip: '建议结合上下文反复跟读，巩固本节课重点。'
+    };
+  });
+  return { title: suggestedTitle || (secs[0] && secs[0].title) || '我的上传课程', lessons: lessons };
+}
+
+async function llmDecompose(text, suggestedTitle) {
+  if (!process.env.LLM_API_KEY || !process.env.LLM_BASE_URL) return null;
+  try {
+    const prompt = '你是一个语言课程拆解助手。请将下面的资料拆解为结构化课程大纲，严格返回 JSON：{"title":string,"lessons":[{"title":string,"subtitle":string,"vocab":[{"w":英文,"ph":音标,"zh":中文,"pos":词性,"phrases":[例句字符串]},],"dialogue":[{"en":英文,"zh":中文}],"grammar":string,"tip":string}]}。只返回 JSON，不要解释。资料：\n' + String(text || '').slice(0, 12000);
+    const r = await fetch(process.env.LLM_BASE_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + process.env.LLM_API_KEY },
+      body: JSON.stringify({ model: process.env.LLM_MODEL || 'gpt-4o-mini', messages: [{ role: 'user', content: prompt }], temperature: 0.3, response_format: { type: 'json_object' } })
+    });
+    const j = await r.json();
+    const content = j.choices && j.choices[0] && j.choices[0].message && j.choices[0].message.content;
+    if (!content) return null;
+    const obj = JSON.parse(content);
+    if (obj && Array.isArray(obj.lessons)) return obj;
+  } catch (e) {}
+  return null;
+}
+
+app.post('/api/admin/analyze', async (req, res) => {
+  const uid = getUid(req);
+  if (!uid) return res.status(401).json({ error: '请先登录' });
+  const b = req.body || {};
+  if (!b.text || !String(b.text).trim()) return res.status(400).json({ error: '缺少文本内容' });
+  let result = await llmDecompose(b.text, b.title);
+  if (!result) result = decomposeText(b.text, b.title);
+  res.json(result);
+});
+
+app.post('/api/admin/course-full', (req, res) => {
+  const uid = getUid(req);
+  if (!uid) return res.status(401).json({ error: '请先登录' });
+  const b = req.body || {};
+  if (!b.title) return res.status(400).json({ error: '缺少课程标题' });
+  const tags = Array.isArray(b.tags) ? b.tags : String(b.tags || '').split(',').map(function (x) { return x.trim(); }).filter(Boolean);
+  const info = db.prepare('INSERT INTO courses (title, cover, level, category, lang, description, tags, price, views, author, lessons_count) VALUES (?,?,?,?,?,?,?,?,?,?,?)')
+    .run(b.title, b.cover || '📘', b.level || '综合', b.category || '其他', b.lang || 'en', b.description || '', JSON.stringify(tags), Number(b.price) || 0, 0, '我', 0);
+  const cid = info.lastInsertRowid;
+  const insL = db.prepare('INSERT INTO course_lessons (course_id, seq, title, subtitle, content) VALUES (?,?,?,?,?)');
+  const lessons = Array.isArray(b.lessons) ? b.lessons : [];
+  lessons.forEach(function (l, i) {
+    const content = JSON.stringify({ dialogue: l.dialogue || [], vocab: l.vocab || [], grammar: l.grammar || '', tip: l.tip || '' });
+    insL.run(cid, i + 1, l.title || ('第' + (i + 1) + '部分'), l.subtitle || '', content);
+  });
+  db.prepare('UPDATE courses SET lessons_count=? WHERE id=?').run(lessons.length, cid);
+  res.json({ id: cid, title: b.title, lessons: lessons.length });
+});
+
 // ---------- 内容管理：删除（需登录） ----------
 app.delete('/api/admin/course', (req, res) => {
   const uid = getUid(req);

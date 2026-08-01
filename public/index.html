@@ -2047,6 +2047,7 @@ async function renderAdmin() {
       <button class="mk-ftab ${adminTab==='course'?'on':''}" onclick="setAdminTab('course')">📚 添加课程</button>
       <button class="mk-ftab ${adminTab==='lesson'?'on':''}" onclick="setAdminTab('lesson')">📝 添加章节</button>
       <button class="mk-ftab ${adminTab==='knowledge'?'on':''}" onclick="setAdminTab('knowledge')">💡 添加知识库</button>
+      <button class="mk-ftab ${adminTab==='upload'?'on':''}" onclick="setAdminTab('upload')">📄 智能上传</button>
     </div>
     <div class="card" style="padding:18px;">
       ${adminTab==='course' ? `
@@ -2084,6 +2085,16 @@ async function renderAdmin() {
         <div style="${fr}"><label style="${lb}">正文</label><textarea id="akContent" class="form-input" rows="5" placeholder="文章内容"></textarea></div>
         <button class="btn-primary" onclick="addAdminKnowledge()">＋ 发布文章</button>
       ` : ''}
+      ${adminTab==='upload' ? `
+        <div style="font-weight:700;margin-bottom:14px;">📄 上传资料 · AI 自动拆解成课程</div>
+        <div id="upDrop" onclick="document.getElementById('upFile').click()" ondragover="event.preventDefault();this.style.borderColor='var(--pri)';" ondragleave="this.style.borderColor='#c7d2fe';" ondrop="event.preventDefault();this.style.borderColor='#c7d2fe';onUpDrop(event);" style="border:2px dashed #c7d2fe;background:#f8faff;border-radius:12px;padding:26px;text-align:center;cursor:pointer;color:#6b7280;transition:.2s;">
+          拖拽文件到此处，或 <span style="color:var(--pri);font-weight:600;">点击选择</span><br>
+          <span style="font-size:12px;">支持 PDF / Word(.docx) / TXT / MD / 图片(PNG·JPG，自动OCR)</span>
+          <input id="upFile" type="file" accept=".pdf,.docx,.txt,.md,image/*" style="display:none;" onchange="onUpFile(event)">
+        </div>
+        <div id="upStatus" style="font-size:13px;color:var(--gray);margin:10px 0;"></div>
+        <div id="upPreview"></div>
+      ` : ''}
       <div id="adminManage" style="margin-top:20px;border-top:1px dashed #e5e7eb;padding-top:16px;"></div>
     </div>
     <p style="font-size:12px;color:var(--gray);margin-top:14px;">提示：添加后立即可在「课程市场 / 知识库」看到。词汇与对话请按上方格式填写，一行一条。</p>
@@ -2093,6 +2104,7 @@ async function renderAdmin() {
 async function renderAdminManage() {
   const box = document.getElementById('adminManage');
   if (!box) return;
+  if (adminTab === 'upload') { box.innerHTML = ''; return; }
   const delBtn = (id) => '<button style="border:1px solid #f3c0c0;background:#fff0f0;color:#c0392b;border-radius:8px;padding:4px 12px;font-size:12px;cursor:pointer;" onclick="delAdmin(\'' + id.kind + '\',' + id.id + ')">删除</button>';
   if (adminTab === 'course') {
     box.innerHTML = '<div style="font-weight:700;margin-bottom:10px;color:#c0392b;">🗑 管理已有课程（点击删除）</div>';
@@ -2198,6 +2210,146 @@ async function addAdminKnowledge() {
   const body = { title: elVal('akTitle'), cover: elVal('akCover') || '💡', tag: elVal('akTag') || '', summary: elVal('akSummary') || '', content: elVal('akContent') || '' };
   if (!body.title) { showToast('请填写文章标题','err'); return; }
   try { await apiPost('/api/admin/knowledge', body); showToast('文章已发布','ok'); } catch (e) { showToast('发布失败','err'); }
+}
+
+// ---------- 智能上传：多格式解析 + AI 拆解 ----------
+const _LIBS = {
+  pdfjs: { url: 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js', onload: function () { try { pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js'; } catch (e) {} } },
+  mammoth: { url: 'https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js' },
+  tesseract: { url: 'https://cdnjs.cloudflare.com/ajax/libs/tesseract.js/4.1.1/tesseract.min.js' }
+};
+const _libCache = {};
+function ensureLib(name) {
+  if (_libCache[name]) return _libCache[name];
+  const cfg = _LIBS[name];
+  const p = new Promise(function (res, rej) {
+    const s = document.createElement('script');
+    s.src = cfg.url; s.crossOrigin = 'anonymous';
+    s.onload = function () { try { cfg.onload && cfg.onload(); } catch (e) {} res(); };
+    s.onerror = function () { rej(new Error('加载解析库失败：' + name)); };
+    document.head.appendChild(s);
+  });
+  _libCache[name] = p;
+  return p;
+}
+async function extractPdfText(file) {
+  const buf = await file.arrayBuffer();
+  const doc = await pdfjsLib.getDocument({ data: buf }).promise;
+  let txt = '';
+  for (let i = 1; i <= doc.numPages; i++) {
+    const page = await doc.getPage(i);
+    const c = await page.getTextContent();
+    txt += c.items.map(function (it) { return it.str || ''; }).join(' ') + '\n';
+  }
+  return txt;
+}
+async function extractDocxText(file) {
+  const buf = await file.arrayBuffer();
+  const res = await mammoth.extractRawText({ arrayBuffer: buf });
+  return res.value || '';
+}
+async function ocrImage(file) {
+  const worker = await Tesseract.createWorker('chi_sim+eng', 1, { logger: function (p) { if (p && p.status === 'recognizing text') { const s = document.getElementById('upStatus'); if (s) s.textContent = 'OCR 识别中 ' + Math.round((p.progress || 0) * 100) + '%'; } } });
+  const ret = await worker.recognize(file);
+  await worker.terminate();
+  return (ret && ret.data && ret.data.text) || '';
+}
+async function extractText(file) {
+  const name = (file.name || '').toLowerCase();
+  if (name.endsWith('.txt') || name.endsWith('.md') || name.endsWith('.text')) return await file.text();
+  if (name.endsWith('.pdf')) { await ensureLib('pdfjs'); return await extractPdfText(file); }
+  if (name.endsWith('.docx')) { await ensureLib('mammoth'); return await extractDocxText(file); }
+  if (file.type && file.type.indexOf('image/') === 0) { await ensureLib('tesseract'); return await ocrImage(file); }
+  return await file.text();
+}
+let smartResult = null, smartSourceText = '', smartCover = '';
+function onUpFile(e) { const f = e.target.files && e.target.files[0]; if (f) analyzeUpload(f); }
+function onUpDrop(e) { const f = e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files[0]; if (f) analyzeUpload(f); }
+async function analyzeUpload(file) {
+  const status = document.getElementById('upStatus');
+  const prev = document.getElementById('upPreview');
+  if (prev) prev.innerHTML = '';
+  if (status) status.textContent = '正在读取文件：' + file.name + ' …';
+  let text = '';
+  try { text = await extractText(file); }
+  catch (err) { if (status) status.textContent = '解析失败：' + (err.message || err) + '（图片请确认含有清晰文字）'; return; }
+  if (!text || !text.trim()) { if (status) status.textContent = '未能从文件中提取到文字内容，换个文件试试。'; return; }
+  smartSourceText = text;
+  if (status) status.textContent = '已提取约 ' + text.length + ' 字，正在调用 AI 拆解…';
+  try {
+    const r = await apiPost('/api/admin/analyze', { title: file.name.replace(/\.[^.]+$/, ''), text: text });
+    if (status) status.textContent = '拆解完成 ✅';
+    renderUploadResult(r);
+  } catch (e) { if (status) status.textContent = '拆解失败：' + (e.message || ''); }
+}
+async function reAnalyze() {
+  if (!smartSourceText) return;
+  const status = document.getElementById('upStatus');
+  if (status) status.textContent = '重新拆解中…';
+  try {
+    const r = await apiPost('/api/admin/analyze', { title: '', text: smartSourceText });
+    if (status) status.textContent = '拆解完成 ✅';
+    renderUploadResult(r);
+  } catch (e) { if (status) status.textContent = '拆解失败：' + (e.message || ''); }
+}
+function onSuCover(e) {
+  const f = e.target.files && e.target.files[0];
+  const prev = document.getElementById('suCoverPreview');
+  if (!f) { smartCover = ''; if (prev) prev.style.display = 'none'; return; }
+  const reader = new FileReader();
+  reader.onload = function () {
+    const img = new Image();
+    img.onload = function () {
+      const maxW = 480; let w = img.width, h = img.height; if (w > maxW) { h = Math.round(h * maxW / w); w = maxW; }
+      const cv = document.createElement('canvas'); cv.width = w; cv.height = h; cv.getContext('2d').drawImage(img, 0, 0, w, h);
+      try { smartCover = cv.toDataURL('image/jpeg', 0.82); } catch (err) { smartCover = reader.result; }
+      if (prev) { prev.src = smartCover; prev.style.display = 'block'; }
+    };
+    img.onerror = function () { smartCover = reader.result; if (prev) { prev.src = smartCover; prev.style.display = 'block'; } };
+    img.src = reader.result;
+  };
+  reader.readAsDataURL(f);
+}
+function renderUploadResult(data) {
+  smartResult = data;
+  const prev = document.getElementById('upPreview');
+  if (!prev) return;
+  const lessons = data.lessons || [];
+  let html = '<div class="card" style="padding:16px;margin-top:10px;border:1px solid #e5e7eb;">';
+  html += '<div style="font-weight:700;margin-bottom:10px;">🤖 AI 拆解结果预览（可直接修改后创建）</div>';
+  html += '<div style="margin-bottom:10px;"><label style="font-size:13px;color:var(--gray);display:block;margin-bottom:5px;">课程标题</label><input id="suTitle" class="form-input" value="' + escHtml(data.title || '') + '"></div>';
+  html += '<div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:10px;">';
+  html += '<div style="flex:1;min-width:110px;"><label style="font-size:13px;color:var(--gray);display:block;margin-bottom:5px;">语言</label><select id="suLang" class="form-input"><option value="en">英语</option><option value="zh">中文</option><option value="ru">俄语</option><option value="ar">阿拉伯</option></select></div>';
+  html += '<div style="flex:1;min-width:110px;"><label style="font-size:13px;color:var(--gray);display:block;margin-bottom:5px;">级别</label><select id="suLevel" class="form-input"><option value="0基础">0基础</option><option value="小学基础">小学基础</option><option value="中学基础">中学基础</option></select></div>';
+  html += '<div style="flex:1;min-width:110px;"><label style="font-size:13px;color:var(--gray);display:block;margin-bottom:5px;">分类</label><select id="suCat" class="form-input"><option value="日常">日常</option><option value="商务">商务</option><option value="出行">出行</option><option value="点餐">点餐</option><option value="外贸">外贸</option><option value="考试">考试</option><option value="新概念">新概念</option></select></div>';
+  html += '</div>';
+  html += '<div style="margin-bottom:6px;"><label style="font-size:13px;color:var(--gray);display:block;margin-bottom:5px;">封面图片（可选）</label><input id="suCoverFile" type="file" accept="image/*" class="form-input" onchange="onSuCover(event)"><img id="suCoverPreview" style="display:none;max-width:120px;max-height:120px;border-radius:8px;margin-top:8px;border:1px solid #eee;"></div>';
+  html += '<div style="font-weight:600;margin:12px 0 8px;">共 ' + lessons.length + ' 章（可改章节标题）</div>';
+  lessons.forEach(function (l, i) {
+    html += '<div style="border:1px solid #eee;border-radius:8px;padding:8px 10px;margin-bottom:6px;"><div style="display:flex;gap:8px;align-items:center;"><span style="color:var(--gray);font-size:12px;">第' + (i + 1) + '章</span><input id="suL_' + i + '" class="form-input" style="flex:1;" value="' + escHtml(l.title || '') + '"></div><div style="font-size:11px;color:var(--gray);margin-top:4px;">词汇 ' + (l.vocab ? l.vocab.length : 0) + ' · 对话 ' + (l.dialogue ? l.dialogue.length : 0) + '</div></div>';
+  });
+  html += '<div style="margin-top:14px;display:flex;gap:10px;flex-wrap:wrap;"><button class="btn-primary" onclick="createSmartCourse()">✅ 创建课程 + ' + lessons.length + ' 章</button><button class="btn-primary" style="background:#eef;color:#374151;" onclick="reAnalyze()">🔄 重新拆解</button><button class="btn-primary" style="background:#eee;color:#374151;" onclick="resetUpload()">↺ 重新上传</button></div>';
+  html += '</div>';
+  prev.innerHTML = html;
+}
+function resetUpload() {
+  smartResult = null; smartSourceText = ''; smartCover = '';
+  const prev = document.getElementById('upPreview'); if (prev) prev.innerHTML = '';
+  const st = document.getElementById('upStatus'); if (st) st.textContent = '';
+}
+async function createSmartCourse() {
+  if (!smartResult) return;
+  const title = elVal('suTitle');
+  if (!title) { showToast('请填写课程标题', 'err'); return; }
+  const lessons = (smartResult.lessons || []).map(function (l, i) {
+    return { title: elVal('suL_' + i) || l.title, subtitle: l.subtitle || '', vocab: l.vocab || [], dialogue: l.dialogue || [], grammar: l.grammar || '', tip: l.tip || '' };
+  });
+  const body = { title: title, cover: smartCover || '', lang: elVal('suLang') || 'en', level: elVal('suLevel') || '0基础', category: elVal('suCat') || '日常', tags: ['智能上传'], price: 0, description: '由资料智能拆解生成', lessons: lessons };
+  try {
+    const r = await apiPost('/api/admin/course-full', body);
+    showToast('已创建课程：' + (r.title || '') + '（' + (r.lessons || 0) + ' 章）', 'ok');
+    resetUpload(); renderAdmin();
+  } catch (e) { showToast('创建失败：' + (e.message || ''), 'err'); }
 }
 
 
