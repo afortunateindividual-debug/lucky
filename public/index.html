@@ -96,6 +96,12 @@
         .navi.on { background:var(--pri-light);color:var(--pri);font-weight:600; }
         .navi-ic { font-size:16px;width:20px;text-align:center;flex-shrink:0; }
         .navi-badge { margin-left:auto;background:var(--err);color:#fff;font-size:10px;padding:1px 6px;border-radius:10px;font-weight:600; }
+        .navi-caret { margin-left:auto;font-size:10px;opacity:.55;transition:transform .2s; }
+        .nav-parent { font-weight:600; }
+        .navi-sub { margin:1px 6px 2px 24px;padding-left:10px;border-left:2px solid var(--border); }
+        .navi-sub-item { padding:7px 12px;margin:1px 0;font-size:12.5px;border-radius:7px; }
+        .navi-sub-item .navi-ic { font-size:14px;width:18px; }
+        .navi-sub.open { display:block; }
         .side-ft { padding:12px 14px;border-top:1px solid var(--border); }
         .user-card { display:flex;align-items:center;gap:10px;padding:8px;border-radius:10px;cursor:pointer;transition:.2s; }
         .user-card:hover { background: #f3f4f6; }
@@ -310,21 +316,7 @@
         .hm-cell.l3 { background:rgba(74,125,255,.65); }
         .hm-cell.l4 { background:rgba(74,125,255,.9); }
 
-        /* ===== Check-in / Points Page ===== */
-        .checkin-card { background:linear-gradient(135deg,#f59e0b,#ef4444);border-radius:var(--radius);padding:24px;color:#fff;margin-bottom:20px;position:relative;overflow:hidden; }
-        .checkin-card::before { content:'🔥';position:absolute;top:10px;right:16px;font-size:40px;opacity:.3; }
-        .ci-head { display:flex;align-items:center;justify-content:space-between;margin-bottom:16px; }
-        .ci-streak { display:flex;align-items:center;gap:8px; }
-        .ci-fire { font-size:28px; }
-        .ci-days { font-size:24px;font-weight:900; }
-        .ci-sub { font-size:12px;opacity:.8; }
-        .ci-calendar { display:grid;grid-template-columns:repeat(7,1fr);gap:6px;margin-bottom:16px; }
-        .ci-day { aspect-ratio:1;border-radius:8px;display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:11px;background:rgba(255,255,255,.15); }
-        .ci-day.done { background:rgba(255,255,255,.35);font-weight:700; }
-        .ci-day.today { border:2px solid #fff;font-weight:700; }
-        .ci-day-name { font-size:9px;opacity:.6;margin-top:1px; }
-        .btn-checkin { width:100%;padding:14px;background:rgba(255,255,255,.25);border:2px solid rgba(255,255,255,.5);border-radius:12px;color:#fff;font-size:16px;font-weight:800;cursor:pointer;transition:.2s;text-align:center; }
-        .btn-checkin:hover { background:rgba(255,255,255,.35);transform:scale(1.02); }
+        /* ===== Account Growth (relocated) ===== */
         .points-overview { display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:20px; }
         .po-card { background:#fff;border-radius:var(--radius);padding:18px;box-shadow:var(--shadow);text-align:center; }
         .po-num { font-size:26px;font-weight:900; }
@@ -654,8 +646,13 @@
         <nav class="side-nav">
             <div class="nav-group">
                 <div class="navi on" data-page="home" onclick="navigateTo('home')"><span class="navi-ic">🏠</span> 主页</div>
-                <div class="navi" data-page="profile" onclick="navigateTo('profile')"><span class="navi-ic">👤</span> 个人中心</div>
-                <div class="navi" data-page="courses" onclick="navigateTo('courses')"><span class="navi-ic">📚</span> 我的课程</div>
+                <div class="navi nav-parent" data-page="profile" onclick="navigateTo('profile')"><span class="navi-ic">👤</span> 个人中心<span class="navi-caret">▾</span></div>
+                <div class="navi-sub open" id="profileSub">
+                    <div class="navi navi-sub-item" data-page="courses" onclick="navigateTo('courses')"><span class="navi-ic">📚</span> 我的课程</div>
+                    <div class="navi navi-sub-item" data-page="dashboard" onclick="navigateTo('dashboard')"><span class="navi-ic">📊</span> 数据面板</div>
+                    <div class="navi navi-sub-item" data-page="membership" onclick="navigateTo('membership')"><span class="navi-ic">👑</span> 会员权益</div>
+                    <div class="navi navi-sub-item" data-page="settings" onclick="navigateTo('settings')"><span class="navi-ic">⚙️</span> 隐私设置</div>
+                </div>
             </div>
             <div class="nav-group">
                 <div class="nav-group-label">学习工具</div>
@@ -667,12 +664,8 @@
                 <div class="navi" data-page="admin" onclick="navigateTo('admin')"><span class="navi-ic">🛠</span> 内容管理</div>
             </div>
             <div class="nav-group">
-                <div class="nav-group-label">账户与成长</div>
-                <div class="navi" data-page="dashboard" onclick="navigateTo('dashboard')"><span class="navi-ic">📊</span> 数据面板</div>
-                <div class="navi" data-page="checkin" onclick="navigateTo('checkin')"><span class="navi-ic">🔥</span> 签到积分<span class="navi-badge">3</span></div>
-                <div class="navi" data-page="membership" onclick="navigateTo('membership')"><span class="navi-ic">👑</span> 会员权益</div>
+                <div class="nav-group-label">账户</div>
                 <div class="navi" data-page="partner" onclick="navigateTo('partner')"><span class="navi-ic">🤝</span> 合伙人招募</div>
-                <div class="navi" data-page="settings" onclick="navigateTo('settings')"><span class="navi-ic">⚙️</span> 隐私设置</div>
             </div>
         </nav>
         <div class="side-ft">
@@ -694,9 +687,8 @@
             <div class="home" style="padding:28px 32px;max-width:1200px;margin:0 auto;">
                 <div class="hero" style="background:linear-gradient(135deg,var(--pri),#8b5cf6);border-radius:18px;padding:36px 40px;color:#fff;margin-bottom:28px;">
                     <h2 style="font-size:26px;margin-bottom:6px;">👋 你好，<span id="homeUserName">lucky</span>！</h2>
-                    <p style="opacity:.9;font-size:14px;">今天也要坚持学英语哦～ 已连续签到 <strong>3</strong> 天</p>
+                    <p style="opacity:.9;font-size:14px;">今天也要坚持学英语哦～ 进入「个人中心」查看你的学习数据与成长</p>
                     <div style="display:flex;gap:12px;margin-top:20px;">
-                        <button class="btn btn-pri" style="background:rgba(255,255,255,.2);border:1px solid rgba(255,255,255,.4);" onclick="navigateTo('checkin')">🔥 每日签到</button>
                         <button class="btn btn-pri" style="background:rgba(255,255,255,.2);border:1px solid rgba(255,255,255,.4);" onclick="navigateTo('courses')">📚 继续学习</button>
                         <button class="btn btn-pri" style="background:rgba(255,255,255,.2);border:1px solid rgba(255,255,255,.4);" onclick="navigateTo('membership')">👑 升级VIP</button>
                     </div>
@@ -867,7 +859,6 @@
                         <div class="log-item"><span class="log-time">15:30</span><div class="log-icon" style="background:#ede9fe;color:#6d28d9;">🎧</div><div class="log-body"><div class="log-text">播放句子音频：<strong>"My friends are coming for tea later."</strong></div><div class="log-detail">使用 Web Speech API · 语速：正常 · 播放次数：3</div></div></div>
                         <div class="log-item"><span class="log-time">15:28</span><div class="log-icon" style="background:#eef2ff;color:var(--pri);">📝</div><div class="log-body"><div class="log-text">开始听写练习</div><div class="log-detail">课程：Little Fox---The Tale of Peter Rabbit 17-32 · 当前第 1/4 句</div></div></div>
                         <div class="log-item"><span class="log-time">15:25</span><div class="log-icon" style="background:#f3f4f6;color:var(--gray);">👁</div><div class="log-body"><div class="log-text">访问页面：<strong>课程详情</strong></div><div class="log-detail">课程ID：f86db2d2-a6b8-48e1-889e-d8a732598da1 · 浏览时长：45秒</div></div></div>
-                        <div class="log-item"><span class="log-time">15:20</span><div class="log-icon" style="background:#dcfce7;color:#166534;">🔥</div><div class="log-body"><div class="log-text">完成每日<strong>签到</strong></div><div class="log-detail">连续签到：3天 · 获得 +20 积分 · 当前等级：Lv.1</div></div></div>
                         <div class="log-item"><span class="log-time">14:55</span><div class="log-icon" style="background:#eef2ff;color:var(--pri);">📚</div><div class="log-body"><div class="log-text">加入课程：<strong>Little Fox 彼得兔故事 17-32</strong></div><div class="log-detail">课程类型：动画故事 · 难度：初级 · 总课时：32节</div></div></div>
                         <div class="log-item"><span class="log-time">14:30</span><div class="log-icon" style="background:#fef3c7;color:#92400e;">📝</div><div class="log-body"><div class="log-text">加入课程：<strong>600句小学生英语新课标（二）核心词汇</strong></div><div class="log-detail">课程类型：词汇记忆 · 难度：小学 · 总课时：600句</div></div></div>
                     </div>
@@ -875,54 +866,19 @@
             </div>
         </div>
 
-        <!-- ===== CHECKIN & POINTS PAGE ===== -->
-        <div class="pg" id="pg-checkin">
-            <div class="page-header"><div class="page-title">🔥 签到与积分</div></div>
-            <div class="page-body">
-                <!-- Check-in Card -->
-                <div class="checkin-card">
-                    <div class="ci-head">
-                        <div class="ci-streak">
-                            <span class="ci-fire">🔥</span>
-                            <div><div class="ci-days" id="streakDays">3</div><div class="ci-sub">连续签到天数</div></div>
-                        </div>
-                        <div style="text-align:right;">
-                            <div style="font-size:12px;opacity:.7;">本月已签</div>
-                            <div style="font-size:22px;font-weight:900;" id="monthSignCount">3 / 25</div>
-                        </div>
-                    </div>
-                    <div class="ci-calendar" id="calendarGrid">
-                        <!-- Generated by JS -->
-                    </div>
-                    <button class="btn-checkin" id="checkinBtn" onclick="doCheckin()">✋ 立即签到 +20积分</button>
-                </div>
-
-                <!-- Points Overview -->
-                <div class="points-overview">
-                    <div class="po-card">
-                        <div class="po-num" style="color:var(--pri);">120</div>
-                        <div class="po-label">当前积分</div>
-                        <div class="level-bar"><div class="lb-track"><div class="lb-fill" style="width:12%;"></div></div><div class="lb-text"><span>Lv.1 新手</span><span>80 / 1000 → Lv.2</span></div></div>
-                    </div>
-                    <div class="po-card">
-                        <div class="po-num" style="color:var(--ok);">+320</div>
-                        <div class="po-label">累计获取</div>
-                    </div>
-                    <div class="po-card">
-                        <div class="po-num" style="color:var(--warn);">-200</div>
-                        <div class="po-label">累计消耗</div>
-                    </div>
-                    <div class="po-card">
-                        <div class="po-num" style="color:var(--purple);">#1,234</div>
-                        <div class="po-label">全站排名</div>
+                <!-- 账户成长（由原签到页迁移，签到功能已取消） -->
+                <div class="card" style="margin-top:22px;">
+                    <div class="card-hd"><div class="card-tit">💰 积分概览</div></div>
+                    <div class="points-overview">
+                        <div class="po-card"><div class="po-num" style="color:var(--pri);">120</div><div class="po-label">当前积分</div><div class="level-bar"><div class="lb-track"><div class="lb-fill" style="width:12%;"></div></div><div class="lb-text"><span>Lv.1 新手</span><span>80 / 1000 → Lv.2</span></div></div></div>
+                        <div class="po-card"><div class="po-num" style="color:var(--ok);">+320</div><div class="po-label">累计获取</div></div>
+                        <div class="po-card"><div class="po-num" style="color:var(--warn);">-200</div><div class="po-label">累计消耗</div></div>
+                        <div class="po-card"><div class="po-num" style="color:var(--purple);">#1,234</div><div class="po-label">全站排名</div></div>
                     </div>
                 </div>
-
-                <!-- Points Rules -->
-                <div class="card">
+                <div class="card" style="margin-top:16px;">
                     <div class="card-hd"><div class="card-tit">📜 积分获取规则</div></div>
                     <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
-                        <div style="display:flex;align-items:center;gap:10px;padding:10px;background:var(--bg);border-radius:8px;"><span style="font-size:20px;">🔥</span><div><div style="font-size:13px;font-weight:600;">每日签到</div><div style="font-size:12px;color:var(--gray);">+20 积分/天，连续7天额外+50</div></div></div>
                         <div style="display:flex;align-items:center;gap:10px;padding:10px;background:var(--bg);border-radius:8px;"><span style="font-size:20px;">📖</span><div><div style="font-size:13px;font-weight:600;">完成学习</div><div style="font-size:12px;color:var(--gray);">+10 积分/节课</div></div></div>
                         <div style="display:flex;align-items:center;gap:10px;padding:10px;background:var(--bg);border-radius:8px;"><span style="font-size:20px;">✅</span><div><div style="font-size:13px;font-weight:600;">答对题目</div><div style="font-size:12px;color:var(--gray);">+5 积分/题</div></div></div>
                         <div style="display:flex;align-items:center;gap:10px;padding:10px;background:var(--bg);border-radius:8px;"><span style="font-size:20px;">📝</span><div><div style="font-size:13px;font-weight:600;">背完单词</div><div style="font-size:12px;color:var(--gray);">+2 积分/词</div></div></div>
@@ -930,24 +886,18 @@
                         <div style="display:flex;align-items:center;gap:10px;padding:10px;background:var(--bg);border-radius:8px;"><span style="font-size:20px;">🏆</span><div><div style="font-size:13px;font-weight:600;">获得成就</div><div style="font-size:12px;color:var(--gray);">+50~200 积分不等</div></div></div>
                     </div>
                 </div>
-
-                <!-- Achievements -->
-                <div class="card">
-                    <div class="card-hd"><div class="card-tit">🏅 成就徽章</div><span style="font-size:12px;color:var(--gray);">已解锁 2 / 12</span></div>
+                <div class="card" style="margin-top:16px;">
+                    <div class="card-hd"><div class="card-tit">🏅 成就徽章</div><span style="font-size:12px;color:var(--gray);">已解锁 1 / 6</span></div>
                     <div class="achievements">
                         <div class="ach-card"><div class="ach-icon">🎉</div><div class="ach-name">初来乍到</div><div class="ach-desc">首次登录</div><div class="ach-unlock">✅ 已解锁</div></div>
-                        <div class="ach-card"><div class="ach-icon">🔥</div><div class="ach-name">三日燃灯</div><div class="ach-desc">连续签到3天</div><div class="ach-unlock">✅ 已解锁</div></div>
                         <div class="ach-card locked"><div class="ach-icon">📚</div><div class="ach-name">学霸养成</div><div class="ach-desc">累计学习10小时</div></div>
                         <div class="ach-card locked"><div class="ach-icon">🎯</div><div class="ach-name">百发百中</div><div class="ach-desc">单次正确率达95%</div></div>
                         <div class="ach-card locked"><div class="ach-icon">📖</div><div class="ach-name">词汇大师</div><div class="ach-desc">累计背诵500个单词</div></div>
                         <div class="ach-card locked"><div class="ach-icon">💎</div><div class="ach-name">钻石会员</div><div class="ach-desc">开通年度VIP</div></div>
                         <div class="ach-card locked"><div class="ach-icon">🤝</div><div class="ach-name">社交达人</div><div class="ach-desc">邀请5位好友注册</div></div>
-                        <div class="ach-card locked"><div class="ach-icon">⭐</div><div class="ach-name">全勤之星</div><div class="ach-desc">当月签到满25天</div></div>
                     </div>
                 </div>
-
-                <!-- Level System -->
-                <div class="card">
+                <div class="card" style="margin-top:16px;">
                     <div class="card-hd"><div class="card-tit">⬆️ 等级体系</div></div>
                     <div style="overflow-x:auto;">
                         <table style="width:100%;border-collapse:collapse;font-size:13px;">
@@ -962,9 +912,8 @@
                         </table>
                     </div>
                 </div>
-            </div>
-        </div>
 
+        <!-- ===== CHECKIN & POINTS PAGE ===== -->
         <!-- ===== MEMBERSHIP PAGE ===== -->
         <div class="pg" id="pg-membership">
             <div class="page-body" style="padding-top:28px;">
@@ -1382,13 +1331,11 @@ const AppState = {
     ],
     achievements: [
         { id:'first_login', name:'初来乍到', icon:'🎉', desc:'首次登录', unlocked:true },
-        { id:'streak_3', name:'三日燃灯', icon:'🔥', desc:'连续签到3天', unlocked:true },
         { id:'study_10h', name:'学霸养成', icon:'📚', desc:'累计学习10小时', unlocked:false },
         { id:'accuracy_95', name:'百发百中', icon:'🎯', desc:'单次正确率达95%', unlocked:false },
         { id:'words_500', name:'词汇大师', icon:'📖', desc:'累计背诵500个单词', unlocked:false },
         { id:'vip_yearly', name:'钻石会员', icon:'💎', desc:'开通年度VIP', unlocked:false },
         { id:'invite_5', name:'社交达人', icon:'🤝', desc:'邀请5位好友注册', unlocked:false },
-        { id:'perfect_month', name:'全勤之星', icon:'⭐', desc:'当月签到满25天', unlocked:false }
     ],
     activityLog: [
         { time:'15:38', type:'login', text:'用户登录系统', detail:'方式：密码登录 · IP：183.241.201.52' },
@@ -1397,7 +1344,6 @@ const AppState = {
         { time:'15:30', type:'audio', text:'播放句子音频', detail:'My friends are coming...' },
         { time:'15:28', type:'practice', text:'开始听写练习', detail:'Lesson 1 第1/4句' },
         { time:'15:25', type:'view', text:'访问课程详情页', detail:'课程ID: f86db2d2...' },
-        { time:'15:20', type:'checkin', text:'完成每日签到', detail:'连续3天 · +20积分' },
         { time:'14:55', type:'enroll', text:'加入课程：Little Fox', detail:'动画故事 · 初级 · 32节' },
         { time:'14:30', type:'enroll', text:'加入课程：600句新课标词汇', detail:'词汇记忆 · 小学 · 600句' }
     ]
@@ -1527,7 +1473,6 @@ function showApp() {
     document.getElementById('authOverlay').classList.add('hidden');
     document.getElementById('appShell').classList.add('active');
     updateUIForUser();
-    renderCalendar();
     renderHome();
 }
 
@@ -1536,16 +1481,6 @@ function updateUIForUser() {
     document.getElementById('homeUserName').textContent = u.nickname;
     document.getElementById('sidebarAvatar').textContent = u.nickname.charAt(0);
     document.getElementById('sidebarName').innerHTML = `${u.nickname}<span class="vip-tag">${u.role.toUpperCase()}</span>`;
-    document.getElementById('streakDays').textContent = u.streak;
-    document.getElementById('monthSignCount').textContent = `${u.monthSigned.length} / 25`;
-
-    // Update checkin button state
-    const cb = document.getElementById('checkinBtn');
-    if (u.todaySigned) {
-        cb.textContent = '✅ 今日已签到';
-        cb.style.opacity = '.6';
-        cb.style.cursor = 'default';
-    }
 }
 
 // ============================================================
@@ -1571,55 +1506,12 @@ function navigateTo(page) {
     if (page === 'course-detail') renderCourseDetail();
     if (page === 'lesson') renderLesson();
     if (page === 'practice') renderPractice();
-}
-
-// ============================================================
-//  CHECKIN SYSTEM
-// ============================================================
-function renderCalendar() {
-    const grid = document.getElementById('calendarGrid');
-    if (!grid) return;
-    const days = ['一','二','三','四','五','六','日'];
-    let html = '';
-    days.forEach(d => html += `<div class="ci-day" style="background:rgba(255,255,255,.08);"><span>${d}</span></div>`);
-
-    const now = new Date();
-    const today = now.getDate();
-    for (let i = 1; i <= 31; i++) {
-        const isSigned = AppState.user.monthSigned.includes(i);
-        const isToday = i === today;
-        const isFuture = i > today;
-        html += `<div class="ci-day ${isSigned?'done':''} ${isToday?'today':''}" style="${isFuture?'opacity:.4':''}">
-            <span>${i}</span>
-            ${isSigned?'<span class="ci-day-name">✓</span>':(!isFuture?'<span class="ci-day-name">&nbsp;</span>':'')}
-        </div>`;
+    if (['courses','dashboard','membership','settings'].includes(page)) {
+        const par = document.querySelector('[data-page="profile"]');
+        if (par) par.classList.add('on');
+        const sub = document.getElementById('profileSub');
+        if (sub) sub.classList.add('open');
     }
-    grid.innerHTML = html;
-}
-
-async function doCheckin() {
-    const token = localStorage.getItem('juyou_token');
-    if (!token) { showToast('请先登录','err'); return; }
-    if (AppState.user.todaySigned) { showToast('今天已经签过了哦～','err'); return; }
-    try {
-        const res = await fetch('/api/checkin', { method:'POST', headers:{ 'Authorization':'Bearer '+token } });
-        const data = await res.json();
-        if (!res.ok) { showToast(data.message || '签到失败','err'); return; }
-        const prev = AppState.user.points;
-        Object.assign(AppState.user, data.user);
-        const gained = data.user.points - prev;
-        logActivity('checkin', `完成每日签到`, `连续${data.user.streak}天 · +${gained}积分`);
-        renderCalendar();
-        updateUIForUser();
-        showToast(`🎉 签到成功！连续${data.user.streak}天，+${gained}积分！`,'ok');
-        if (data.user.streak >= 3) {
-            const ach = AppState.achievements.find(a => a.id === 'streak_3');
-            if (ach && !ach.unlocked) {
-                ach.unlocked = true;
-                setTimeout(() => showToast('🏅 解锁成就：三日燃灯！','ok'), 1500);
-            }
-        }
-    } catch(e) { showToast('网络错误，请确认后端已启动','err'); }
 }
 
 // ============================================================
