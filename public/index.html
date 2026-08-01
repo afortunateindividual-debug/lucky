@@ -1823,7 +1823,7 @@ async function renderHome() {
         if (!courses.length) { list.innerHTML = '<p style="color:var(--gray);padding:20px;">暂无课程</p>'; return; }
         list.innerHTML = courses.map(c => `
             <div class="card" style="padding:0;overflow:hidden;cursor:pointer;transition:.2s;" onclick="openCourseDetail(${c.id})">
-                <div style="height:96px;background:linear-gradient(135deg,#667eea,#764ba2);display:flex;align-items:center;justify-content:center;font-size:42px;">${c.cover}</div>
+                <div style="position:relative;overflow:hidden;height:96px;background:linear-gradient(135deg,#667eea,#764ba2);display:flex;align-items:center;justify-content:center;font-size:42px;">${isCoverImg(c.cover)?coverImgTag(c.cover):(c.cover||'📘')}</div>
                 <div style="padding:14px;">
                     ${c.lang === 'zh' ? '<span style="font-size:11px;background:#fde8e8;color:#c0392b;padding:2px 8px;border-radius:10px;">中文</span> ' : ''}
                     <div style="font-weight:600;font-size:15px;margin:6px 0;">${c.title}</div>
@@ -1895,9 +1895,9 @@ async function renderCourses() {
             var tagText = c.price > 0 ? ('\u00a5' + c.price) : '\u514d\u8d39';
             var hotTag = c.views > 1500 ? '<span class="cat-tag hot">\u70ed</span>' : '';
             return '<div class="cat-card" onclick="openCourseDetail(' + c.id + ')">' +
-                '<div class="cat-cover ' + g + '">' +
+                '<div class="cat-cover ' + g + '" style="position:relative;overflow:hidden;">' +
                     '<div class="cat-cover-bg"></div>' +
-                    '<span>' + (c.cover || '\ud83d\udcdc') + '</span>' +
+                    (isCoverImg(c.cover) ? coverImgTag(c.cover) : '<span>' + (c.cover || '\ud83d\udcdc') + '</span>') +
                     '<span class="cat-tag ' + tagCls + '">' + tagText + '</span>' +
                     hotTag +
                 '</div>' +
@@ -2029,6 +2029,8 @@ function showArticle(id) {
 function closeArticle() { const m = document.getElementById('articleModal'); if (m) m.style.display = 'none'; }
 function escHtml(s){ if(s===undefined||s===null) return ''; return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
 let adminTab = 'course';
+function isCoverImg(c){ return typeof c === 'string' && (c.indexOf('data:image') === 0 || c.indexOf('http') === 0 || c.indexOf('/uploads/') === 0); }
+function coverImgTag(c, extra){ return '<img src="' + c + '" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block;' + (extra||'') + '">'; }
 async function renderAdmin() {
   const body = document.getElementById('adminBody');
   if (!body) return;
@@ -2050,10 +2052,13 @@ async function renderAdmin() {
       ${adminTab==='course' ? `
         <div style="font-weight:700;margin-bottom:14px;">新增一门课程</div>
         <div style="${fr}"><label style="${lb}">课程标题</label><input id="acTitle" class="form-input" placeholder="如：外贸商务英语开口沟通实战"></div>
-        <div style="${fr}"><label style="${lb}">封面 Emoji</label><input id="acCover" class="form-input" value="📘"></div>
-        <div style="${fr}"><label style="${lb}">语言</label><select id="acLang" class="form-input"><option value="en">英语</option><option value="zh">中文</option></select></div>
-        <div style="${fr}"><label style="${lb}">级别</label><input id="acLevel" class="form-input" value="职场" placeholder="零基础/小学/初中/高中/大学/实用/职场/雅思/综合"></div>
-        <div style="${fr}"><label style="${lb}">分类</label><input id="acCat" class="form-input" value="商务" placeholder="教材同步/口语/语法/写作/商务..."></div>
+        <div style="${fr}"><label style="${lb}">封面图片（点击上传，留空则用默认图标）</label>
+          <input id="acCoverFile" type="file" accept="image/*" class="form-input" onchange="onCoverFile(event)">
+          <img id="acCoverPreview" style="display:none;max-width:120px;max-height:120px;border-radius:8px;margin-top:8px;border:1px solid #eee;">
+        </div>
+        <div style="${fr}"><label style="${lb}">语言</label><select id="acLang" class="form-input"><option value="en">英语</option><option value="zh">中文</option><option value="ru">俄语</option><option value="ar">阿拉伯</option></select></div>
+        <div style="${fr}"><label style="${lb}">级别</label><select id="acLevel" class="form-input"><option value="0基础">0基础</option><option value="小学基础">小学基础</option><option value="中学基础">中学基础</option></select></div>
+        <div style="${fr}"><label style="${lb}">分类</label><select id="acCat" class="form-input"><option value="日常">日常</option><option value="商务">商务</option><option value="出行">出行</option><option value="点餐">点餐</option><option value="外贸">外贸</option><option value="考试">考试</option><option value="新概念">新概念</option></select></div>
         <div style="${fr}"><label style="${lb}">标签（逗号分隔）</label><input id="acTags" class="form-input" placeholder="外贸,商务"></div>
         <div style="${fr}"><label style="${lb}">价格（0=免费）</label><input id="acPrice" class="form-input" value="0" type="number"></div>
         <div style="${fr}"><label style="${lb}">简介</label><textarea id="acDesc" class="form-input" rows="3" placeholder="课程简介"></textarea></div>
@@ -2095,7 +2100,7 @@ async function renderAdminManage() {
       const d = await apiGet('/api/courses');
       const cs = d.courses || [];
       if (!cs.length) { box.innerHTML += '<p style="color:var(--gray);font-size:13px;">暂无课程</p>'; return; }
-      box.innerHTML += cs.map(c => '<div style="display:flex;align-items:center;justify-content:space-between;padding:8px 10px;border:1px solid #eee;border-radius:8px;margin-bottom:6px;"><span>' + c.cover + ' ' + escHtml(c.title) + '</span>' + delBtn({ kind: 'course', id: c.id }) + '</div>').join('');
+      box.innerHTML += cs.map(c => '<div style="display:flex;align-items:center;justify-content:space-between;padding:8px 10px;border:1px solid #eee;border-radius:8px;margin-bottom:6px;"><span>' + (isCoverImg(c.cover) ? '<img src="'+c.cover+'" style="width:22px;height:22px;border-radius:6px;object-fit:cover;vertical-align:middle;margin-right:6px;">' : (c.cover||'📘')+' ') + escHtml(c.title) + '</span>' + delBtn({ kind: 'course', id: c.id }) + '</div>').join('');
     } catch (e) { box.innerHTML += '<p style="color:var(--gray);">加载失败</p>'; }
   } else if (adminTab === 'knowledge') {
     box.innerHTML = '<div style="font-weight:700;margin-bottom:10px;color:#c0392b;">🗑 管理已有知识库（点击删除）</div>';
@@ -2147,15 +2152,37 @@ function parseAdminDialogue(text) {
   });
   return out;
 }
+let pendingCover = '';
+function onCoverFile(e) {
+  const f = e.target.files && e.target.files[0];
+  const prev = document.getElementById('acCoverPreview');
+  if (!f) { pendingCover = ''; if (prev) prev.style.display = 'none'; return; }
+  const reader = new FileReader();
+  reader.onload = function () {
+    const img = new Image();
+    img.onload = function () {
+      const maxW = 480; let w = img.width, h = img.height;
+      if (w > maxW) { h = Math.round(h * maxW / w); w = maxW; }
+      const cv = document.createElement('canvas'); cv.width = w; cv.height = h;
+      cv.getContext('2d').drawImage(img, 0, 0, w, h);
+      try { pendingCover = cv.toDataURL('image/jpeg', 0.82); }
+      catch (err) { pendingCover = reader.result; }
+      if (prev) { prev.src = pendingCover; prev.style.display = 'block'; }
+    };
+    img.onerror = function () { pendingCover = reader.result; if (prev) { prev.src = pendingCover; prev.style.display = 'block'; } };
+    img.src = reader.result;
+  };
+  reader.readAsDataURL(f);
+}
 async function addAdminCourse() {
   const body = {
-    title: elVal('acTitle'), cover: elVal('acCover') || '📘', lang: elVal('acLang'),
-    level: elVal('acLevel') || '综合', category: elVal('acCat') || '其他',
+    title: elVal('acTitle'), cover: pendingCover || '📘',
+    lang: elVal('acLang') || 'en', level: elVal('acLevel') || '0基础', category: elVal('acCat') || '日常',
     tags: (elVal('acTags') || '').split(',').map(function(s){return s.trim();}).filter(Boolean),
     price: Number(elVal('acPrice')) || 0, description: elVal('acDesc') || ''
   };
   if (!body.title) { showToast('请填写课程标题','err'); return; }
-  try { const r = await apiPost('/api/admin/course', body); showToast('课程已创建：' + (r.title || ''),'ok'); } catch (e) { showToast('创建失败','err'); }
+  try { const r = await apiPost('/api/admin/course', body); showToast('课程已创建：' + (r.title || ''),'ok'); pendingCover = ''; renderAdmin(); } catch (e) { showToast('创建失败','err'); }
 }
 async function addAdminLesson() {
   const cid = elVal('alCourse');
@@ -2199,7 +2226,7 @@ async function renderMyCourses() {
             html += '<h3 style="font-size:16px;font-weight:700;margin:20px 0 12px;">全部课程</h3><div class="biz-grid">';
             html += courses.map(c => `
                 <div class="card" style="padding:0;overflow:hidden;">
-                    <div style="height:80px;background:linear-gradient(135deg,#667eea,#764ba2);display:flex;align-items:center;justify-content:center;font-size:40px;">${c.cover}</div>
+                    <div style="position:relative;overflow:hidden;height:80px;background:linear-gradient(135deg,#667eea,#764ba2);display:flex;align-items:center;justify-content:center;font-size:40px;">${isCoverImg(c.cover)?coverImgTag(c.cover):(c.cover||'📘')}</div>
                     <div style="padding:14px;">
                         <div style="font-weight:600;">${c.title}</div>
                         <div style="font-size:12px;color:var(--gray);margin-top:4px;">${c.lessons_count}节</div>
@@ -2333,7 +2360,7 @@ async function renderCourseDetail() {
         body.innerHTML = `
             <!-- 课程头部横幅 -->
             <div class="cd-hero">
-                <div class="cd-hero-img">${c.cover}</div>
+                <div class="cd-hero-img" style="position:relative;overflow:hidden;">${isCoverImg(c.cover)?coverImgTag(c.cover):(c.cover||'📘')}</div>
                 <div class="cd-hero-info">
                     <div class="cd-hero-title">${c.title}</div>
                     <div class="cd-stats">
