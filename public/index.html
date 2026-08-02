@@ -1049,7 +1049,17 @@
                     <div class="stat-card"><div class="stat-num" style="color:var(--pri);">1</div><div class="stat-label">今日课程</div></div>
                     <div class="stat-card"><div class="stat-num" style="color:var(--purple);">1分钟</div><div class="stat-label">今日时长</div></div>
                 </div>
-                <div class="card"><div class="card-tit">🔄 继续学习</div>
+                <!-- 错题本卡片 -->
+                <div class="card" style="margin-bottom:20px;" onclick="navigateTo('mistakes')">
+                    <div class="card-hd" style="cursor:pointer;">
+                        <div class="card-tit">❌ 错题本</div>
+                        <span style="font-size:12px;color:var(--gray);cursor:pointer;">查看全部 ›</span>
+                    </div>
+                    <div id="coursesMistakeList">
+                        <p style="text-align:center;padding:20px;color:var(--gray);font-size:13px;">还没有错题，去练习巩固吧～</p>
+                    </div>
+                </div>
+                <div class="card"><div class="card-tit">🔄 继续学��</div>
                     <div style="display:flex;gap:16px;margin-top:14px;">
                         <div style="flex:1;background:var(--bg);border-radius:12px;padding:16px;display:flex;gap:14px;align-items:center;cursor:pointer;transition:.2s;" onmouseover="this.style.boxShadow='0 4px 12px rgba(0,0,0,.08)'" onmouseout="this.style.boxShadow='none'">
                             <div style="width:100px;height:70px;background:linear-gradient(135deg,#4a7dff,#6366f1);border-radius:10px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:28px;flex-shrink:0;">🦊</div>
@@ -2318,6 +2328,31 @@ async function renderMyCourses() {
             <div class="stat-card"><div class="stat-num" style="color:var(--pri);">0</div><div class="stat-label">今日课程</div></div>
             <div class="stat-card"><div class="stat-num" style="color:var(--purple);">0</div><div class="stat-label">今日时长</div></div>
         </div>`;
+        // 错题本卡片
+        const mistakes = AppState.mistakes || [];
+        html += `<div class="card" style="margin-bottom:20px;" onclick="navigateTo('mistakes')">
+            <div class="card-hd" style="cursor:pointer;">
+                <div class="card-tit">❌ 错题本</div>
+                <span style="font-size:12px;color:var(--gray);cursor:pointer;">查看全部 ›</span>
+            </div>`;
+        if (!mistakes.length) {
+            html += '<p style="text-align:center;padding:20px;color:var(--gray);font-size:13px;">还没有错题，去练习巩固吧～</p>';
+        } else {
+            html += '<div>';
+            mistakes.slice(0, 5).forEach(m => {
+                const s = (m.sentence || '').replace(/'/g, "\\'");
+                html += `<div style="padding:10px 14px;border-bottom:1px solid #eee;display:flex;justify-content:space-between;align-items:center;gap:10px;">
+                    <div style="flex:1;min-width:0;">
+                        <div style="font-weight:600;font-size:13px;word-break:break-word;">${m.sentence}</div>
+                        <div style="font-size:11px;color:var(--gray);margin-top:2px;">${m.course||''} · 错误${m.wrongCount||1}次</div>
+                    </div>
+                    <button class="btn-audio" style="padding:4px 8px;font-size:12px;flex-shrink:0;" onclick="event.stopPropagation();speakText('${s}')">🔊</button>
+                </div>`;
+            });
+            if (mistakes.length > 5) html += `<p style="text-align:center;padding:8px;color:var(--pri);font-size:12px;">还有 ${mistakes.length - 5} 条错题…</p>`;
+            html += '</div>';
+        }
+        html += '</div>';
         if (!courses.length) {
             html += '<div class="card"><p style="padding:30px;text-align:center;color:var(--gray);">还没有加入课程，去课程市场看看吧～</p></div>';
         } else {
