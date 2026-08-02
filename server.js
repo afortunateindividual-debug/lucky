@@ -1813,23 +1813,27 @@ app.post('/api/admin/words', (req, res) => {
   if (!uid) return res.status(401).json({ error: '请先登录' });
   const arr = Array.isArray(req.body && req.body.words) ? req.body.words : [];
   if (!arr.length) return res.status(400).json({ error: '缺少单词数据' });
-  const existing = new Set(db.prepare('SELECT LOWER(word) AS w FROM words').all().map(r => r.w));
   const ins = db.prepare('INSERT INTO words (word, phonetic, meaning, ru_meaning, example, example2, image, level, lang, category) VALUES (?,?,?,?,?,?,?,?,?,?)');
-  let added = 0, skipped = 0;
+  const upd = db.prepare('UPDATE words SET phonetic=?,meaning=?,ru_meaning=?,example=?,example2=?,image=?,level=?,lang=?,category=? WHERE word=?');
+  let added = 0, updated = 0;
   const tx = db.transaction(() => {
     for (const it of arr) {
       if (!it || !it.word) continue;
       const w = String(it.word).trim();
       if (!w) continue;
       const key = w.toLowerCase();
-      if (existing.has(key)) { skipped++; continue; }
-      existing.add(key);
-      ins.run(w, it.phonetic || '', it.meaning || '', it.ru_meaning || '', it.example || '', it.example2 || '', it.image || '📝', it.level || '', it.lang || 'en', it.category || '');
-      added++;
+      const exist = db.prepare('SELECT id FROM words WHERE LOWER(word)=?').get(key);
+      if (exist) {
+        upd.run(it.phonetic || '', it.meaning || '', it.ru_meaning || '', it.example || '', it.example2 || '', it.image || '📝', it.level || '', it.lang || 'en', it.category || '', w);
+        updated++;
+      } else {
+        ins.run(w, it.phonetic || '', it.meaning || '', it.ru_meaning || '', it.example || '', it.example2 || '', it.image || '📝', it.level || '', it.lang || 'en', it.category || '');
+        added++;
+      }
     }
   });
   tx();
-  res.json({ ok: true, added, skipped });
+  res.json({ ok: true, added, updated });
 });
 
 // ---------- 内容管理：AI 拆解上传文本 ----------
