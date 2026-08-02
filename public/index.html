@@ -568,6 +568,29 @@
     .am-del{border:1px solid #f3c0c0;background:#fff0f0;color:#c0392b;border-radius:8px;padding:5px 12px;font-size:12px;cursor:pointer;flex:0 0 auto;}
     .am-del:hover{background:#c0392b;color:#fff;}
     .admin-tip{font-size:12px;color:var(--gray);margin-top:14px;line-height:1.6;}
+
+    /* AI 客服浮窗 */
+    .chat-fab { position:fixed;right:22px;bottom:22px;width:56px;height:56px;border-radius:50%;background:linear-gradient(135deg,#667eea,#764ba2);color:#fff;font-size:26px;display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 6px 20px rgba(102,126,234,.45);z-index:9998;transition:transform .2s; }
+    .chat-fab:hover { transform:scale(1.08); }
+    .chat-panel { position:fixed;right:22px;bottom:22px;width:366px;height:524px;max-height:calc(100vh - 44px);background:#fff;border-radius:16px;box-shadow:0 12px 40px rgba(0,0,0,.18);display:flex;flex-direction:column;overflow:hidden;z-index:9999;opacity:0;transform:translateY(16px) scale(.98);pointer-events:none;transition:.25s; }
+    .chat-panel.open { opacity:1;transform:translateY(0) scale(1);pointer-events:auto; }
+    .chat-head { display:flex;align-items:center;gap:10px;padding:14px 16px;background:linear-gradient(135deg,#667eea,#764ba2);color:#fff;flex-shrink:0; }
+    .ch-avatar { width:36px;height:36px;border-radius:50%;background:rgba(255,255,255,.2);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0; }
+    .ch-info { flex:1;min-width:0; }
+    .ch-name { font-size:14px;font-weight:700; }
+    .ch-sub { font-size:11px;opacity:.85;margin-top:1px; }
+    .ch-close { background:none;border:none;color:#fff;font-size:22px;cursor:pointer;line-height:1;opacity:.85; }
+    .ch-close:hover { opacity:1; }
+    .chat-body { flex:1;overflow-y:auto;padding:14px;background:#f7f8fc; }
+    .msg { max-width:82%;padding:9px 12px;border-radius:12px;font-size:13px;line-height:1.55;margin-bottom:10px;word-break:break-word;white-space:pre-wrap; }
+    .msg.bot { background:#fff;color:var(--dk);border:1px solid #eef0f4;align-self:flex-start;border-bottom-left-radius:4px; }
+    .msg.me { background:linear-gradient(135deg,#667eea,#764ba2);color:#fff;margin-left:auto;border-bottom-right-radius:4px; }
+    .msg.typing { background:#fff;color:var(--gray);font-style:italic; }
+    .chat-input { display:flex;gap:8px;padding:10px 12px;border-top:1px solid var(--border);background:#fff;flex-shrink:0; }
+    .chat-input textarea { flex:1;resize:none;border:1px solid #e2e5ec;border-radius:10px;padding:9px 11px;font-size:13px;font-family:inherit;outline:none;max-height:84px;line-height:1.4; }
+    .chat-input textarea:focus { border-color:var(--pri); }
+    .chat-send { border:none;background:linear-gradient(135deg,#667eea,#764ba2);color:#fff;border-radius:10px;padding:0 16px;font-size:13px;font-weight:600;cursor:pointer;flex-shrink:0; }
+    .chat-send:hover { opacity:.92; }
     </style>
 </head>
 <body>
@@ -3076,7 +3099,78 @@ document.addEventListener('DOMContentLoaded', () => {
         if (e.key === 'Escape') closePwdModal();
     });
 });
+/* ============ AI 智能客服 ============ */
+let chatOpen = false;
+function toggleChat() {
+    chatOpen = !chatOpen;
+    const panel = document.getElementById('chatPanel');
+    const fab = document.getElementById('chatFab');
+    if (panel) panel.classList.toggle('open', chatOpen);
+    if (fab) fab.style.display = chatOpen ? 'none' : 'flex';
+    const body = document.getElementById('chatBody');
+    if (chatOpen) {
+        if (body && !body.dataset.init) {
+            addMsg('bot', '您好！我是学语言 AI 客服小语 👋\n请问有什么可以帮您？您可以问我关于课程、会员、合伙人或错题本的问题。');
+            body.dataset.init = '1';
+        }
+        setTimeout(() => { const i = document.getElementById('chatInput'); if (i) i.focus(); }, 120);
+    }
+}
+function addMsg(role, text) {
+    const body = document.getElementById('chatBody');
+    if (!body) return;
+    const d = document.createElement('div');
+    d.className = 'msg ' + (role === 'bot' ? 'bot' : 'me');
+    d.textContent = text;
+    body.appendChild(d);
+    body.scrollTop = body.scrollHeight;
+}
+async function sendChat() {
+    const inp = document.getElementById('chatInput');
+    if (!inp) return;
+    const q = inp.value.trim();
+    if (!q) return;
+    addMsg('me', q);
+    inp.value = '';
+    const body = document.getElementById('chatBody');
+    const typing = document.createElement('div');
+    typing.className = 'msg bot typing';
+    typing.textContent = '正在输入…';
+    body.appendChild(typing);
+    body.scrollTop = body.scrollHeight;
+    // 收集历史（排除当前问题这条 me 与服务端会再附加）
+    const all = Array.from(body.querySelectorAll('.msg:not(.typing)'));
+    if (all.length && all[all.length - 1].classList.contains('me')) all.pop();
+    const history = all.map(m => ({ role: m.classList.contains('bot') ? 'bot' : 'user', content: m.textContent }));
+    try {
+        const res = await fetch('/api/chat', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ question: q, history }) });
+        const data = await res.json();
+        typing.remove();
+        addMsg('bot', data.answer || '抱歉，我没能理解您的问题，请换种方式描述～');
+    } catch (e) {
+        typing.remove();
+        addMsg('bot', '网络异常，请稍后再试一次～');
+    }
+}
 </script>
+
+<!-- ==================== AI 客服浮窗 ==================== -->
+<div class="chat-fab" id="chatFab" onclick="toggleChat()" title="AI 客服">💬</div>
+<div class="chat-panel" id="chatPanel">
+    <div class="chat-head">
+        <div class="ch-avatar">🤖</div>
+        <div class="ch-info">
+            <div class="ch-name">小语 · AI 客服</div>
+            <div class="ch-sub">在线 · 随时为您解答</div>
+        </div>
+        <button class="ch-close" onclick="toggleChat()" title="关闭">×</button>
+    </div>
+    <div class="chat-body" id="chatBody"></div>
+    <div class="chat-input">
+        <textarea id="chatInput" placeholder="输入您的问题，回车发送…" rows="1" onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendChat();}"></textarea>
+        <button class="chat-send" onclick="sendChat()">发送</button>
+    </div>
+</div>
 
 </body>
 </html>

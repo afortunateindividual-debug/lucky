@@ -1948,6 +1948,52 @@ app.delete('/api/admin/knowledge', (req, res) => {
   res.json({ ok: true });
 });
 
+// ============ AI 智能客服 ============
+const CS_SYSTEM = '你是「小语」，学语言平台的 AI 智能客服。请用简体中文、亲切且简短地回答用户关于：课程学习、会员权益、合伙人推广计划、错题本、账号与隐私设置、充值付费等问题；可引导用户使用对应页面（如「课程市场」「我的课程」「会员权益」「合伙人招募」「账户中心」）。遇到不确定的问题，诚实说明并可建议联系人工客服。回复控制在 200 字以内。';
+
+function presetAnswer(q) {
+  const t = String(q || '').toLowerCase();
+  const faq = [
+    { k: ['课程', '怎么学', '学习', '学什么', '入门', 'course'], a: '您可以在「课程市场」浏览体系化课程，或在「我的课程」继续学习。平台提供 Little Fox 动画、新课标词汇等课程，支持含音视频的课文跟读与智能练习。' },
+    { k: ['会员', '权益', '升级', 'vip', '畅学', '收费', '多少钱'], a: '会员分为畅学版与合伙人版：畅学版解锁全部课程与智能练习；合伙人版额外含专属社群与推广返佣权限。可在「会员权益」页查看并升级。' },
+    { k: ['合伙人', '推广', '赚钱', '佣金', '邀请', '返佣', 'partner'], a: '加入合伙人计划后，邀请好友注册即可获得推广返佣。在「合伙人招募」页可查看邀请明细与申请提现（满 ¥100 起提）。' },
+    { k: ['错题', '错题本', '错'], a: '错题本已整合在「我的课程」页（今日时长下方）。系统会记录练习中的易错句子，支持点击 🔊 跟读巩固。' },
+    { k: ['登录', '密码', '账号', '注册', '登入', 'login'], a: '可在左下角「账户中心 ▾」的「个人中心 / 隐私设置」管理账号。如忘记密码，请使用登录页的验证码方式重置。' },
+    { k: ['退款', '退费', '付费', '支付', '钱'], a: '涉及订单与退款，请联系人工客服并提供账号信息，我们会尽快为您处理。' },
+    { k: ['你好', '您好', 'hi', 'hello', '在吗', '你是谁'], a: '您好！我是学语言 AI 客服小语，很高兴为您服务～请问有什么可以帮您？' }
+  ];
+  for (const f of faq) if (f.k.some(w => t.includes(w))) return f.a;
+  return '感谢您的提问！我可以帮您解答「课程学习 / 会员权益 / 合伙人计划 / 错题本 / 账号设置」等方面的问题，请告诉我您想了解哪一块，或留下具体问题，我会尽力帮您～';
+}
+
+async function chatLLM(messages) {
+  if (!process.env.LLM_API_KEY || !process.env.LLM_BASE_URL) return null;
+  try {
+    const r = await fetch(process.env.LLM_BASE_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + process.env.LLM_API_KEY },
+      body: JSON.stringify({ model: process.env.LLM_MODEL || 'gpt-4o-mini', messages, temperature: 0.5 })
+    });
+    const j = await r.json();
+    const content = j.choices && j.choices[0] && j.choices[0].message && j.choices[0].message.content;
+    return content ? content.trim() : null;
+  } catch (e) { return null; }
+}
+
+app.post('/api/chat', async (req, res) => {
+  const b = req.body || {};
+  const history = Array.isArray(b.history) ? b.history.slice(-10) : [];
+  const question = String(b.question || '').trim();
+  if (!question) return res.status(400).json({ error: '请输入问题' });
+  const msgs = [{ role: 'system', content: CS_SYSTEM }]
+    .concat(history.map(m => ({ role: (m.role === 'bot' ? 'assistant' : 'user'), content: String(m.content || '') })))
+    .concat([{ role: 'user', content: question }]);
+  let answer = await chatLLM(msgs);
+  let source = 'ai';
+  if (!answer) { answer = presetAnswer(question); source = 'preset'; }
+  res.json({ answer, source });
+});
+
 app.listen(PORT, '0.0.0.0', () => {
   console.log(`学语言后端已启动： http://0.0.0.0:${PORT}`);
 });
