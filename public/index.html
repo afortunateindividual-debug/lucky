@@ -103,6 +103,9 @@
         .navi-sub-item .navi-ic { font-size:14px;width:18px; }
         .navi-sub.open { display:block; }
         .side-ft { padding:12px 14px;border-top:1px solid var(--border); }
+        .foot-hd { display:flex;align-items:center;gap:8px;padding:9px 8px;margin:6px 0 2px;border-radius:8px;cursor:pointer;color:var(--gray);font-size:12.5px;font-weight:600; }
+        .foot-hd:hover { background:#f3f4f6; }
+        .foot-hd-t { flex:1; }
         .user-card { display:flex;align-items:center;gap:10px;padding:8px;border-radius:10px;cursor:pointer;transition:.2s; }
         .user-card:hover { background: #f3f4f6; }
         .u-avatar { width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;font-size:13px;font-weight:bold;flex-shrink:0; }
@@ -664,16 +667,9 @@
 
     <!-- Sidebar -->
     <aside class="side">
-        <div class="side-hd nav-parent" id="brandHd" onclick="toggleBrandSub()">
+        <div class="side-hd">
             <div class="side-logo">学</div>
             <span class="side-title">学语言</span>
-            <span class="navi-caret" id="brandCaret" style="margin-left:auto;">▾</span>
-        </div>
-        <div class="navi-sub open" id="brandSub" style="margin-top:2px;">
-            <div class="navi navi-sub-item" data-page="profile" onclick="navigateTo('profile')"><span class="navi-ic">👤</span> 个人中心</div>
-            <div class="navi navi-sub-item" data-page="dashboard" onclick="navigateTo('dashboard')"><span class="navi-ic">📊</span> 数据面板</div>
-            <div class="navi navi-sub-item" data-page="membership" onclick="navigateTo('membership')"><span class="navi-ic">👑</span> 会员权益</div>
-            <div class="navi navi-sub-item" data-page="settings" onclick="navigateTo('settings')"><span class="navi-ic">⚙️</span> 隐私设置</div>
         </div>
             <nav class="side-nav">
             <div class="nav-group">
@@ -698,6 +694,16 @@
                     <div class="u-name" id="sidebarName">lucky<span class="vip-tag" id="sidebarVipTag">FREE</span></div>
                     <div class="u-lv">Lv.1 新手 · 120 积分</div>
                 </div>
+            </div>
+            <div class="foot-hd nav-parent" id="footHd" onclick="toggleFootSub()">
+                <span class="foot-hd-t">账户中心</span>
+                <span class="navi-caret" id="footCaret" style="margin-left:auto;transform:rotate(-90deg);">▾</span>
+            </div>
+            <div class="navi-sub" id="footSub" style="margin:2px 6px 4px;">
+                <div class="navi navi-sub-item" data-page="profile" onclick="navigateTo('profile')"><span class="navi-ic">👤</span> 个人中心</div>
+                <div class="navi navi-sub-item" data-page="dashboard" onclick="navigateTo('dashboard')"><span class="navi-ic">📊</span> 数据面板</div>
+                <div class="navi navi-sub-item" data-page="membership" onclick="navigateTo('membership')"><span class="navi-ic">👑</span> 会员权益</div>
+                <div class="navi navi-sub-item" data-page="settings" onclick="navigateTo('settings')"><span class="navi-ic">⚙️</span> 隐私设置</div>
             </div>
         </div>
     </aside>
@@ -1499,6 +1505,13 @@ function updateUIForUser() {
 function toggleBrandSub() {
     const sub = document.getElementById('brandSub');
     const caret = document.getElementById('brandCaret');
+    if (!sub) return;
+    const open = sub.classList.toggle('open');
+    if (caret) caret.style.transform = open ? 'rotate(0deg)' : 'rotate(-90deg)';
+}
+function toggleFootSub() {
+    const sub = document.getElementById('footSub');
+    const caret = document.getElementById('footCaret');
     if (!sub) return;
     const open = sub.classList.toggle('open');
     if (caret) caret.style.transform = open ? 'rotate(0deg)' : 'rotate(-90deg)';
