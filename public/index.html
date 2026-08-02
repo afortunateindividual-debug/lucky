@@ -1157,6 +1157,13 @@
         <div class="pg" id="pg-mistakes"><div class="page-header"><div class="page-title">❌ 错题本</div></div><div class="page-body"><div class="card"><p style="text-align:center;padding:40px;color:var(--gray);">错题本 — 深色主题，智能错因分析与针对性练习</p></div></div></div>
         <div class="pg" id="pg-lookup"><div class="page-header"><div class="page-title">🔍 查单词</div></div><div class="page-body">
             <div class="card" style="margin-bottom:16px;"><input id="dictSearch" class="u-input" placeholder="🔍 输入单词查询释义、音标、例句…" oninput="onDictSearch()"></div>
+            <div id="dictCatBar" style="display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap;">
+                <button class="mk-ftab ${(AppState.dictCat||'')===''?'on':''}" onclick="setDictCat('')">全部</button>
+                <button class="mk-ftab ${(AppState.dictCat||'')==='名词'?'on':''}" onclick="setDictCat('名词')">名词</button>
+                <button class="mk-ftab ${(AppState.dictCat||'')==='动词'?'on':''}" onclick="setDictCat('动词')">动词</button>
+                <button class="mk-ftab ${(AppState.dictCat||'')==='形容词'?'on':''}" onclick="setDictCat('形容词')">形容词</button>
+                <button class="mk-ftab ${(AppState.dictCat||'')==='其他'?'on':''}" onclick="setDictCat('其他')">其他</button>
+            </div>
             <div id="dictList" class="biz-grid sm"></div>
         </div></div>
         <div class="pg" id="pg-knowledge"><div class="page-header"><div class="page-title">💡 知识库</div></div><div class="page-body">
@@ -1746,6 +1753,7 @@ function renderMistakes() {
 let _searchTimer;
 function onCourseSearch(){ clearTimeout(_searchTimer); _searchTimer = setTimeout(renderCourses, 250); }
 function onDictSearch(){ clearTimeout(_searchTimer); _searchTimer = setTimeout(renderLookup, 250); }
+function setDictCat(c){ AppState.dictCat = c; renderLookup(); }
 
 async function apiGet(url) {
     const token = localStorage.getItem('juyou_token');
@@ -1902,7 +1910,11 @@ async function renderLookup() {
     list.innerHTML = '<p style="color:var(--gray);padding:20px;">输入单词查询…</p>';
     try {
         const q = document.getElementById('dictSearch').value.trim();
-        const data = await apiGet('/api/words' + (q ? '?q=' + encodeURIComponent(q) : ''));
+        const cat = AppState.dictCat || '';
+        const params = [];
+        if (q) params.push('q=' + encodeURIComponent(q));
+        if (cat) params.push('category=' + encodeURIComponent(cat));
+        const data = await apiGet('/api/words' + (params.length ? '?' + params.join('&') : ''));
         const words = data.words || [];
         if (!words.length) { list.innerHTML = '<p style="color:var(--gray);padding:20px;">未找到单词</p>'; return; }
         list.innerHTML = words.map(w => {
@@ -1911,7 +1923,7 @@ async function renderLookup() {
                 <div style="display:flex;align-items:center;gap:12px;">
                     <div style="font-size:40px;flex-shrink:0;">${w.image || '📝'}</div>
                     <div style="flex:1;min-width:0;">
-                        <div style="font-size:20px;font-weight:700;">${w.word}</div>
+                        <div style="font-size:20px;font-weight:700;">${w.word} <span style="font-size:11px;background:#eef;color:#667eea;padding:2px 8px;border-radius:10px;vertical-align:middle;">${w.category || '其他'}</span></div>
                         <div style="color:var(--gray);font-size:14px;">${w.phonetic || ''}</div>
                     </div>
                     <button class="btn-audio" style="margin-left:auto;padding:6px 12px;flex-shrink:0;" onclick="speakText('${safe}')">🔊</button>
