@@ -540,6 +540,31 @@
     .quiz-opt.ok{border-color:#36c275;background:rgba(54,194,117,.15);}
     .quiz-opt.bad{border-color:#ef5350;background:rgba(239,83,80,.15);}
     .quiz-idx{width:28px;height:28px;flex:0 0 28px;border-radius:50%;background:#3a4252;color:#cfd6e4;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:600;}
+    /* ===== 内容管理优化 ===== */
+    .admin-intro{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;background:linear-gradient(135deg,#eef3ff,#f7f9ff);border:1px solid #e3e9ff;border-radius:14px;padding:18px 20px;margin-bottom:16px;}
+    .admin-intro-t{font-size:18px;font-weight:800;color:var(--dk);}
+    .admin-intro-d{font-size:13px;color:var(--gray);margin-top:4px;max-width:560px;line-height:1.6;}
+    .admin-stats{display:flex;gap:10px;}
+    .admin-stat{background:#fff;border:1px solid #e3e9ff;border-radius:12px;padding:10px 16px;text-align:center;min-width:64px;}
+    .admin-stat b{display:block;font-size:20px;font-weight:800;color:var(--pri);line-height:1.1;}
+    .admin-stat span{font-size:12px;color:var(--gray);}
+    .admin-tabs{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px;}
+    .admin-card{padding:20px;}
+    .af{margin-bottom:14px;}
+    .af>label{display:block;font-size:13px;color:var(--gray);margin-bottom:6px;font-weight:600;}
+    .af-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+    .af-grid .af{margin-bottom:0;}
+    @media(max-width:560px){.af-grid{grid-template-columns:1fr;}}
+    .admin-sec-t{font-size:15px;font-weight:700;margin:6px 0 14px;color:var(--dk);}
+    .admin-manage{margin-top:22px;border-top:1px dashed #e5e7eb;padding-top:16px;}
+    .admin-manage-t{font-weight:700;margin-bottom:10px;color:#c0392b;font-size:14px;}
+    .am-item{display:flex;align-items:center;gap:10px;justify-content:space-between;padding:9px 12px;border:1px solid #eef0f3;border-radius:10px;margin-bottom:8px;background:#fcfdff;transition:.15s;}
+    .am-item:hover{border-color:#c7d2fe;box-shadow:0 2px 8px rgba(74,125,255,.08);}
+    .am-item .am-ic{font-size:18px;flex:0 0 24px;text-align:center;}
+    .am-item .am-title{flex:1;font-size:14px;color:var(--dk);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+    .am-del{border:1px solid #f3c0c0;background:#fff0f0;color:#c0392b;border-radius:8px;padding:5px 12px;font-size:12px;cursor:pointer;flex:0 0 auto;}
+    .am-del:hover{background:#c0392b;color:#fff;}
+    .admin-tip{font-size:12px;color:var(--gray);margin-top:14px;line-height:1.6;}
     </style>
 </head>
 <body>
@@ -946,21 +971,6 @@
                     </div>
                 </div>
 
-                <!-- Detailed Comparison Table -->
-                <h3 style="font-size:17px;font-weight:700;margin:30px 0 14px;">详细功能对比</h3>
-                <div class="compare-table">
-                    <div class="ct-head"><span>功能项</span><span>免费版</span><span>畅学版</span><span>合伙人版</span></div>
-                    <div class="ct-row"><span>价格</span><span>¥0</span><span class="ct-limit">¥29/月</span><span class="ct-limit">¥699/年</span></div>
-                    <div class="ct-row"><span>每日解锁句数</span><span class="ct-limit">3 句</span><span class="ct-yes">30 句</span><span class="ct-yes">∞ 无限</span></div>
-                    <div class="ct-row"><span>AI 朗读次数</span><span class="ct-limit">5 次/天</span><span class="ct-yes">100 次/天</span><span class="ct-yes">∞ 无限</span></div>
-                    <div class="ct-row"><span>课程范围</span><span class="ct-limit">仅免费课</span><span class="ct-yes">全部课程</span><span class="ct-yes">全部+新课抢先</span></div>
-                    <div class="ct-row"><span>AI 语音评测</span><span class="ct-no">✗</span><span class="ct-yes">✓ 高级</span><span class="ct-yes">✓ 专业级</span></div>
-                    <div class="ct-row"><span>AI 写作批改</span><span class="ct-no">✗</span><span class="ct-limit">30次/月</span><span class="ct-yes">300次/日</span></div>
-                    <div class="ct-row"><span>广告</span><span class="ct-yes">有广告</span><span class="ct-yes">无广告</span><span class="ct-yes">无广告+可获利</span></div>
-                    <div class="ct-row"><span>推广返佣</span><span class="ct-no">✗</span><span class="ct-no">✗</span><span class="ct-yes">30% 佣金</span></div>
-                    <div class="ct-row"><span>专属社群</span><span class="ct-no">✗</span><span class="ct-no">✗</span><span class="ct-yes">✓</span></div>
-                    <div class="ct-row"><span>数据分析</span><span class="ct-limit">基础</span><span class="ct-yes">深度</span><span class="ct-yes">专业+导出</span></div>
-                </div>
                 <p style="text-align:center;color:var(--gray);font-size:13px;margin-top:20px;">首购有一分钱，解锁设产品详情页内容与引导的内容持续丰富。感谢您的支持！</p>
             </div>
         </div>
@@ -1892,58 +1902,80 @@ async function renderAdmin() {
   const body = document.getElementById('adminBody');
   if (!body) return;
   if (!AppState.isLoggedIn) { body.innerHTML = '<div class="card"><p style="padding:30px;text-align:center;color:var(--gray);">请先登录后再管理内容</p></div>'; return; }
-  let courseOpts = '';
+  let courseOpts = '', courseCount = 0, knowCount = 0, lessonCount = 0;
   try {
-    const data = await apiGet('/api/courses');
-    (data.courses || []).forEach(c => { courseOpts += '<option value="' + c.id + '">' + escHtml(c.title) + '</option>'; });
+    const d = await apiGet('/api/courses');
+    (d.courses || []).forEach(c => { courseOpts += '<option value="' + c.id + '">' + escHtml(c.title) + '</option>'; lessonCount += (c.lessons ? c.lessons.length : 0); });
+    courseCount = (d.courses || []).length;
   } catch (e) {}
-  const fr = 'margin-bottom:12px;';
-  const lb = 'display:block;font-size:13px;color:var(--gray);margin-bottom:5px;';
+  try {
+    const k = await apiGet('/api/knowledge');
+    knowCount = (k.articles || []).length;
+  } catch (e) {}
   body.innerHTML = `
-    <div style="display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap;">
+    <div class="admin-intro">
+      <div>
+        <div class="admin-intro-t">🛠 内容管理</div>
+        <div class="admin-intro-d">自助上传与管理课程、章节与知识库，支持多格式智能拆解。内容创建后即时同步到课程市场与知识库。</div>
+      </div>
+      <div class="admin-stats">
+        <div class="admin-stat"><b>${courseCount}</b><span>课程</span></div>
+        <div class="admin-stat"><b>${lessonCount}</b><span>章节</span></div>
+        <div class="admin-stat"><b>${knowCount}</b><span>知识库</span></div>
+      </div>
+    </div>
+    <div class="admin-tabs">
       <button class="mk-ftab ${adminTab==='course'?'on':''}" onclick="setAdminTab('course')">📚 添加课程</button>
       <button class="mk-ftab ${adminTab==='lesson'?'on':''}" onclick="setAdminTab('lesson')">📝 添加章节</button>
       <button class="mk-ftab ${adminTab==='knowledge'?'on':''}" onclick="setAdminTab('knowledge')">💡 添加知识库</button>
       <button class="mk-ftab ${adminTab==='upload'?'on':''}" onclick="setAdminTab('upload')">📄 智能上传</button>
     </div>
-    <div class="card" style="padding:18px;">
+    <div class="card admin-card">
       ${adminTab==='course' ? `
-        <div style="font-weight:700;margin-bottom:14px;">新增一门课程</div>
-        <div style="${fr}"><label style="${lb}">课程标题</label><input id="acTitle" class="form-input" placeholder="如：外贸商务英语开口沟通实战"></div>
-        <div style="${fr}"><label style="${lb}">封面图片（点击上传，留空则用默认图标）</label>
+        <div class="admin-sec-t">📚 新增一门课程</div>
+        <div class="af"><label>课程标题</label><input id="acTitle" class="form-input" placeholder="如：外贸商务英语开口沟通实战"></div>
+        <div class="af"><label>封面图片（点击上传，留空则用默认图标）</label>
           <input id="acCoverFile" type="file" accept="image/*" class="form-input" onchange="onCoverFile(event)">
           <img id="acCoverPreview" style="display:none;max-width:120px;max-height:120px;border-radius:8px;margin-top:8px;border:1px solid #eee;">
         </div>
-        <div style="${fr}"><label style="${lb}">语言</label><select id="acLang" class="form-input"><option value="en">英语</option><option value="zh">中文</option><option value="ru">俄语</option><option value="ar">阿拉伯</option></select></div>
-        <div style="${fr}"><label style="${lb}">级别</label><select id="acLevel" class="form-input"><option value="0基础">0基础</option><option value="小学基础">小学基础</option><option value="中学基础">中学基础</option></select></div>
-        <div style="${fr}"><label style="${lb}">分类</label><select id="acCat" class="form-input"><option value="日常">日常</option><option value="商务">商务</option><option value="出行">出行</option><option value="点餐">点餐</option><option value="外贸">外贸</option><option value="考试">考试</option><option value="新概念">新概念</option></select></div>
-        <div style="${fr}"><label style="${lb}">标签（逗号分隔）</label><input id="acTags" class="form-input" placeholder="外贸,商务"></div>
-        <div style="${fr}"><label style="${lb}">价格（0=免费）</label><input id="acPrice" class="form-input" value="0" type="number"></div>
-        <div style="${fr}"><label style="${lb}">简介</label><textarea id="acDesc" class="form-input" rows="3" placeholder="课程简介"></textarea></div>
+        <div class="af-grid">
+          <div class="af"><label>语言</label><select id="acLang" class="form-input"><option value="en">英语</option><option value="zh">中文</option><option value="ru">俄语</option><option value="ar">阿拉伯</option></select></div>
+          <div class="af"><label>级别</label><select id="acLevel" class="form-input"><option value="0基础">0基础</option><option value="小学基础">小学基础</option><option value="中学基础">中学基础</option></select></div>
+          <div class="af"><label>分类</label><select id="acCat" class="form-input"><option value="日常">日常</option><option value="商务">商务</option><option value="出行">出行</option><option value="点餐">点餐</option><option value="外贸">外贸</option><option value="考试">考试</option><option value="新概念">新概念</option></select></div>
+          <div class="af"><label>价格（0 = 免费）</label><input id="acPrice" class="form-input" value="0" type="number"></div>
+        </div>
+        <div class="af"><label>标签（逗号分隔）</label><input id="acTags" class="form-input" placeholder="外贸,商务"></div>
+        <div class="af"><label>简介</label><textarea id="acDesc" class="form-input" rows="3" placeholder="课程简介"></textarea></div>
         <button class="btn-primary" onclick="addAdminCourse()">＋ 创建课程</button>
       ` : ''}
       ${adminTab==='lesson' ? `
-        <div style="font-weight:700;margin-bottom:14px;">给课程添加章节（每周 / 每课）</div>
-        <div style="${fr}"><label style="${lb}">选择课程</label><select id="alCourse" class="form-input">${courseOpts}</select></div>
-        <div style="${fr}"><label style="${lb}">章节标题</label><input id="alTitle" class="form-input" placeholder="如：第一周：商务沟通开场"></div>
-        <div style="${fr}"><label style="${lb}">章节副标题</label><input id="alSub" class="form-input" placeholder="一句话描述"></div>
-        <div style="${fr}"><label style="${lb}">核心词汇（每行一个）<br><span style="font-size:11px;color:var(--gray)">格式：英文 | 音标 | 中文 | 词性 | 短语1;短语2</span></label><textarea id="alVocab" class="form-input" rows="6" placeholder="inquiry|/ɪnˈkwaɪəri/|询盘|名词|Thanks for your inquiry."></textarea></div>
-        <div style="${fr}"><label style="${lb}">对话 / 例句（每行一个）<br><span style="font-size:11px;color:var(--gray)">格式：英文 ||| 中文</span></label><textarea id="alDialogue" class="form-input" rows="5" placeholder="Hello, nice to meet you.|||您好，很高兴认识您。"></textarea></div>
-        <div style="${fr}"><label style="${lb}">语法 / 技巧点</label><textarea id="alGrammar" class="form-input" rows="3" placeholder="本周沟通技巧"></textarea></div>
-        <div style="${fr}"><label style="${lb}">学习提示</label><textarea id="alTip" class="form-input" rows="2" placeholder="学习建议"></textarea></div>
+        <div class="admin-sec-t">📝 给课程添加章节（每周 / 每课）</div>
+        <div class="af"><label>选择课程</label><select id="alCourse" class="form-input">${courseOpts}</select></div>
+        <div class="af-grid">
+          <div class="af"><label>章节标题</label><input id="alTitle" class="form-input" placeholder="如：第一周：商务沟通开场"></div>
+          <div class="af"><label>章节副标题</label><input id="alSub" class="form-input" placeholder="一句话描述"></div>
+        </div>
+        <div class="af"><label>核心词汇（每行一个）<br><span style="font-size:11px;color:var(--gray)">格式：英文 | 音标 | 中文 | 词性 | 短语1;短语2</span></label><textarea id="alVocab" class="form-input" rows="6" placeholder="inquiry|/ɪnˈkwaɪəri/|询盘|名词|Thanks for your inquiry."></textarea></div>
+        <div class="af"><label>对话 / 例句（每行一个）<br><span style="font-size:11px;color:var(--gray)">格式：英文 ||| 中文</span></label><textarea id="alDialogue" class="form-input" rows="5" placeholder="Hello, nice to meet you.|||您好，很高兴认识您。"></textarea></div>
+        <div class="af-grid">
+          <div class="af"><label>语法 / 技巧点</label><textarea id="alGrammar" class="form-input" rows="3" placeholder="本周沟通技巧"></textarea></div>
+          <div class="af"><label>学习提示</label><textarea id="alTip" class="form-input" rows="3" placeholder="学习建议"></textarea></div>
+        </div>
         <button class="btn-primary" onclick="addAdminLesson()">＋ 添加章节</button>
       ` : ''}
       ${adminTab==='knowledge' ? `
-        <div style="font-weight:700;margin-bottom:14px;">新增知识库文章</div>
-        <div style="${fr}"><label style="${lb}">标题</label><input id="akTitle" class="form-input" placeholder="文章标题"></div>
-        <div style="${fr}"><label style="${lb}">封面 Emoji</label><input id="akCover" class="form-input" value="💡"></div>
-        <div style="${fr}"><label style="${lb}">标签</label><input id="akTag" class="form-input" placeholder="语法图解/学习方法..."></div>
-        <div style="${fr}"><label style="${lb}">摘要</label><input id="akSummary" class="form-input" placeholder="一句话摘要"></div>
-        <div style="${fr}"><label style="${lb}">正文</label><textarea id="akContent" class="form-input" rows="5" placeholder="文章内容"></textarea></div>
+        <div class="admin-sec-t">💡 新增知识库文章</div>
+        <div class="af"><label>标题</label><input id="akTitle" class="form-input" placeholder="文章标题"></div>
+        <div class="af-grid">
+          <div class="af"><label>封面 Emoji</label><input id="akCover" class="form-input" value="💡"></div>
+          <div class="af"><label>标签</label><input id="akTag" class="form-input" placeholder="语法图解/学习方法..."></div>
+        </div>
+        <div class="af"><label>摘要</label><input id="akSummary" class="form-input" placeholder="一句话摘要"></div>
+        <div class="af"><label>正文</label><textarea id="akContent" class="form-input" rows="5" placeholder="文章内容"></textarea></div>
         <button class="btn-primary" onclick="addAdminKnowledge()">＋ 发布文章</button>
       ` : ''}
       ${adminTab==='upload' ? `
-        <div style="font-weight:700;margin-bottom:14px;">📄 上传资料 · AI 自动拆解成课程</div>
+        <div class="admin-sec-t">📄 上传资料 · AI 自动拆解成课程</div>
         <div id="upDrop" onclick="document.getElementById('upFile').click()" ondragover="event.preventDefault();this.style.borderColor='var(--pri)';" ondragleave="this.style.borderColor='#c7d2fe';" ondrop="event.preventDefault();this.style.borderColor='#c7d2fe';onUpDrop(event);" style="border:2px dashed #c7d2fe;background:#f8faff;border-radius:12px;padding:26px;text-align:center;cursor:pointer;color:#6b7280;transition:.2s;">
           拖拽文件到此处，或 <span style="color:var(--pri);font-weight:600;">点击选择</span><br>
           <span style="font-size:12px;">支持 PDF / Word(.docx) / TXT / MD / 图片(PNG·JPG，自动OCR)</span>
@@ -1952,9 +1984,9 @@ async function renderAdmin() {
         <div id="upStatus" style="font-size:13px;color:var(--gray);margin:10px 0;"></div>
         <div id="upPreview"></div>
       ` : ''}
-      <div id="adminManage" style="margin-top:20px;border-top:1px dashed #e5e7eb;padding-top:16px;"></div>
+      <div id="adminManage" class="admin-manage"></div>
     </div>
-    <p style="font-size:12px;color:var(--gray);margin-top:14px;">提示：添加后立即可在「课程市场 / 知识库」看到。词汇与对话请按上方格式填写，一行一条。</p>
+    <p class="admin-tip">提示：添加后立即可在「课程市场 / 知识库」看到。词汇与对话请按上方格式填写，一行一条。</p>
   `;
   renderAdminManage();
 }
@@ -1962,32 +1994,32 @@ async function renderAdminManage() {
   const box = document.getElementById('adminManage');
   if (!box) return;
   if (adminTab === 'upload') { box.innerHTML = ''; return; }
-  const delBtn = (id) => '<button style="border:1px solid #f3c0c0;background:#fff0f0;color:#c0392b;border-radius:8px;padding:4px 12px;font-size:12px;cursor:pointer;" onclick="delAdmin(\'' + id.kind + '\',' + id.id + ')">删除</button>';
+  const delBtn = (id) => '<button class="am-del" onclick="delAdmin(\'' + id.kind + '\',' + id.id + ')">删除</button>';
   if (adminTab === 'course') {
-    box.innerHTML = '<div style="font-weight:700;margin-bottom:10px;color:#c0392b;">🗑 管理已有课程（点击删除）</div>';
+    box.innerHTML = '<div class="admin-manage-t">🗑 管理已有课程（点击删除）</div>';
     try {
       const d = await apiGet('/api/courses');
       const cs = d.courses || [];
       if (!cs.length) { box.innerHTML += '<p style="color:var(--gray);font-size:13px;">暂无课程</p>'; return; }
-      box.innerHTML += cs.map(c => '<div style="display:flex;align-items:center;justify-content:space-between;padding:8px 10px;border:1px solid #eee;border-radius:8px;margin-bottom:6px;"><span>' + (isCoverImg(c.cover) ? '<img src="'+c.cover+'" style="width:22px;height:22px;border-radius:6px;object-fit:cover;vertical-align:middle;margin-right:6px;">' : (c.cover||'📘')+' ') + escHtml(c.title) + '</span>' + delBtn({ kind: 'course', id: c.id }) + '</div>').join('');
+      box.innerHTML += cs.map(c => '<div class="am-item"><span class="am-ic">' + (isCoverImg(c.cover) ? '<img src="'+c.cover+'" style="width:22px;height:22px;border-radius:6px;object-fit:cover;">' : (c.cover||'📘')) + '</span><span class="am-title">' + escHtml(c.title) + '</span>' + delBtn({ kind: 'course', id: c.id }) + '</div>').join('');
     } catch (e) { box.innerHTML += '<p style="color:var(--gray);">加载失败</p>'; }
   } else if (adminTab === 'knowledge') {
-    box.innerHTML = '<div style="font-weight:700;margin-bottom:10px;color:#c0392b;">🗑 管理已有知识库（点击删除）</div>';
+    box.innerHTML = '<div class="admin-manage-t">🗑 管理已有知识库（点击删除）</div>';
     try {
       const d = await apiGet('/api/knowledge');
       const ks = d.articles || [];
       if (!ks.length) { box.innerHTML += '<p style="color:var(--gray);font-size:13px;">暂无文章</p>'; return; }
-      box.innerHTML += ks.map(k => '<div style="display:flex;align-items:center;justify-content:space-between;padding:8px 10px;border:1px solid #eee;border-radius:8px;margin-bottom:6px;"><span>' + escHtml(k.title) + '</span>' + delBtn({ kind: 'knowledge', id: k.id }) + '</div>').join('');
+      box.innerHTML += ks.map(k => '<div class="am-item"><span class="am-ic">💡</span><span class="am-title">' + escHtml(k.title) + '</span>' + delBtn({ kind: 'knowledge', id: k.id }) + '</div>').join('');
     } catch (e) { box.innerHTML += '<p style="color:var(--gray);">加载失败</p>'; }
   } else if (adminTab === 'lesson') {
-    box.innerHTML = '<div style="font-weight:700;margin-bottom:10px;color:#c0392b;">🗑 管理课程章节（点击删除）</div>';
+    box.innerHTML = '<div class="admin-manage-t">🗑 管理课程章节（点击删除）</div>';
     const sel = document.getElementById('alCourse');
     if (!sel || !sel.value) { box.innerHTML += '<p style="color:var(--gray);font-size:13px;">请先在上方选择课程</p>'; return; }
     try {
       const d = await apiGet('/api/courses/' + sel.value);
       const ls = d.lessons || [];
       if (!ls.length) { box.innerHTML += '<p style="color:var(--gray);font-size:13px;">该课程暂无章节</p>'; return; }
-      box.innerHTML += ls.map(l => '<div style="display:flex;align-items:center;justify-content:space-between;padding:8px 10px;border:1px solid #eee;border-radius:8px;margin-bottom:6px;"><span>' + l.seq + '. ' + escHtml(l.title) + '</span>' + delBtn({ kind: 'lesson', id: l.id }) + '</div>').join('');
+      box.innerHTML += ls.map(l => '<div class="am-item"><span class="am-ic">📝</span><span class="am-title">' + l.seq + '. ' + escHtml(l.title) + '</span>' + delBtn({ kind: 'lesson', id: l.id }) + '</div>').join('');
     } catch (e) { box.innerHTML += '<p style="color:var(--gray);">加载失败</p>'; }
   }
 }
