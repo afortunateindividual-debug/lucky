@@ -668,11 +668,16 @@
             <div class="side-logo">学</div>
             <span class="side-title">学语言</span>
         </div>
-            <nav class="side-nav">
+        <nav class="side-nav">
             <div class="nav-group">
                 <div class="navi on" data-page="home" onclick="navigateTo('home')"><span class="navi-ic">🏠</span> 主页</div>
-                <div class="navi" data-page="courses" onclick="navigateTo('courses')"><span class="navi-ic">📚</span> 我的课程</div>
-                <div class="navi" data-page="profile" onclick="navigateTo('profile')"><span class="navi-ic">👤</span> 个人中心</div>
+                <div class="navi nav-parent" data-page="profile" onclick="navigateTo('profile')"><span class="navi-ic">👤</span> 个人中心<span class="navi-caret">▾</span></div>
+                <div class="navi-sub open" id="profileSub">
+                    <div class="navi navi-sub-item" data-page="courses" onclick="navigateTo('courses')"><span class="navi-ic">📚</span> 我的课程</div>
+                    <div class="navi navi-sub-item" data-page="dashboard" onclick="navigateTo('dashboard')"><span class="navi-ic">📊</span> 数据面板</div>
+                    <div class="navi navi-sub-item" data-page="membership" onclick="navigateTo('membership')"><span class="navi-ic">👑</span> 会员权益</div>
+                    <div class="navi navi-sub-item" data-page="settings" onclick="navigateTo('settings')"><span class="navi-ic">⚙️</span> 隐私设置</div>
+                </div>
             </div>
             <div class="nav-group">
                 <div class="nav-group-label">学习工具</div>
@@ -685,9 +690,6 @@
             </div>
             <div class="nav-group">
                 <div class="nav-group-label">账户</div>
-                <div class="navi" data-page="dashboard" onclick="navigateTo('dashboard')"><span class="navi-ic">📊</span> 数据面板</div>
-                <div class="navi" data-page="membership" onclick="navigateTo('membership')"><span class="navi-ic">👑</span> 会员权益</div>
-                <div class="navi" data-page="settings" onclick="navigateTo('settings')"><span class="navi-ic">⚙️</span> 隐私设置</div>
                 <div class="navi" data-page="partner" onclick="navigateTo('partner')"><span class="navi-ic">🤝</span> 合伙人招募</div>
             </div>
         </nav>
@@ -1516,6 +1518,12 @@ function navigateTo(page) {
     if (page === 'course-detail') renderCourseDetail();
     if (page === 'lesson') renderLesson();
     if (page === 'practice') renderPractice();
+    if (['courses','dashboard','membership','settings'].includes(page)) {
+        const par = document.querySelector('[data-page="profile"]');
+        if (par) par.classList.add('on');
+        const sub = document.getElementById('profileSub');
+        if (sub) sub.classList.add('open');
+    }
 }
 
 // ============================================================
