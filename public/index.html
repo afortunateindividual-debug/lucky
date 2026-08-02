@@ -98,7 +98,7 @@
         .navi-badge { margin-left:auto;background:var(--err);color:#fff;font-size:10px;padding:1px 6px;border-radius:10px;font-weight:600; }
         .navi-caret { margin-left:auto;font-size:10px;opacity:.55;transition:transform .2s; }
         .nav-parent { font-weight:600; }
-        .navi-sub { margin:1px 6px 2px 24px;padding-left:10px;border-left:2px solid var(--border); }
+        .navi-sub { display:none; margin:1px 6px 2px 24px;padding-left:10px;border-left:2px solid var(--border); }
         .navi-sub-item { padding:7px 12px;margin:1px 0;font-size:12.5px;border-radius:7px; }
         .navi-sub-item .navi-ic { font-size:14px;width:18px; }
         .navi-sub.open { display:block; }
@@ -664,9 +664,17 @@
 
     <!-- Sidebar -->
     <aside class="side">
-        <div class="side-hd" onclick="navigateTo('home')">
+        <div class="side-hd nav-parent" id="brandHd" onclick="toggleBrandSub()">
             <div class="side-logo">学</div>
             <span class="side-title">学语言</span>
+            <span class="navi-caret" id="brandCaret" style="margin-left:auto;">▾</span>
+        </div>
+        <div class="navi-sub open" id="brandSub" style="margin-top:2px;">
+            <div class="navi navi-sub-item" data-page="profile" onclick="navigateTo('profile')"><span class="navi-ic">👤</span> 个人中心</div>
+            <div class="navi navi-sub-item" data-page="dashboard" onclick="navigateTo('dashboard')"><span class="navi-ic">📊</span> 数据面板</div>
+            <div class="navi navi-sub-item" data-page="membership" onclick="navigateTo('membership')"><span class="navi-ic">👑</span> 会员权益</div>
+            <div class="navi navi-sub-item" data-page="settings" onclick="navigateTo('settings')"><span class="navi-ic">⚙️</span> 隐私设置</div>
+            <div class="navi navi-sub-item" data-page="partner" onclick="navigateTo('partner')"><span class="navi-ic">🤝</span> 合伙人招募</div>
         </div>
             <nav class="side-nav">
             <div class="nav-group">
@@ -681,14 +689,6 @@
                 <div class="navi" data-page="lookup" onclick="navigateTo('lookup')"><span class="navi-ic">🔍</span> 查单词</div>
                 <div class="navi" data-page="knowledge" onclick="navigateTo('knowledge')"><span class="navi-ic">💡</span> 知识库</div>
                 <div class="navi" data-page="admin" onclick="navigateTo('admin')"><span class="navi-ic">🛠</span> 内容管理</div>
-            </div>
-            <div class="nav-group">
-                <div class="nav-group-label">账户</div>
-                <div class="navi" data-page="profile" onclick="navigateTo('profile')"><span class="navi-ic">👤</span> 个人中心</div>
-                <div class="navi" data-page="dashboard" onclick="navigateTo('dashboard')"><span class="navi-ic">📊</span> 数据面板</div>
-                <div class="navi" data-page="membership" onclick="navigateTo('membership')"><span class="navi-ic">👑</span> 会员权益</div>
-                <div class="navi" data-page="settings" onclick="navigateTo('settings')"><span class="navi-ic">⚙️</span> 隐私设置</div>
-                <div class="navi" data-page="partner" onclick="navigateTo('partner')"><span class="navi-ic">🤝</span> 合伙人招募</div>
             </div>
         </nav>
         <div class="side-ft">
@@ -1496,6 +1496,13 @@ function updateUIForUser() {
 // ============================================================
 //  NAVIGATION
 // ============================================================
+function toggleBrandSub() {
+    const sub = document.getElementById('brandSub');
+    const caret = document.getElementById('brandCaret');
+    if (!sub) return;
+    const open = sub.classList.toggle('open');
+    if (caret) caret.style.transform = open ? 'rotate(0deg)' : 'rotate(-90deg)';
+}
 function navigateTo(page) {
     clearPracticeKey();
     if (!AppState.isLoggedIn && page !== 'home') { showToast('请先登录','err'); return; }
