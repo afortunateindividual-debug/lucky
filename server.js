@@ -49,7 +49,6 @@ try { db.exec(`ALTER TABLE courses ADD COLUMN lang TEXT DEFAULT 'en'`); } catch 
 try { db.exec(`ALTER TABLE course_lessons ADD COLUMN content TEXT DEFAULT '[]'`); } catch (e) {}
 try { db.exec(`ALTER TABLE practice_quizzes ADD COLUMN lang TEXT DEFAULT 'en'`); } catch (e) {}
 try { db.exec(`ALTER TABLE words ADD COLUMN lang TEXT DEFAULT 'en'`); } catch (e) {}
-try { db.exec(`ALTER TABLE words ADD COLUMN category TEXT DEFAULT ''`); } catch (e) {}
 try { db.exec(`ALTER TABLE practice_sentences ADD COLUMN lang TEXT DEFAULT 'en'`); } catch (e) {}
 
 db.exec(`CREATE TABLE IF NOT EXISTS sessions (
@@ -116,6 +115,7 @@ db.exec(`CREATE TABLE IF NOT EXISTS words (
   image TEXT,
   level TEXT,
   lang TEXT DEFAULT 'en',
+  category TEXT DEFAULT '',
   created_at TEXT DEFAULT (datetime('now','localtime'))
 )`);
 
