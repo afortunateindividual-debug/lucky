@@ -1919,17 +1919,29 @@ async function renderLookup() {
         if (!words.length) { list.innerHTML = '<p style="color:var(--gray);padding:20px;">未找到单词</p>'; return; }
         list.innerHTML = words.map(w => {
             const safe = (w.word || '').replace(/'/g, "\\'");
+            const safeEx1 = (w.example || '').replace(/'/g, "\\'");
+            const safeEx2 = (w.example2 || '').replace(/'/g, "\\'");
+            const imgHtml = (w.image && !w.image.startsWith('📝') && w.image.startsWith('http'))
+                ? `<img src="${w.image}" style="width:72px;height:72px;object-fit:cover;border-radius:12px;flex-shrink:0;" alt="${w.word}" onerror="this.style.display='none';this.nextSibling.style.display='flex';"><div style="width:72px;height:72px;border-radius:12px;background:linear-gradient(135deg,#f093fb,#f5576c);display:none;align-items:center;justify-content:center;font-size:32px;flex-shrink:0;">📝</div>`
+                : `<div style="width:72px;height:72px;border-radius:12px;background:linear-gradient(135deg,#f093fb,#f5576c);display:flex;align-items:center;justify-content:center;font-size:32px;flex-shrink:0;">${w.image || '📝'}</div>`;
             return `<div class="card" style="padding:16px;">
-                <div style="display:flex;align-items:center;gap:12px;">
-                    <div style="font-size:40px;flex-shrink:0;">${w.image || '📝'}</div>
+                <div style="display:flex;align-items:center;gap:14px;">
+                    ${imgHtml}
                     <div style="flex:1;min-width:0;">
-                        <div style="font-size:20px;font-weight:700;">${w.word} <span style="font-size:11px;background:#eef;color:#667eea;padding:2px 8px;border-radius:10px;vertical-align:middle;">${w.category || '其他'}</span></div>
-                        <div style="color:var(--gray);font-size:14px;">${w.phonetic || ''}</div>
+                        <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+                            <span style="font-size:22px;font-weight:700;cursor:pointer;color:var(--dark);" onclick="speakText('${safe}')">${w.word}</span>
+                            <span style="font-size:11px;background:#eef;color:#667eea;padding:2px 8px;border-radius:10px;">${w.category || '其他'}</span>
+                        </div>
+                        <div style="color:var(--gray);font-size:14px;margin-top:2px;">${w.phonetic || ''}</div>
                     </div>
-                    <button class="btn-audio" style="margin-left:auto;padding:6px 12px;flex-shrink:0;" onclick="speakText('${safe}')">🔊</button>
+                    <button class="btn-audio" style="margin-left:auto;padding:8px 14px;flex-shrink:0;border-radius:50%;background:#f0f4ff;border:none;cursor:pointer;font-size:18px;" onclick="event.stopPropagation();speakText('${safe}')">🔊</button>
                 </div>
-                <div style="margin-top:10px;color:#e67e22;font-weight:600;">${w.meaning || ''}</div>
-                <div style="font-size:13px;color:var(--gray);margin-top:4px;">${w.example || ''}</div>
+                <div style="margin-top:10px;display:flex;gap:10px;align-items:baseline;flex-wrap:wrap;">
+                    <span style="color:#e67e22;font-weight:600;font-size:15px;">${w.meaning || ''}</span>
+                    ${w.ru_meaning ? `<span style="color:#8e44ad;font-weight:500;font-size:13px;padding:2px 8px;background:#faf0ff;border-radius:6px;">🇷🇺 ${w.ru_meaning}</span>` : ''}
+                </div>
+                ${w.example ? `<div style="font-size:13px;color:var(--dark);margin-top:8px;padding:8px 10px;background:#fffbf0;border-radius:8px;cursor:pointer;line-height:1.6;" onclick="speakText('${safeEx1}')">💬 ${w.example}</div>` : ''}
+                ${w.example2 ? `<div style="font-size:13px;color:var(--dark);margin-top:6px;padding:8px 10px;background:#f0f9ff;border-radius:8px;cursor:pointer;line-height:1.6;" onclick="speakText('${safeEx2}')">💬 ${w.example2}</div>` : ''}
             </div>`;
         }).join('');
     } catch (e) { list.innerHTML = '<p style="color:var(--err);padding:20px;">加载失败</p>'; }

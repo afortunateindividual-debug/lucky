@@ -111,7 +111,9 @@ db.exec(`CREATE TABLE IF NOT EXISTS words (
   word TEXT,
   phonetic TEXT,
   meaning TEXT,
+  ru_meaning TEXT,
   example TEXT,
+  example2 TEXT,
   image TEXT,
   level TEXT,
   lang TEXT DEFAULT 'en',
@@ -1812,7 +1814,7 @@ app.post('/api/admin/words', (req, res) => {
   const arr = Array.isArray(req.body && req.body.words) ? req.body.words : [];
   if (!arr.length) return res.status(400).json({ error: '缺少单词数据' });
   const existing = new Set(db.prepare('SELECT LOWER(word) AS w FROM words').all().map(r => r.w));
-  const ins = db.prepare('INSERT INTO words (word, phonetic, meaning, example, image, level, lang, category) VALUES (?,?,?,?,?,?,?,?)');
+  const ins = db.prepare('INSERT INTO words (word, phonetic, meaning, ru_meaning, example, example2, image, level, lang, category) VALUES (?,?,?,?,?,?,?,?,?,?)');
   let added = 0, skipped = 0;
   const tx = db.transaction(() => {
     for (const it of arr) {
@@ -1822,7 +1824,7 @@ app.post('/api/admin/words', (req, res) => {
       const key = w.toLowerCase();
       if (existing.has(key)) { skipped++; continue; }
       existing.add(key);
-      ins.run(w, it.phonetic || '', it.meaning || '', it.example || '', it.image || '📝', it.level || '', it.lang || 'en', it.category || '');
+      ins.run(w, it.phonetic || '', it.meaning || '', it.ru_meaning || '', it.example || '', it.example2 || '', it.image || '📝', it.level || '', it.lang || 'en', it.category || '');
       added++;
     }
   });
