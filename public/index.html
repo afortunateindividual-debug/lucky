@@ -1140,14 +1140,52 @@
                 <div class="card"><div style="font-size:34px;margin-bottom:8px;">🎯</div><div style="font-weight:600;margin-bottom:6px;">精准人群</div><div style="font-size:13px;color:var(--gray);">语言学习需求明确，转化路径短，成交率高。</div></div>
                 <div class="card"><div style="font-size:34px;margin-bottom:8px;">🤝</div><div style="font-weight:600;margin-bottom:6px;">专属对接</div><div style="font-size:13px;color:var(--gray);">1 对 1 运营陪跑，活动与培训持续赋能。</div></div>
             </div>
-            <h3 style="font-size:16px;font-weight:700;margin:20px 0 12px;">适合谁</h3>
-            <div style="display:flex;flex-wrap:wrap;gap:10px;margin-bottom:8px;">
-                <span class="tag tag-g">英语老师 / 培训机构</span><span class="tag tag-b">母婴 / 教育博主</span><span class="tag tag-y">留学 / 移民顾问</span><span class="tag tag-p">校园团长</span><span class="tag tag-g">育儿社群主理人</span>
+            <!-- 邀请明细 -->
+            <h3 style="font-size:16px;font-weight:700;margin:20px 0 12px;">邀请明细</h3>
+            <div class="biz-grid" style="margin-bottom:16px;">
+                <div class="card"><div style="font-size:24px;font-weight:700;color:var(--pri);">12</div><div style="font-size:13px;color:var(--gray);margin-top:4px;">累计邀请（人）</div></div>
+                <div class="card"><div style="font-size:24px;font-weight:700;color:var(--ok);">9</div><div style="font-size:13px;color:var(--gray);margin-top:4px;">已注册（人）</div></div>
+                <div class="card"><div style="font-size:24px;font-weight:700;color:var(--warn);">¥360</div><div style="font-size:13px;color:var(--gray);margin-top:4px;">待结算佣金</div></div>
             </div>
-            <h3 style="font-size:16px;font-weight:700;margin:20px 0 12px;">常见问题</h3>
-            <div class="card" style="margin-bottom:10px;"><div style="font-weight:600;">Q：成为合伙人收费吗？</div><div style="font-size:13px;color:var(--gray);margin-top:4px;">A：完全免费，0 门槛加入。</div></div>
-            <div class="card" style="margin-bottom:10px;"><div style="font-weight:600;">Q：收益怎么结算？</div><div style="font-size:13px;color:var(--gray);margin-top:4px;">A：按月结算，后台实时查看推广数据与佣金。</div></div>
-            <div class="card" style="margin-bottom:10px;"><div style="font-weight:600;">Q：需要自己录课吗？</div><div style="font-size:13px;color:var(--gray);margin-top:4px;">A：不需要，使用平台现有课程与素材即可。</div></div>
+            <div class="card" style="margin-bottom:20px;">
+                <div style="font-weight:600;margin-bottom:10px;">最近邀请记录</div>
+                <div style="overflow-x:auto;">
+                    <table style="width:100%;border-collapse:collapse;font-size:13px;">
+                        <thead><tr style="background:var(--bg);"><th style="padding:9px;text-align:left;">昵称</th><th style="padding:9px;">手机号</th><th style="padding:9px;">注册时间</th><th style="padding:9px;">状态</th><th style="padding:9px;">奖励</th></tr></thead>
+                        <tbody>
+                            <tr><td style="padding:9px;border-bottom:1px solid var(--border);">小语</td><td style="padding:9px;border-bottom:1px solid var(--border);">138****8821</td><td style="padding:9px;border-bottom:1px solid var(--border);">2026-07-28</td><td style="padding:9px;border-bottom:1px solid var(--border);color:var(--ok);">已注册</td><td style="padding:9px;border-bottom:1px solid var(--border);">+30 积分</td></tr>
+                            <tr><td style="padding:9px;border-bottom:1px solid var(--border);">Anna</td><td style="padding:9px;border-bottom:1px solid var(--border);">139****2207</td><td style="padding:9px;border-bottom:1px solid var(--border);">2026-07-25</td><td style="padding:9px;border-bottom:1px solid var(--border);color:var(--ok);">已注册</td><td style="padding:9px;border-bottom:1px solid var(--border);">+30 积分</td></tr>
+                            <tr><td style="padding:9px;border-bottom:1px solid var(--border);">老王</td><td style="padding:9px;border-bottom:1px solid var(--border);">137****6610</td><td style="padding:9px;border-bottom:1px solid var(--border);">2026-07-20</td><td style="padding:9px;border-bottom:1px solid var(--border);color:var(--gray);">待激活</td><td style="padding:9px;border-bottom:1px solid var(--border);">—</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- 提现 -->
+            <h3 style="font-size:16px;font-weight:700;margin:20px 0 12px;">提现</h3>
+            <div class="card" style="margin-bottom:16px;">
+                <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;">
+                    <div><div style="font-size:13px;color:var(--gray);">可提现余额</div><div style="font-size:26px;font-weight:700;color:var(--pri);margin-top:4px;">¥ 360.00</div></div>
+                    <div style="text-align:right;"><div style="font-size:13px;color:var(--gray);">累计已提现</div><div style="font-size:18px;font-weight:600;margin-top:4px;">¥ 1,240.00</div></div>
+                </div>
+                <div style="display:flex;gap:8px;margin-top:14px;flex-wrap:wrap;">
+                    <input id="wdAmount" class="form-input" placeholder="提现金额（元）" style="max-width:180px;" type="number">
+                    <button class="btn btn-pri" onclick="simulateWithdraw()">申请提现</button>
+                </div>
+                <div style="font-size:12px;color:var(--gray);margin-top:8px;">* 每月 1-5 日开放提现，到账周期 T+3，单笔最低 ¥100。</div>
+            </div>
+            <div class="card" style="margin-bottom:8px;">
+                <div style="font-weight:600;margin-bottom:10px;">提现记录</div>
+                <div style="overflow-x:auto;">
+                    <table style="width:100%;border-collapse:collapse;font-size:13px;">
+                        <thead><tr style="background:var(--bg);"><th style="padding:9px;text-align:left;">申请时间</th><th style="padding:9px;">金额</th><th style="padding:9px;">到账方式</th><th style="padding:9px;">状态</th></tr></thead>
+                        <tbody>
+                            <tr><td style="padding:9px;border-bottom:1px solid var(--border);">2026-07-03</td><td style="padding:9px;border-bottom:1px solid var(--border);">¥ 500.00</td><td style="padding:9px;border-bottom:1px solid var(--border);">微信</td><td style="padding:9px;border-bottom:1px solid var(--border);color:var(--ok);">已到账</td></tr>
+                            <tr><td style="padding:9px;border-bottom:1px solid var(--border);">2026-06-04</td><td style="padding:9px;border-bottom:1px solid var(--border);">¥ 740.00</td><td style="padding:9px;border-bottom:1px solid var(--border);">微信</td><td style="padding:9px;border-bottom:1px solid var(--border);color:var(--ok);">已到账</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
             <div style="text-align:center;margin:24px 0 8px;"><button class="btn btn-pri" onclick='navigateTo("membership")'>立即申请成为合伙人 →</button></div>
         </div></div>
 
@@ -1492,6 +1530,14 @@ function navigateTo(page) {
 // ============================================================
 //  MEMBERSHIP UPGRADE
 // ============================================================
+function simulateWithdraw() {
+    const amt = document.getElementById('wdAmount');
+    const v = amt && parseFloat(amt.value);
+    if (!v || v < 100) { showToast('提现金额需不低于 ¥100', 'warn'); return; }
+    showToast('✅ 提现申请已提交，预计 T+3 到账', 'ok');
+    amt.value = '';
+}
+
 async function simulateUpgrade(tier) {
     const token = localStorage.getItem('juyou_token');
     if (!token) { showToast('请先登录','err'); return; }
