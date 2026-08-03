@@ -551,6 +551,12 @@
     .admin-stat{background:#fff;border:1px solid #e3e9ff;border-radius:12px;padding:10px 16px;text-align:center;min-width:64px;}
     .admin-stat b{display:block;font-size:20px;font-weight:800;color:var(--pri);line-height:1.1;}
     .admin-stat span{font-size:12px;color:var(--gray);}
+    .up-modes{display:flex;gap:12px;margin-bottom:16px;}
+    .up-mode-card{flex:1;background:#fff;border:2px solid #e3e9ff;border-radius:12px;padding:14px;text-align:center;cursor:pointer;transition:.2s;}
+    .up-mode-card:hover,.up-mode-card.on{border-color:var(--pri);background:#f0f4ff;}
+    .up-mode-icon{font-size:28px;margin-bottom:4px;}
+    .up-mode-label{font-size:14px;font-weight:700;color:var(--dk);}
+    .up-mode-hint{font-size:11px;color:var(--gray);margin-top:4px;line-height:1.5;}
     .admin-tabs{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px;}
     .admin-card{padding:20px;}
     .af{margin-bottom:14px;}
@@ -2095,10 +2101,28 @@ async function renderAdmin() {
       ` : ''}
       ${adminTab==='upload' ? `
         <div class="admin-sec-t">📄 上传资料 · AI 自动拆解成课程</div>
-        <div id="upDrop" onclick="document.getElementById('upFile').click()" ondragover="event.preventDefault();this.style.borderColor='var(--pri)';" ondragleave="this.style.borderColor='#c7d2fe';" ondrop="event.preventDefault();this.style.borderColor='#c7d2fe';onUpDrop(event);" style="border:2px dashed #c7d2fe;background:#f8faff;border-radius:12px;padding:26px;text-align:center;cursor:pointer;color:#6b7280;transition:.2s;">
-          拖拽文件到此处，或 <span style="color:var(--pri);font-weight:600;">点击选择</span><br>
-          <span style="font-size:12px;">支持 PDF / Word(.docx) / TXT / MD / 图片(PNG·JPG，自动OCR)</span>
-          <input id="upFile" type="file" accept=".pdf,.docx,.txt,.md,image/*" style="display:none;" onchange="onUpFile(event)">
+        <div class="up-modes">
+          <div class="up-mode-card" id="upModeFile">
+            <div class="up-mode-icon">📁</div>
+            <div class="up-mode-label">上传文件</div>
+            <div class="up-mode-hint">TXT / MD 即时可用<br>PDF / DOCX 需等待解析</div>
+          </div>
+          <div class="up-mode-card" id="upModeText">
+            <div class="up-mode-icon">📝</div>
+            <div class="up-mode-label">粘贴文本</div>
+            <div class="up-mode-hint">直接粘贴课程资料<br>无需任何解析库</div>
+          </div>
+        </div>
+        <div id="upFileArea">
+          <div id="upDrop" onclick="document.getElementById('upFile').click()" ondragover="event.preventDefault();this.style.borderColor='var(--pri)';" ondragleave="this.style.borderColor='#c7d2fe';" ondrop="event.preventDefault();this.style.borderColor='#c7d2fe';onUpDrop(event);" style="border:2px dashed #c7d2fe;background:#f8faff;border-radius:12px;padding:26px;text-align:center;cursor:pointer;color:#6b7280;transition:.2s;">
+            拖拽文件到此处，或 <span style="color:var(--pri);font-weight:600;">点击选择</span><br>
+            <span style="font-size:12px;">推荐用 TXT / MD 文件，即时可上传</span>
+            <input id="upFile" type="file" accept=".pdf,.docx,.txt,.md,image/*" style="display:none;" onchange="onUpFile(event)">
+          </div>
+        </div>
+        <div id="upTextArea" style="display:none;">
+          <textarea id="upTextInput" class="form-input" rows="12" placeholder="在此粘贴课程大纲、教材内容、对话文本等资料…&#10;&#10;提示：用标题（如 # 第一章 或 第1课）分隔章节，AI 会自动拆解为课程。" style="width:100%;font-size:14px;line-height:1.7;"></textarea>
+          <button class="btn-primary" onclick="analyzeTextInput()" style="margin-top:10px;">🤖 AI 拆解</button>
         </div>
         <div id="upStatus" style="font-size:13px;color:var(--gray);margin:10px 0;"></div>
         <div id="upPreview"></div>
@@ -2150,7 +2174,27 @@ async function delAdmin(kind, id) {
     renderAdminManage();
   } catch (e) { showToast('删除失败：' + (e.message || ''), 'err'); }
 }
-function setAdminTab(t) { adminTab = t; renderAdmin(); }
+function setAdminTab(t) { adminTab = t; renderAdmin(); if (t === 'upload') { initUpModes(); } }
+let upMode = 'file';
+function initUpModes() {
+  const fc = document.getElementById('upModeFile'), tc = document.getElementById('upModeText');
+  if (fc) fc.onclick = function () { upMode = 'file'; document.getElementById('upFileArea').style.display = ''; document.getElementById('upTextArea').style.display = 'none'; fc.classList.add('on'); tc.classList.remove('on'); };
+  if (tc) tc.onclick = function () { upMode = 'text'; document.getElementById('upFileArea').style.display = 'none'; document.getElementById('upTextArea').style.display = ''; tc.classList.add('on'); fc.classList.remove('on'); };
+  document.getElementById('upModeFile').classList.add('on');
+  document.getElementById('upFileArea').style.display = '';
+  document.getElementById('upTextArea').style.display = 'none';
+}
+async function analyzeTextInput() {
+  const ta = document.getElementById('upTextInput'); if (!ta) return;
+  const text = ta.value.trim(); if (!text) { showToast('请先粘贴文本内容', 'warn'); return; }
+  const status = document.getElementById('upStatus'); if (status) status.textContent = '已粘贴约 ' + text.length + ' 字，正在 AI 拆解…';
+  smartSourceText = text;
+  try {
+    const r = await apiPost('/api/admin/analyze', { title: '', text: text });
+    if (status) status.textContent = '拆解完成 ✅';
+    renderUploadResult(r);
+  } catch (e) { if (status) status.textContent = '拆解失败：' + (e.message || ''); }
+}
 function elVal(id) { const el = document.getElementById(id); return el ? el.value : ''; }
 function parseAdminVocab(text) {
   const out = [];
@@ -2231,10 +2275,11 @@ function ensureLib(name) {
   if (_libCache[name]) return _libCache[name];
   const cfg = _LIBS[name];
   const p = new Promise(function (res, rej) {
+    const timer = setTimeout(function () { rej(new Error('加载' + name + '超时（网络不通），建议用TXT文件或粘贴文本')); }, 10000);
     const s = document.createElement('script');
     s.src = cfg.url; s.crossOrigin = 'anonymous';
-    s.onload = function () { try { cfg.onload && cfg.onload(); } catch (e) {} res(); };
-    s.onerror = function () { rej(new Error('加载解析库失败：' + name)); };
+    s.onload = function () { clearTimeout(timer); try { cfg.onload && cfg.onload(); } catch (e) {} res(); };
+    s.onerror = function () { clearTimeout(timer); rej(new Error('加载' + name + '解析库失败（网络不通），建议用 TXT 文件或粘贴文本上传')); };
     document.head.appendChild(s);
   });
   _libCache[name] = p;
@@ -2265,9 +2310,18 @@ async function ocrImage(file) {
 async function extractText(file) {
   const name = (file.name || '').toLowerCase();
   if (name.endsWith('.txt') || name.endsWith('.md') || name.endsWith('.text')) return await file.text();
-  if (name.endsWith('.pdf')) { await ensureLib('pdfjs'); return await extractPdfText(file); }
-  if (name.endsWith('.docx')) { await ensureLib('mammoth'); return await extractDocxText(file); }
-  if (file.type && file.type.indexOf('image/') === 0) { await ensureLib('tesseract'); return await ocrImage(file); }
+  if (name.endsWith('.pdf')) {
+    try { await ensureLib('pdfjs'); return await extractPdfText(file); }
+    catch (e) { throw new Error('PDF解析库加载失败（网络不通），建议：将PDF内容复制粘贴为TXT文件后再上传，或切换到"粘贴文本"模式直接粘贴内容。'); }
+  }
+  if (name.endsWith('.docx')) {
+    try { await ensureLib('mammoth'); return await extractDocxText(file); }
+    catch (e) { throw new Error('Word解析库加载失败（网络不通），建议：将内容另存为TXT文件后再上传，或切换到"粘贴文本"模式直接粘贴内容。'); }
+  }
+  if (file.type && file.type.indexOf('image/') === 0) {
+    try { await ensureLib('tesseract'); return await ocrImage(file); }
+    catch (e) { throw new Error('OCR识别库加载失败（网络不通），建议：手动将图片文字录入为TXT文件后再上传，或切换到"粘贴文本"模式直接粘贴内容。'); }
+  }
   return await file.text();
 }
 let smartResult = null, smartSourceText = '', smartCover = '';
