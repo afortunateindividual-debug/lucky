@@ -401,10 +401,10 @@
     .cat-card:hover{transform:translateY(-4px);box-shadow:0 12px 32px rgba(0,0,0,.1);border-color:#c7d2fe;}
     .cat-cover{height:130px;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden;}
     .cat-cover span{font-size:52px;z-index:1;text-shadow:0 2px 8px rgba(0,0,0,.15);}
-    .cat-tag{position:absolute;top:10px;left:10px;padding:3px 10px;border-radius:6px;font-size:11px;font-weight:700;color:#fff;z-index:2;}
+    .cat-tag{position:absolute;top:10px;left:10px;padding:4px 12px;border-radius:20px;font-size:11px;font-weight:700;color:#fff;z-index:2;box-shadow:0 2px 6px rgba(0,0,0,.18);letter-spacing:.3px;}
     .cat-tag.free{background:linear-gradient(135deg,#22c55e,#16a34a);}
     .cat-tag.paid{background:linear-gradient(135deg,#f59e0b,#d97706);}
-    .cat-tag.hot{background:linear-gradient(135deg,#ef4444,#dc2626);}
+    .cat-tag.hot{left:auto;right:10px;background:linear-gradient(135deg,#ef4444,#dc2626);}
     .cat-body{padding:14px 16px 16px;}
     .cat-title{font-size:15px;font-weight:700;color:#111827;margin-bottom:6px;line-height:1.4;}
     .cat-meta{display:flex;align-items:center;gap:8px;font-size:12px;color:#9ca3af;}
@@ -1921,27 +1921,33 @@ async function renderLookup() {
             const safe = (w.word || '').replace(/'/g, "\\'");
             const safeEx1 = (w.example || '').replace(/'/g, "\\'");
             const safeEx2 = (w.example2 || '').replace(/'/g, "\\'");
-            const imgHtml = (w.image && !w.image.startsWith('📝') && w.image.startsWith('http'))
-                ? `<img src="${w.image}" style="width:72px;height:72px;object-fit:cover;border-radius:12px;flex-shrink:0;" alt="${w.word}" onerror="this.style.display='none';this.nextSibling.style.display='flex';"><div style="width:72px;height:72px;border-radius:12px;background:linear-gradient(135deg,#f093fb,#f5576c);display:none;align-items:center;justify-content:center;font-size:32px;flex-shrink:0;">📝</div>`
-                : `<div style="width:72px;height:72px;border-radius:12px;background:linear-gradient(135deg,#f093fb,#f5576c);display:flex;align-items:center;justify-content:center;font-size:32px;flex-shrink:0;">${w.image || '📝'}</div>`;
-            return `<div class="card" style="padding:16px;">
-                <div style="display:flex;align-items:center;gap:14px;">
-                    ${imgHtml}
-                    <div style="flex:1;min-width:0;">
-                        <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
-                            <span style="font-size:22px;font-weight:700;cursor:pointer;color:var(--dark);" onclick="speakText('${safe}')">${w.word}</span>
-                            <span style="font-size:11px;background:#eef;color:#667eea;padding:2px 8px;border-radius:10px;">${w.category || '其他'}</span>
+            const hasImg = w.image && !w.image.startsWith('📝') && (w.image.startsWith('http') || w.image.startsWith('/'));
+            const imgHtml = hasImg
+                ? `<div style="width:72px;height:72px;border-radius:14px;overflow:hidden;flex-shrink:0;position:relative;box-shadow:0 2px 8px rgba(0,0,0,.1);">
+                     <img src="${w.image}" style="width:100%;height:100%;object-fit:cover;display:block;" alt="" onerror="this.style.display='none';this.parentNode.querySelector('.w-fb').style.display='flex';">
+                     <div class="w-fb" style="position:absolute;inset:0;background:linear-gradient(135deg,#f093fb,#f5576c);display:none;align-items:center;justify-content:center;font-size:28px;">📝</div>
+                   </div>`
+                : `<div style="width:72px;height:72px;border-radius:14px;background:linear-gradient(135deg,#f093fb,#f5576c);display:flex;align-items:center;justify-content:center;font-size:28px;flex-shrink:0;box-shadow:0 2px 8px rgba(0,0,0,.1);">${w.image && !w.image.includes('/') ? w.image : '📝'}</div>`;
+            return `<div class="card" style="padding:0;overflow:hidden;border:1px solid #e5e7eb;">
+                <div style="padding:16px;">
+                    <div style="display:flex;align-items:center;gap:14px;">
+                        ${imgHtml}
+                        <div style="flex:1;min-width:0;">
+                            <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+                                <span style="font-size:22px;font-weight:700;cursor:pointer;color:var(--dark);transition:color .2s;" onmouseenter="this.style.color='#4a7dff'" onmouseleave="this.style.color='var(--dark)'" onclick="speakText('${safe}')">${w.word}</span>
+                                <span style="font-size:11px;background:#eef;color:#667eea;padding:2px 10px;border-radius:10px;font-weight:600;">${w.category || '其他'}</span>
+                            </div>
+                            <div style="color:var(--gray);font-size:14px;margin-top:2px;font-family:'Segoe UI',system-ui,sans-serif;">${w.phonetic || ''}</div>
                         </div>
-                        <div style="color:var(--gray);font-size:14px;margin-top:2px;">${w.phonetic || ''}</div>
+                        <button class="btn-audio" style="padding:8px 14px;flex-shrink:0;border-radius:50%;background:#f0f4ff;border:none;cursor:pointer;font-size:18px;transition:background .2s,transform .15s;" onmouseenter="this.style.background='#e0e7ff'" onmouseleave="this.style.background='#f0f4ff'" onmousedown="this.style.transform='scale(.92)'" onmouseup="this.style.transform='scale(1)'" onclick="event.stopPropagation();speakText('${safe}')">🔊</button>
                     </div>
-                    <button class="btn-audio" style="margin-left:auto;padding:8px 14px;flex-shrink:0;border-radius:50%;background:#f0f4ff;border:none;cursor:pointer;font-size:18px;" onclick="event.stopPropagation();speakText('${safe}')">🔊</button>
+                    <div style="margin-top:10px;display:flex;gap:10px;align-items:baseline;flex-wrap:wrap;">
+                        <span style="color:#e67e22;font-weight:600;font-size:15px;">${w.meaning || ''}</span>
+                        ${w.ru_meaning ? `<span style="color:#8e44ad;font-weight:500;font-size:13px;padding:2px 10px;background:#faf0ff;border-radius:6px;">🇷🇺 ${w.ru_meaning}</span>` : ''}
+                    </div>
                 </div>
-                <div style="margin-top:10px;display:flex;gap:10px;align-items:baseline;flex-wrap:wrap;">
-                    <span style="color:#e67e22;font-weight:600;font-size:15px;">${w.meaning || ''}</span>
-                    ${w.ru_meaning ? `<span style="color:#8e44ad;font-weight:500;font-size:13px;padding:2px 8px;background:#faf0ff;border-radius:6px;">🇷🇺 ${w.ru_meaning}</span>` : ''}
-                </div>
-                ${w.example ? `<div style="font-size:13px;color:var(--dark);margin-top:8px;padding:8px 10px;background:#fffbf0;border-radius:8px;cursor:pointer;line-height:1.6;" onclick="speakText('${safeEx1}')">💬 ${w.example}</div>` : ''}
-                ${w.example2 ? `<div style="font-size:13px;color:var(--dark);margin-top:6px;padding:8px 10px;background:#f0f9ff;border-radius:8px;cursor:pointer;line-height:1.6;" onclick="speakText('${safeEx2}')">💬 ${w.example2}</div>` : ''}
+                ${w.example ? `<div style="font-size:13px;color:var(--dark);padding:10px 16px;background:#fffbf0;border-top:1px solid #f3e8c8;cursor:pointer;line-height:1.6;transition:background .2s;" onmouseenter="this.style.background='#fff5e0'" onmouseleave="this.style.background='#fffbf0'" onclick="speakText('${safeEx1}')">💬 ${w.example}</div>` : ''}
+                ${w.example2 ? `<div style="font-size:13px;color:var(--dark);padding:10px 16px;background:#f0f9ff;border-top:1px solid #d0e8ff;cursor:pointer;line-height:1.6;transition:background .2s;" onmouseenter="this.style.background='#e6f3ff'" onmouseleave="this.style.background='#f0f9ff'" onclick="speakText('${safeEx2}')">💬 ${w.example2}</div>` : ''}
             </div>`;
         }).join('');
     } catch (e) { list.innerHTML = '<p style="color:var(--err);padding:20px;">加载失败</p>'; }
