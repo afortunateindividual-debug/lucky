@@ -6,4 +6,6 @@ node_modules/
 tts_cache/
 tts_cache_bak/
 _seedtest/
+_v6.html
+.env
 .DS_Store

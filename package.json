@@ -1,8 +1,8 @@
 {
-  "name": "xueyuyan-server",
+  "name": "polylingua-ai",
   "version": "1.0.0",
   "private": true,
-  "description": "学语言 - 用户系统后端（Express + SQLite）",
+  "description": "PolyLingua AI — AI Multilingual Learning & Global Community Platform (AI 多语言学习与全球交流平台)",
   "type": "commonjs",
   "main": "server.js",
   "scripts": {
@@ -11,6 +11,22 @@
   "engines": {
     "node": ">=18"
   },
+  "keywords": [
+    "language-learning",
+    "multilingual",
+    "ai",
+    "education",
+    "community",
+    "express",
+    "sqlite"
+  ],
+  "author": "PolyLingua AI Team",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/afortunateindividual-debug/lucky.git"
+  },
+  "homepage": "https://lucky-production-e5cc.up.railway.app",
   "dependencies": {
     "express": "^4.19.2",
     "better-sqlite3": "^11.3.0"

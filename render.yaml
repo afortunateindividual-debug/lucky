@@ -3,7 +3,7 @@
 # 在 Render 后台 New -> Web Service 关联 GitHub 仓库后会自动读取本文件
 services:
   - type: web
-    name: xueyuyan
+    name: polylingua-ai
     runtime: node
     plan: free
     branch: main

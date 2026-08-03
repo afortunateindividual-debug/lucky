@@ -1,5 +1,5 @@
 /**
- * 学语言 - 用户系统后端（已扩展：注册/登录/资料/签到/升级/错题/行为日志/资料编辑）
+ * PolyLingua AI — 用户系统后端（注册/登录/资料/签到/升级/错题/行为日志/资料编辑）
  * 技术栈：Express + better-sqlite3 + 内置 crypto（scrypt 加盐哈希）
  * 前端同源托管在 public/，API 挂在 /api 下，避免跨域问题。
  */
@@ -1236,22 +1236,22 @@ function seedIfEmpty() {
   if (db.prepare('SELECT COUNT(*) c FROM courses').get().c > 0) return;
 
   const courses = [
-    { title: '新课标高中英语必修一', cover: '📘', level: '高中', category: '教材同步', lang: 'en', description: '紧扣新课标，逐课精讲词汇语法，配套听说读写训练。', tags: ['新课标', '教材'], price: 0, views: 1280, author: '学语言教研', lessons: 6 },
+    { title: '新课标高中英语必修一', cover: '📘', level: '高中', category: '教材同步', lang: 'en', description: '紧扣新课标，逐课精讲词汇语法，配套听说读写训练。', tags: ['新课标', '教材'], price: 0, views: 1280, author: 'PolyLingua AI', lessons: 6 },
     { title: '小学英语口语启蒙', cover: '🎈', level: '小学', category: '口语', lang: 'en', description: '从26个字母到日常对话，让孩子敢说爱说。', tags: ['启蒙', '口语'], price: 0, views: 2304, author: 'Lucky老师', lessons: 6 },
-    { title: '零基础成人英语', cover: '🌱', level: '零基础', category: '综合', lang: 'en', description: '完全从零开始，建立英语语感与基础词汇量。', tags: ['成人', '零基础'], price: 29, views: 980, author: '学语言教研', lessons: 6 },
+    { title: '零基础成人英语', cover: '🌱', level: '零基础', category: '综合', lang: 'en', description: '完全从零开始，建立英语语感与基础词汇量。', tags: ['成人', '零基础'], price: 29, views: 980, author: 'PolyLingua AI', lessons: 6 },
     { title: '中考语法专项突破', cover: '📐', level: '初中', category: '语法', lang: 'en', description: '八大时态、从句、非谓语系统梳理，提分利器。', tags: ['中考', '语法'], price: 0, views: 1567, author: 'Lucky老师', lessons: 6 },
     { title: '雅思口语7分训练', cover: '🎯', level: '雅思', category: '口语', lang: 'en', description: 'Part1-3全真话题，地道表达+逻辑框架。', tags: ['雅思', '口语'], price: 199, views: 642, author: '外籍考官Tom', lessons: 6 },
-    { title: '旅游英语随手说', cover: '✈️', level: '实用', category: '场景', lang: 'en', description: '机场、酒店、点餐、问路，出行必备300句。', tags: ['旅游', '场景'], price: 0, views: 1890, author: '学语言教研', lessons: 6 },
+    { title: '旅游英语随手说', cover: '✈️', level: '实用', category: '场景', lang: 'en', description: '机场、酒店、点餐、问路，出行必备300句。', tags: ['旅游', '场景'], price: 0, views: 1890, author: 'PolyLingua AI', lessons: 6 },
     { title: '商务邮件写作', cover: '💼', level: '职场', category: '写作', lang: 'en', description: '从问候到跟进，写出专业得体的英文邮件。', tags: ['职场', '写作'], price: 99, views: 733, author: '外籍考官Tom', lessons: 6 },
     { title: '自然拼读Phonics', cover: '🔤', level: '小学', category: '拼读', lang: 'en', description: '建立字母与发音的对应关系，见词能读。', tags: ['拼读', '小学'], price: 0, views: 2105, author: 'Lucky老师', lessons: 6 },
-    { title: '高考完形填空技巧', cover: '🧩', level: '高中', category: '应试', lang: 'en', description: '上下文逻辑+固定搭配，完形不再丢分。', tags: ['高考', '技巧'], price: 0, views: 1122, author: '学语言教研', lessons: 6 },
+    { title: '高考完形填空技巧', cover: '🧩', level: '高中', category: '应试', lang: 'en', description: '上下文逻辑+固定搭配，完形不再丢分。', tags: ['高考', '技巧'], price: 0, views: 1122, author: 'PolyLingua AI', lessons: 6 },
     { title: '美剧地道表达精讲', cover: '📺', level: '实用', category: '文化', lang: 'en', description: '从Friends到Modern Family，学中用用中学。', tags: ['美剧', '文化'], price: 29, views: 1743, author: 'Lucky老师', lessons: 6 },
-    { title: '四六级核心词汇', cover: '📚', level: '大学', category: '词汇', lang: 'en', description: '高频词根词缀记忆法，30天突破核心词。', tags: ['四六级', '词汇'], price: 0, views: 2056, author: '学语言教研', lessons: 6 },
+    { title: '四六级核心词汇', cover: '📚', level: '大学', category: '词汇', lang: 'en', description: '高频词根词缀记忆法，30天突破核心词。', tags: ['四六级', '词汇'], price: 0, views: 2056, author: 'PolyLingua AI', lessons: 6 },
     { title: '日常英语听力训练', cover: '🎧', level: '综合', category: '听力', lang: 'en', description: '慢速到常速渐进，磨出英语耳朵。', tags: ['听力', '综合'], price: 0, views: 1340, author: '外籍考官Tom', lessons: 6 },
-    { title: '旅游汉语轻松说', cover: '🏯', level: '入门', category: '场景', lang: 'zh', description: '出国旅游、景点购物、餐厅点单，最常用的汉语开口就说。', tags: ['汉语', '旅游'], price: 0, views: 860, author: '学语言教研', lessons: 6 },
+    { title: '旅游汉语轻松说', cover: '🏯', level: '入门', category: '场景', lang: 'zh', description: '出国旅游、景点购物、餐厅点单，最常用的汉语开口就说。', tags: ['汉语', '旅游'], price: 0, views: 860, author: 'PolyLingua AI', lessons: 6 },
     { title: '日常中文口语', cover: '💬', level: '入门', category: '口语', lang: 'zh', description: '从打招呼到约朋友，老外也能聊的中文日常对话。', tags: ['汉语', '口语'], price: 0, views: 1102, author: 'Lucky老师', lessons: 6 },
-    { title: 'HSK1汉字与语法基础', cover: '🀄', level: 'HSK1', category: '基础', lang: 'zh', description: '系统学150核心词与基本句式，打好汉语根基。', tags: ['HSK', '基础'], price: 29, views: 540, author: '学语言教研', lessons: 6 },
-    { title: '外贸商务英语开口沟通实战陪跑', cover: '💼', level: '职场', category: '商务', lang: 'en', description: '为零基础外贸新人打造的12周开口陪跑：从第一次见客户到独立完成外贸全流程英语沟通。', tags: ['外贸','商务'], price: 2980, views: 320, author: '学语言教研', lessons: 12 }
+    { title: 'HSK1汉字与语法基础', cover: '🀄', level: 'HSK1', category: '基础', lang: 'zh', description: '系统学150核心词与基本句式，打好汉语根基。', tags: ['HSK', '基础'], price: 29, views: 540, author: 'PolyLingua AI', lessons: 6 },
+    { title: '外贸商务英语开口沟通实战陪跑', cover: '💼', level: '职场', category: '商务', lang: 'en', description: '为零基础外贸新人打造的12周开口陪跑：从第一次见客户到独立完成外贸全流程英语沟通。', tags: ['外贸','商务'], price: 2980, views: 320, author: 'PolyLingua AI', lessons: 12 }
   ];
   const insC = db.prepare('INSERT INTO courses (title, cover, level, category, lang, description, tags, price, views, author, lessons_count) VALUES (?,?,?,?,?,?,?,?,?,?,?)');
   courses.forEach(c => {
@@ -1286,7 +1286,7 @@ function seedIfEmpty() {
 
   const knowledge = [
     { title: '日落用英文怎么说', summary: 'sunset 是日落，但表达晚霞、暮色还有更多地道说法。', cover: '🌅', tag: '实用表达', content: 'sunset 指日落这一刻；afterglow 是日落后天边的余晖；dusk 是黄昏、暮色。可以说：We enjoyed the sunset on the beach.' },
-    { title: '“看世界”的多种英文表达', summary: 'see the world 不只是旅游，更代表开阔眼界。', cover: '🌍', tag: '实用表达', content: 'see the world 看世界；broaden one’s horizons 开阔视野；travel far and wide 游遍四方。学语言，正是为了看更大的世界。' },
+    { title: '“看世界”的多种英文表达', summary: 'see the world 不只是旅游，更代表开阔眼界。', cover: '🌍', tag: '实用表达', content: 'see the world 看世界；broaden one’s horizons 开阔视野；travel far and wide 游遍四方。PolyLingua AI，正是为了看更大的世界。' },
     { title: '可数名词与不可数名词', summary: '搞清 a/an 与量词，写作不再扣分。', cover: '📐', tag: '语法图解', content: '可数名词有单复数（apple/apples）；不可数名词无复数（water/advice）。不可数前加 a piece of / a cup of 等量词。' },
     { title: '现在完成时 vs 一般过去时', summary: '一个强调结果影响，一个只说过去动作。', cover: '⏱️', tag: '语法图解', content: 'I have lost my key.（现在还没找到） vs I lost my key yesterday.（只陈述昨天发生）。完成时连接过去与现在。' },
     { title: '连读与略音：让口语更自然', summary: '母语者为什么说得那么快？秘密在连读。', cover: '🔗', tag: '发音技巧', content: '连读：前词尾辅音+后词首元音连成一体（check it → che-kit）。略读：t/d 在辅音间常弱化。多听多模仿即可。' },
@@ -1983,7 +1983,7 @@ app.delete('/api/admin/knowledge', (req, res) => {
 });
 
 // ============ AI 智能客服 ============
-const CS_SYSTEM = '你是「小语」，学语言平台的 AI 智能客服。请用简体中文、亲切且简短地回答用户关于：课程学习、会员权益、合伙人推广计划、错题本、账号与隐私设置、充值付费等问题；可引导用户使用对应页面（如「课程市场」「我的课程」「会员权益」「合伙人招募」「账户中心」）。遇到不确定的问题，诚实说明并可建议联系人工客服。回复控制在 200 字以内。';
+const CS_SYSTEM = '你是「Poly」，PolyLingua AI 平台的 AI 智能客服。请用简体中文、亲切且简短地回答��户关于：课程学习、会员权益、合伙人推广计划、错题本、账号与隐私设置、充值付费等问题；可引导用户使用��应页面（如「课程市场」「我的课程」「会员��益」「合伙人招募」「账户中心」）。遇到不确定的问题，诚实说明并可建议联系人工客服。回复控制在 200 字以内。';
 
 function presetAnswer(q) {
   const t = String(q || '').toLowerCase();
@@ -1994,7 +1994,7 @@ function presetAnswer(q) {
     { k: ['错题', '错题本', '错'], a: '错题本已整合在「我的课程」页（今日时长下方）。系统会记录练习中的易错句子，支持点击 🔊 跟读巩固。' },
     { k: ['登录', '密码', '账号', '注册', '登入', 'login'], a: '可在左下角「账户中心 ▾」的「个人中心 / 隐私设置」管理账号。如忘记密码，请使用登录页的验证码方式重置。' },
     { k: ['退款', '退费', '付费', '支付', '钱'], a: '涉及订单与退款，请联系人工客服并提供账号信息，我们会尽快为您处理。' },
-    { k: ['你好', '您好', 'hi', 'hello', '在吗', '你是谁'], a: '您好！我是学语言 AI 客服小语，很高兴为您服务～请问有什么可以帮您？' }
+    { k: ['你好', '您好', 'hi', 'hello', '在吗', '你是谁'], a: '您好！我是 PolyLingua AI 客服 Poly，很高兴为您服务～请问有��么可以帮您？' }
   ];
   for (const f of faq) if (f.k.some(w => t.includes(w))) return f.a;
   return '感谢您的提问！我可以帮您解答「课程学习 / 会员权益 / 合伙人计划 / 错题本 / 账号设置」等方面的问题，请告诉我您想了解哪一块，或留下具体问题，我会尽力帮您～';
@@ -2029,5 +2029,5 @@ app.post('/api/chat', async (req, res) => {
 });
 
 app.listen(PORT, '0.0.0.0', () => {
-  console.log(`学语言后端已启动： http://0.0.0.0:${PORT}`);
+  console.log(`PolyLingua AI 后端已启动： http://0.0.0.0:${PORT}`);
 });

@@ -1,4 +1,4 @@
-# 公网部署指南 · 学语言（Node + Express + SQLite 全栈）
+# 公网部署指南 · PolyLingua AI（Node + Express + SQLite 全栈）
 
 部署后你会得到一个**公网网址**，任何人打开链接即可注册、登录、学课程、练句子——无需安装任何东西。
 
@@ -19,7 +19,7 @@
 ## 方式一：Railway（推荐，最简单，无需 GitHub）
 
 1. 注册 https://railway.app （可用 GitHub 账号登录，免费）
-2. 在 server/ 目录下安装并登录 CLI：
+2. 在项目目录下安装并登录 CLI：
    ```bash
    npm i -g @railway/cli
    railway login        # 浏览器授权
@@ -36,10 +36,9 @@
 
 ## 方式二：Render（需一个 GitHub 仓库）
 
-1. 在 GitHub 新建一个空仓库（例如 `xueyuyan`）。
-2. 把本地 `server/` 目录内容 push 上去：
+1. 在 GitHub 新建一个空仓库（例如 `polylingua-ai`）。
+2. 把项目内容 push 上去：
    ```bash
-   cd server
    git init
    git add -A
    git commit -m "init"
@@ -69,5 +68,6 @@ curl http://localhost:3001/api/health
 | 变量 | 说明 | 默认值 |
 |------|------|--------|
 | `PORT` | 监听端口（云平台自动注入） | 3001 |
+| `DB_PATH` | SQLite 数据库文件路径 | ./data.db |
 | `TTS_PY` | edge-tts 的 python 路径；云端留空，前端回退浏览器发音 | 本机 venv 路径 |
-| `NODE_ENV` | 运行环境 | - |
+| `NODE_ENV` | 运行环境 | — |

@@ -1,98 +1,182 @@
-# 学语言 · 后端服务（最小闭环）
+# PolyLingua AI
 
-完整的用户系统原型从「纯前端 localStorage 模拟」升级为「前端 + 真实后端 API」。
+> **AI Multilingual Learning & Global Community Platform**
+> AI 多语言学习与全球交流平台
 
-## 启动方式
+[![Node.js](https://img.shields.io/badge/node-%3E%3D18-brightgreen)](https://nodejs.org)
+[![Express](https://img.shields.io/badge/express-4.x-blue)](https://expressjs.com)
+[![SQLite](https://img.shields.io/badge/sqlite-3.x-lightgrey)](https://sqlite.org)
+[![License](https://img.shields.io/badge/license-MIT-green)](LICENSE)
 
-```bash
-cd server
-npm install        # 依赖已安装，首次克隆时需执行
-node server.js     # 或 npm start
+---
+
+## 项目定位 / Positioning
+
+PolyLingua AI 是一个面向全球语言学习者的 AI 驱动平台。从单词记忆到场景对话，从课程学习到社区互动——让每个人都能用 AI 的力量，轻松掌握一门新语言。
+
+PolyLingua AI is an AI-powered platform for language learners worldwide. From vocabulary acquisition to situational conversations, from structured courses to community interaction — empowering everyone to master a new language with the help of AI.
+
+---
+
+## 核心功能 / Features
+
+| 模块 | 说明 |
+|------|------|
+| 用户系统 | 手机/邮箱注册登录，scrypt 加盐哈希密码存储，JWT Token 鉴权 |
+| 会员体系 | Free / Pro / Partner 三级，支持在线升级 |
+| 每日签到 | 连续签到奖励（streak+points），7 天额外 bonus |
+| 课程市场 | 多语种分级课程（高考/四六级/旅游/商务/HSK），章节化学习 |
+| 句子听写 | 带语法成分标注��交互式听写练习 |
+| 单词查词 | 英中俄三语词典，AI 生成视觉词图，双例句 + 点击发音 |
+| 错题本 | 自动收集听写错题，支持回顾复习 |
+| AI 客服 | 内置智能客服回答课程/会员/合伙人/错题等问题 |
+| 知识库 | 精选语言学习文章与实用表达 |
+| 行为日志 | 全站用户行为追踪与分析 |
+| 美式发音 | Edge TTS en-US-AriaNeural（云端自动回退浏览器合成语音）|
+| AI 视觉词图 | 为单词自动生成记忆图片，强化视觉联想 |
+
+---
+
+## 技术栈 / Tech Stack
+
+```
+┌──────────────────────────────────┐
+│         Browser (SPA)            │
+│  Vanilla JS + CSS Custom Props   │
+└──────────────┬───────────────────┘
+               │ HTTP /api/*
+┌──────────────▼───────────────────┐
+│      Express.js Server           │
+│  • static hosting (public/)      │
+│  • REST API (/api/*)             │
+│  • scrypt auth (built-in crypto) │
+│  • Edge TTS proxy                │
+└──────────────┬───────────────────┘
+               │ better-sqlite3
+┌──────────────▼───────────────────┐
+│         SQLite (WAL mode)        │
+│  users | sessions | courses      │
+│  words | mistakes | knowledge    │
+│  activities | user_words ...     │
+└──────────────────────────────────┘
 ```
 
-启动后访问：**http://localhost:3001**
+- **Backend**: Node.js + Express + better-sqlite3
+- **Database**: SQLite (WAL mode, zero-config)
+- **Frontend**: Single-page vanilla JS, same-origin served (no CORS)
+- **Auth**: crypto.scrypt salted hash, Bearer token
+- **TTS**: Edge TTS (en-US-AriaNeural) with browser Web Speech fallback
+- **Deploy**: Railway / Render / Docker
 
-> 前端与后端同源（Express 同时托管 `public/` 静态文件 + `/api` 接口），无需处理跨域。
+---
 
-## 技术栈
+## 快速开始 / Quick Start
 
-- **Express** —— HTTP 服务 + 静态托管
-- **better-sqlite3** —— 本地 SQLite 数据库（零配置、文件即库）
-- **Node 内置 crypto** —— `scrypt` 加盐哈希存储密码，无额外依赖
+### 本地运行
 
-## 已实现的接口
+```bash
+# 安装依赖
+npm install
 
-| 方法 | 路径 | 说明 | 成功/失败 |
-|------|------|------|-----------|
-| POST | `/api/register` | 注册 `{nickname, phone, password}` | 200 返回 token+用户 / 400 / 409 已注册 |
-| POST | `/api/login` | 登录 `{account, pwd}`（手机或邮箱） | 200 返回 token+用户 / 401 |
-| GET  | `/api/profile` | 拉取资料（Header `Authorization: Bearer <token>`） | 200 返回用户 / 401 过期或缺失 |
+# 启动（默认端口 3001）
+npm start
 
-## 数据库
+# 或指定端口
+PORT=8080 npm start
+```
 
-- 文件：`server/data.db`（SQLite，首次运行自动建表）
-- 表：`users`（用户主表）、`sessions`（登录令牌，30 天有效期）、`mistakes`、`activities`、`courses`、`user_courses`、`words`、`user_words`、`knowledge`、`course_lessons`（章节目录）、`practice_sentences`（句子听写练习，含分词与语法标注）
-- 密码以 `scrypt(密码, 随机盐)` 的十六进制哈希存储，数据库被拿走也无法还原明文
-- 返回前端的手机号已脱敏（`138****8885`），与前端 `AppState` 字段对齐
+浏览器打开 **http://localhost:3001**
 
-## 前端改造点（`public/index.html`）
+> 演示账号：`13800008885` / `123456`
 
-- `doLogin` / `doRegister`：从「直接改内存」改为 `fetch` 真实接口
-- 启动恢复会话：读 `localStorage.juyou_token` → `GET /api/profile` 拉真实资料
-- `doLogout`：清除 token
-- `localStorage` 不再存业务数据，只存登录令牌
+### 环境变量
 
-## 已实现接口（已全部接入前端真实 API）
+| 变量 | 说明 | 默认值 |
+|------|------|--------|
+| `PORT` | 服务端口 | 3001 |
+| `NODE_ENV` | 运行环境 | — |
+| `DB_PATH` | 数据库文件路径 | ./data.db |
+| `TTS_PY` | Edge TTS Python 路径 | 本地 venv 路径 |
 
-| 方法 | 路径 | 说明 |
-|------|------|------|
-| POST | `/api/checkin` | 每日签到：streak+1、points+20（连续7天额外+50）、month_signed 记录、写行为日志 |
-| POST | `/api/upgrade` | 会员升级：写入 `role`（free/pro/partner） |
-| GET  | `/api/mistakes` | 拉取当前用户错题列表 |
-| POST | `/api/mistakes` | 新增错题（听写产生时调用） |
-| POST | `/api/track` | 行为日志上报（登录/浏览/签到/练习等） |
-| PATCH| `/api/profile` | 资料编辑（昵称/性别/生日/城市/邮箱）持久化 |
-| GET  | `/api/courses/:id` | 课程详情 + 章节目录（course_lessons） |
-| GET  | `/api/practice?courseId=` | 课程句子听写练习（practice_sentences，含语法成分标注） |
-| GET  | `/api/tts?text=` | 美式发音 TTS（Edge TTS `en-US-AriaNeural`，需本地装有 edge-tts；失败返回 5xx 由前端回退 Web Speech） |
+详见 [.env.example](.env.example)
 
-> 前端 `public/index.html` 已将上述全部改为真实接口调用：签到、会员升级、资料编辑、行为日志上报、错题本列表均落库；`localStorage` 仅存登录令牌。
+---
 
-## 让他人公网访问
+## 项目结构 / Project Structure
 
-当前为本地服务，仅本机可访问。要让别人也能用，需部署到公网服务器
-（如云主机 / 容器 / 支持 Node 的 PaaS）。部署时把 `server/` 目录整体上传并
-`npm install && node server.js`，用 Nginx 反向代理到 80/443 端口即可。
+```
+polylingua-ai/
+├── server.js            # 后端主入口（Express + SQLite）
+├── public/
+│   ├── index.html       # 前端 SPA（内联 CSS + JS）
+│   └── word-images/     # AI 生成的单词视觉图片
+├── package.json
+├── Dockerfile           # Docker 容器化
+├── Procfile             # Heroku 部署
+├── railway.json         # Railway 部署配置
+├── render.yaml          # Render 部署配置
+├── DEPLOY.md            # 部署指南
+├── CHANGELOG.md
+├── LICENSE              # MIT
+└── .env.example
+```
 
-### 详细部署步骤（云服务器，让别人访问真后端）
+---
 
-前提：一台有公网 IP 的 Linux 服务器（阿里云 / 腾讯云 / 华为云 / 任意 VPS）。
+## API 文档 / API Reference
 
-1. **上传代码**：把整个 `server/` 目录传到服务器（`scp` / `git clone` / 面板上传均可）。
-2. **安装依赖**：`cd server && npm install --production`
-3. **常驻运行**（用 pm2，防止关掉终端进程就死）：
-   ```bash
-   npm install -g pm2
-   pm2 start server.js --name xueyuyan
-   pm2 save && pm2 startup      # 开机自启
-   ```
-4. **Nginx 反代**（示例，把 80 端口转发给本地 3001）：
-   ```nginx
-   server {
-     listen 80;
-     server_name 你的域名;
-     location / {
-       proxy_pass http://127.0.0.1:3001;
-       proxy_set_header Host $host;
-       proxy_set_header X-Real-IP $remote_addr;
-     }
-   }
-   ```
-5. **放通防火墙** 80/443，并把域名 A 记录解析到服务器 IP。
-6. 浏览器开 `http://你的域名` —— 多人注册登录，数据真正互通。
+| 方法 | 路径 | 说明 | 认证 |
+|------|------|------|------|
+| POST | `/api/register` | 注册 | — |
+| POST | `/api/login` | 登录 | — |
+| GET | `/api/profile` | 获取个人资料 | Bearer |
+| PATCH | `/api/profile` | 编辑个人资料 | Bearer |
+| POST | `/api/checkin` | 每日签到 | Bearer |
+| POST | `/api/upgrade` | 会员升级 | Bearer |
+| GET | `/api/courses` | 课程列表 | Bearer |
+| GET | `/api/courses/:id` | 课程详情 + 章节 | Bearer |
+| GET | `/api/practice` | 句子听写练习 | Bearer |
+| GET | `/api/words` | 单词查询 | Bearer |
+| GET | `/api/mistakes` | 错题列表 | Bearer |
+| POST | `/api/mistakes` | 新增错题 | Bearer |
+| POST | `/api/track` | 行为日志 | Bearer |
+| GET | `/api/tts` | 文本转语音 | Bearer |
+| GET | `/api/health` | 健康检查 | — |
+| GET/POST | `/api/cs` | AI 客服 | Bearer |
+| POST | `/api/admin/words` | 批量导入单词 | Bearer (admin) |
 
-> 暂时没有公网服务器也行：
-> - **同局域网**：朋友直接开 `http://你的内网IP:3001`（cmd 里 `ipconfig` 查 IPv4）。
-> - **临时公网演示**：用内网穿透把本机 3001 暴露出去（见下方决策）。
->
-> 端口可在启动前用环境变量覆盖：`PORT=8080 node server.js`
+---
+
+## 部署 / Deployment
+
+支持一键部署到主流云平台：
+
+- **[Railway](https://railway.app)** — `railway up`（推荐，无需 GitHub）
+- **[Render](https://render.com)** — 关联 GitHub 仓库自动部署
+- **Docker** — `docker build -t polylingua-ai . && docker run -p 3001:3000 polylingua-ai`
+
+详细步骤见 [DEPLOY.md](DEPLOY.md)
+
+当前生产环境：**[https://lucky-production-e5cc.up.railway.app](https://lucky-production-e5cc.up.railway.app)**
+
+---
+
+## 贡献 / Contributing
+
+欢迎提交 Issue 和 Pull Request！
+
+1. Fork 本仓库
+2. 创建功能分支 (`git checkout -b feature/amazing-feature`)
+3. 提交变更 (`git commit -m 'Add amazing feature'`)
+4. 推送分支 (`git push origin feature/amazing-feature`)
+5. 开启 Pull Request
+
+---
+
+## 许可证 / License
+
+MIT © 2026 PolyLingua AI Team — 详见 [LICENSE](LICENSE)
+
+---
+
+***Learn languages. Connect worlds. — 学语言，连世界。***
