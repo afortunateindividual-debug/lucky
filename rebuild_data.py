@@ -521,7 +521,7 @@ IMG_MAP = {
     # Image filename -> word mapping (original 35 + AI-generated 135)
     "angry_2026-08-04T10-15-54.png": "angry",
     "A_small_black_ant_carrying_a_c_2026-08-02T12-19-47.png": "ant",
-    "A_red_shiny_apple_on_a_wooden__2026-08-02T12-19-47.png": "apple",
+    "A_red_shiny_apple_on_a_wooden__2026-08-02T12-19-47.png": "Apple",
     "bag_2026-08-04T10-08-02.png": "bag",
     "ball_2026-08-04T10-08-18.png": "ball",
     "banana_2026-08-04T10-04-54.png": "banana",
