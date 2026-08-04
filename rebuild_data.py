@@ -581,8 +581,8 @@ if __name__ == "__main__":
         exit(1)
 
     publish_knowledge()
-    update_images()
     import_words()
+    update_images()
 
     print("\n=== ALL DONE ===")
     print(f"Total words: {len(ALL_WORDS)}")
