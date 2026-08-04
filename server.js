@@ -1928,6 +1928,75 @@ app.post('/api/admin/analyze', async (req, res) => {
   res.json(result);
 });
 
+// ---------- 内容管理：链接直抓（抓取网页正文） ----------
+app.post('/api/admin/fetch-url', async (req, res) => {
+  const uid = getUid(req);
+  if (!uid) return res.status(401).json({ error: '请先登录' });
+  const b = req.body || {};
+  const raw = String(b.url || '').trim();
+  if (!raw) return res.status(400).json({ error: '请输入网页链接' });
+  let u;
+  try {
+    u = new URL(raw);
+    if (u.protocol !== 'http:' && u.protocol !== 'https:') return res.status(400).json({ error: '仅支持 http/https 链接' });
+  } catch (e) {
+    return res.status(400).json({ error: '链接格式不正确' });
+  }
+  try {
+    const resp = await fetch(u.href, {
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0 Safari/537.36',
+        'Accept': 'text/html,application/xhtml+xml'
+      },
+      redirect: 'follow'
+    });
+    if (!resp.ok) return res.status(502).json({ error: '抓取失败，状态码 ' + resp.status });
+    const html = await resp.text();
+    const extracted = extractArticleText(html);
+    if (!extracted.text || extracted.text.length < 30) {
+      return res.status(422).json({ error: '未能从该页面提取到正文，请改用「粘贴文本」模式手动粘贴内容。' });
+    }
+    res.json({ ok: true, title: extracted.title, text: extracted.text, url: u.href });
+  } catch (e) {
+    res.status(502).json({ error: '抓取失败：' + (e && e.message ? e.message : '网络错误') });
+  }
+});
+
+function extractArticleText(html) {
+  let h = String(html || '');
+  let title = '';
+  const mt = h.match(/<title[^>]*>([\s\S]*?)<\/title>/i);
+  if (mt) title = decodeEntities(mt[1].replace(/\s+/g, ' ').trim());
+  if (!title) {
+    const mh = h.match(/<h1[^>]*>([\s\S]*?)<\/h1>/i);
+    if (mh) title = decodeEntities(mh[1].replace(/<[^>]+>/g, '').trim());
+  }
+  h = h.replace(/<(script|style|noscript|svg|head|meta|link|iframe)[^>]*>[\s\S]*?<\/\1>/gi, ' ');
+  h = h.replace(/<!--[\s\S]*?-->/g, ' ');
+  h = h.replace(/<\s*(br|\/p|\/div|\/li|\/h[1-6]|\/tr|\/section|\/article|\/blockquote)[^>]*>/gi, '\n');
+  h = h.replace(/<[^>]+>/g, ' ');
+  h = decodeEntities(h);
+  h = h.replace(/[ \t]+/g, ' ');
+  h = h.split('\n').map(function (s) { return s.trim(); }).filter(Boolean).join('\n');
+  h = h.replace(/\n{3,}/g, '\n\n');
+  const text = h.trim().slice(0, 20000);
+  return { title: title, text: text };
+}
+
+function decodeEntities(s) {
+  return String(s || '')
+    .replace(/&nbsp;/gi, ' ')
+    .replace(/&amp;/gi, '&')
+    .replace(/&lt;/gi, '<')
+    .replace(/&gt;/gi, '>')
+    .replace(/&quot;/gi, '"')
+    .replace(/&#0*39;/gi, "'")
+    .replace(/&apos;/gi, "'")
+    .replace(/&#x0*27;/gi, "'")
+    .replace(/&#(\d+);/gi, function (_, n) { return String.fromCharCode(parseInt(n, 10)); })
+    .replace(/&#x([0-9a-fA-F]+);/gi, function (_, n) { return String.fromCharCode(parseInt(n, 16)); });
+}
+
 app.post('/api/admin/course-full', (req, res) => {
   const uid = getUid(req);
   if (!uid) return res.status(401).json({ error: '请先登录' });

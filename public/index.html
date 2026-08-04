@@ -1772,7 +1772,7 @@ async function apiPost(url, body) {
     const token = localStorage.getItem('polylingua_token');
     const r = await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token }, body: JSON.stringify(body) });
     const d = await r.json().catch(() => ({}));
-    if (!r.ok) throw new Error(d.message || '操作失败');
+    if (!r.ok) throw new Error(d.message || d.error || '操作失败');
     return d;
 }
 async function apiDelete(url) {
@@ -2105,24 +2105,36 @@ async function renderAdmin() {
           <div class="up-mode-card" id="upModeFile">
             <div class="up-mode-icon">📁</div>
             <div class="up-mode-label">上传文件</div>
-            <div class="up-mode-hint">TXT / MD 即时可用<br>PDF / DOCX 需等待解析</div>
+            <div class="up-mode-hint">TXT / MD 即时 · 图片OCR<br>PDF / DOCX 待解析库</div>
           </div>
           <div class="up-mode-card" id="upModeText">
             <div class="up-mode-icon">📝</div>
             <div class="up-mode-label">粘贴文本</div>
             <div class="up-mode-hint">直接粘贴课程资料<br>无需任何解析库</div>
           </div>
+          <div class="up-mode-card" id="upModeUrl">
+            <div class="up-mode-icon">🔗</div>
+            <div class="up-mode-label">链接直抓</div>
+            <div class="up-mode-hint">粘贴网页链接<br>自动抓取正文</div>
+          </div>
         </div>
         <div id="upFileArea">
           <div id="upDrop" onclick="document.getElementById('upFile').click()" ondragover="event.preventDefault();this.style.borderColor='var(--pri)';" ondragleave="this.style.borderColor='#c7d2fe';" ondrop="event.preventDefault();this.style.borderColor='#c7d2fe';onUpDrop(event);" style="border:2px dashed #c7d2fe;background:#f8faff;border-radius:12px;padding:26px;text-align:center;cursor:pointer;color:#6b7280;transition:.2s;">
             拖拽文件到此处，或 <span style="color:var(--pri);font-weight:600;">点击选择</span><br>
-            <span style="font-size:12px;">推荐用 TXT / MD 文件，即时可上传</span>
+            <span style="font-size:12px;">支持 TXT / MD（即时）、图片（本地OCR中英文）、PDF / DOCX（解析库加载中）</span>
             <input id="upFile" type="file" accept=".pdf,.docx,.txt,.md,image/*" style="display:none;" onchange="onUpFile(event)">
           </div>
         </div>
         <div id="upTextArea" style="display:none;">
           <textarea id="upTextInput" class="form-input" rows="12" placeholder="在此粘贴课程大纲、教材内容、对话文本等资料…&#10;&#10;提示：用标题（如 # 第一章 或 第1课）分隔章节，AI 会自动拆解为课程。" style="width:100%;font-size:14px;line-height:1.7;"></textarea>
           <button class="btn-primary" onclick="analyzeTextInput()" style="margin-top:10px;">🤖 AI 拆解</button>
+        </div>
+        <div id="upUrlArea" style="display:none;">
+          <div style="display:flex;gap:10px;">
+            <input id="upUrlInput" class="form-input" style="flex:1;" placeholder="粘贴网页 / 文章链接，例如 https://..." onkeydown="if(event.key==='Enter')fetchUrlInput()">
+            <button class="btn-primary" onclick="fetchUrlInput()">🔗 抓取并拆解</button>
+          </div>
+          <div style="font-size:12px;color:var(--gray);margin-top:6px;">自动抓取网页正文并 AI 拆解成课程 / 知识库（仅支持 http/https 公开网页，需登录态）</div>
         </div>
         <div id="upStatus" style="font-size:13px;color:var(--gray);margin:10px 0;"></div>
         <div id="upPreview"></div>
@@ -2177,12 +2189,38 @@ async function delAdmin(kind, id) {
 function setAdminTab(t) { adminTab = t; renderAdmin(); if (t === 'upload') { initUpModes(); } }
 let upMode = 'file';
 function initUpModes() {
-  const fc = document.getElementById('upModeFile'), tc = document.getElementById('upModeText');
-  if (fc) fc.onclick = function () { upMode = 'file'; document.getElementById('upFileArea').style.display = ''; document.getElementById('upTextArea').style.display = 'none'; fc.classList.add('on'); tc.classList.remove('on'); };
-  if (tc) tc.onclick = function () { upMode = 'text'; document.getElementById('upFileArea').style.display = 'none'; document.getElementById('upTextArea').style.display = ''; tc.classList.add('on'); fc.classList.remove('on'); };
-  document.getElementById('upModeFile').classList.add('on');
-  document.getElementById('upFileArea').style.display = '';
-  document.getElementById('upTextArea').style.display = 'none';
+  const fc = document.getElementById('upModeFile'), tc = document.getElementById('upModeText'), uc = document.getElementById('upModeUrl');
+  if (fc) fc.onclick = function () { switchUpMode('file'); };
+  if (tc) tc.onclick = function () { switchUpMode('text'); };
+  if (uc) uc.onclick = function () { switchUpMode('url'); };
+  switchUpMode('file');
+}
+function switchUpMode(m) {
+  upMode = m;
+  const cards = { file: 'upModeFile', text: 'upModeText', url: 'upModeUrl' };
+  Object.keys(cards).forEach(function (k) {
+    const c = document.getElementById(cards[k]);
+    if (c) { if (k === m) c.classList.add('on'); else c.classList.remove('on'); }
+  });
+  document.getElementById('upFileArea').style.display = (m === 'file') ? '' : 'none';
+  document.getElementById('upTextArea').style.display = (m === 'text') ? '' : 'none';
+  document.getElementById('upUrlArea').style.display = (m === 'url') ? '' : 'none';
+}
+async function fetchUrlInput() {
+  const inp = document.getElementById('upUrlInput'); if (!inp) return;
+  const url = inp.value.trim(); if (!url) { showToast('请输入网页链接', 'warn'); return; }
+  const status = document.getElementById('upStatus'); if (status) status.textContent = '正在抓取网页正文…';
+  try {
+    const fr = await apiPost('/api/admin/fetch-url', { url: url });
+    if (status) status.textContent = '抓取成功（约 ' + (fr.text ? fr.text.length : 0) + ' 字），正在 AI 拆解…';
+    const r = await apiPost('/api/admin/analyze', { title: fr.title || '', text: fr.text });
+    if (status) status.textContent = '拆解完成 ✅';
+    renderUploadResult(r);
+  } catch (e) {
+    const msg = (e && e.message) ? e.message : '';
+    if (status) status.textContent = '失败：' + msg;
+    showToast('抓取/拆解失败：' + msg, 'err');
+  }
 }
 async function analyzeTextInput() {
   const ta = document.getElementById('upTextInput'); if (!ta) return;
@@ -2268,7 +2306,7 @@ async function addAdminKnowledge() {
 const _LIBS = {
   pdfjs: { url: 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js', onload: function () { try { pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js'; } catch (e) {} } },
   mammoth: { url: 'https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js' },
-  tesseract: { url: 'https://cdnjs.cloudflare.com/ajax/libs/tesseract.js/4.1.1/tesseract.min.js' }
+  tesseract: { url: '/libs/ocr/tesseract.min.js' }
 };
 const _libCache = {};
 function ensureLib(name) {
@@ -2302,7 +2340,13 @@ async function extractDocxText(file) {
   return res.value || '';
 }
 async function ocrImage(file) {
-  const worker = await Tesseract.createWorker('chi_sim+eng', 1, { logger: function (p) { if (p && p.status === 'recognizing text') { const s = document.getElementById('upStatus'); if (s) s.textContent = 'OCR 识别中 ' + Math.round((p.progress || 0) * 100) + '%'; } } });
+  const base = '/libs/ocr/';
+  const worker = await Tesseract.createWorker('chi_sim+eng', 1, {
+    workerPath: base + 'worker.min.js',
+    corePath: base + 'tesseract-core.wasm',
+    langPath: base,
+    logger: function (p) { if (p && p.status === 'recognizing text') { const s = document.getElementById('upStatus'); if (s) s.textContent = 'OCR 识别中 ' + Math.round((p.progress || 0) * 100) + '%'; } }
+  });
   const ret = await worker.recognize(file);
   await worker.terminate();
   return (ret && ret.data && ret.data.text) || '';
