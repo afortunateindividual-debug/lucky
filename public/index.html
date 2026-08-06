@@ -1811,6 +1811,8 @@ async function renderLookup() {
             const safe = (w.word || '').replace(/'/g, "\\'");
             const safeEx1 = (w.example || '').replace(/'/g, "\\'");
             const safeEx2 = (w.example2 || '').replace(/'/g, "\\'");
+            let phrases = [];
+            try { phrases = w.phrases ? JSON.parse(w.phrases) : []; } catch(e){ phrases = []; }
             const hasImg = w.image && !w.image.startsWith('📝') && (w.image.startsWith('http') || w.image.startsWith('/'));
             const imgHtml = hasImg
                 ? `<div style="width:72px;height:72px;border-radius:14px;overflow:hidden;flex-shrink:0;position:relative;box-shadow:0 2px 8px rgba(0,0,0,.1);">
@@ -1827,7 +1829,7 @@ async function renderLookup() {
                                 <span style="font-size:22px;font-weight:700;cursor:pointer;color:var(--dark);transition:color .2s;" onmouseenter="this.style.color='#4a7dff'" onmouseleave="this.style.color='var(--dark)'" onclick="speakText('${safe}')">${w.word}</span>
                                 <span style="font-size:11px;background:#eef;color:#667eea;padding:2px 10px;border-radius:10px;font-weight:600;">${w.category || '其他'}</span>
                             </div>
-                            <div style="color:var(--gray);font-size:14px;margin-top:2px;font-family:'Segoe UI',system-ui,sans-serif;">${w.phonetic || ''}</div>
+                            <div style="color:var(--gray);font-size:14px;margin-top:2px;font-family:'Segoe UI',system-ui,sans-serif;">${w.phonetic ? `<span style="background:#eef;color:#667eea;padding:1px 8px;border-radius:6px;font-weight:600;margin-right:6px;">英</span><span style="font-family:'Segoe UI',system-ui,sans-serif;">${w.phonetic}</span>` : ''}</div>
                         </div>
                         <button class="btn-audio" style="padding:8px 14px;flex-shrink:0;border-radius:50%;background:#f0f4ff;border:none;cursor:pointer;font-size:18px;transition:background .2s,transform .15s;" onmouseenter="this.style.background='#e0e7ff'" onmouseleave="this.style.background='#f0f4ff'" onmousedown="this.style.transform='scale(.92)'" onmouseup="this.style.transform='scale(1)'" onclick="event.stopPropagation();speakText('${safe}')">🔊</button>
                     </div>
@@ -1835,6 +1837,17 @@ async function renderLookup() {
                         <span style="color:#e67e22;font-weight:600;font-size:15px;">${w.meaning || ''}</span>
                         ${w.ru_meaning ? `<span style="color:#8e44ad;font-weight:500;font-size:13px;padding:2px 10px;background:#faf0ff;border-radius:6px;">🇷🇺 ${w.ru_meaning}</span>` : ''}
                     </div>
+                ${(w.zh_reading || w.fr_word) ? `
+                <div style="margin-top:10px;display:flex;gap:10px;flex-wrap:wrap;align-items:center;">
+                    ${w.zh_reading ? `<span style="font-size:13px;color:#0a9e6e;background:#e6f9f0;padding:3px 10px;border-radius:8px;"><b>中</b>&nbsp;${escHtml(w.zh_reading)}</span>` : ''}
+                    ${w.fr_word ? `<span style="font-size:13px;color:#2563eb;background:#e6efff;padding:3px 10px;border-radius:8px;"><b>法</b>&nbsp;${escHtml(w.fr_word)}${w.fr_reading ? ` <span style="color:#64748b;">${escHtml(w.fr_reading)}</span>` : ''}</span>` : ''}
+                </div>` : ''}
+                ${(phrases && phrases.length) ? `
+                <div style="margin-top:10px;padding-top:10px;border-top:1px dashed #e5e7eb;">
+                    <div style="font-size:12px;color:var(--gray);font-weight:600;margin-bottom:6px;">✨ 金典短语</div>
+                    ${phrases.map(p => `<div style="font-size:13px;color:#b45309;background:#fff7ed;padding:6px 10px;border-radius:8px;margin-bottom:5px;line-height:1.5;cursor:pointer;" onclick="event.stopPropagation();speakText(this.textContent)">${escHtml(p)}</div>`).join('')}
+                </div>` : ''}
+
                 </div>
                 ${w.example ? `<div style="font-size:13px;color:var(--dark);padding:10px 16px;background:#fffbf0;border-top:1px solid #f3e8c8;cursor:pointer;line-height:1.6;transition:background .2s;" onmouseenter="this.style.background='#fff5e0'" onmouseleave="this.style.background='#fffbf0'" onclick="speakText('${safeEx1}')">💬 ${w.example}</div>` : ''}
                 ${w.example2 ? `<div style="font-size:13px;color:var(--dark);padding:10px 16px;background:#f0f9ff;border-top:1px solid #d0e8ff;cursor:pointer;line-height:1.6;transition:background .2s;" onmouseenter="this.style.background='#e6f3ff'" onmouseleave="this.style.background='#f0f9ff'" onclick="speakText('${safeEx2}')">💬 ${w.example2}</div>` : ''}

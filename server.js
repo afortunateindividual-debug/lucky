@@ -118,8 +118,16 @@ db.exec(`CREATE TABLE IF NOT EXISTS words (
   level TEXT,
   lang TEXT DEFAULT 'en',
   category TEXT DEFAULT '',
+  zh_reading TEXT DEFAULT '',
+  fr_word TEXT DEFAULT '',
+  fr_reading TEXT DEFAULT '',
+  phrases TEXT DEFAULT '',
   created_at TEXT DEFAULT (datetime('now','localtime'))
 )`);
+// 三语读法 + 金典短语 字段迁移（旧库兼容）
+['zh_reading', 'fr_word', 'fr_reading', 'phrases'].forEach(col => {
+  try { db.exec(`ALTER TABLE words ADD COLUMN ${col} TEXT DEFAULT ''`); } catch (e) {}
+});
 
 db.exec(`CREATE TABLE IF NOT EXISTS user_words (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -1813,8 +1821,8 @@ app.post('/api/admin/words', (req, res) => {
   if (!uid) return res.status(401).json({ error: '请先登录' });
   const arr = Array.isArray(req.body && req.body.words) ? req.body.words : [];
   if (!arr.length) return res.status(400).json({ error: '缺少单词数据' });
-  const ins = db.prepare('INSERT INTO words (word, phonetic, meaning, ru_meaning, example, example2, image, level, lang, category) VALUES (?,?,?,?,?,?,?,?,?,?)');
-  const upd = db.prepare('UPDATE words SET phonetic=?,meaning=?,ru_meaning=?,example=?,example2=?,image=?,level=?,lang=?,category=? WHERE word=?');
+  const ins = db.prepare('INSERT INTO words (word, phonetic, meaning, ru_meaning, example, example2, image, level, lang, category, zh_reading, fr_word, fr_reading, phrases) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)');
+  const upd = db.prepare('UPDATE words SET phonetic=?,meaning=?,ru_meaning=?,example=?,example2=?,image=?,level=?,lang=?,category=?,zh_reading=?,fr_word=?,fr_reading=?,phrases=? WHERE word=?');
   let added = 0, updated = 0;
   const tx = db.transaction(() => {
     for (const it of arr) {
@@ -1824,10 +1832,10 @@ app.post('/api/admin/words', (req, res) => {
       const key = w.toLowerCase();
       const exist = db.prepare('SELECT id FROM words WHERE LOWER(word)=?').get(key);
       if (exist) {
-        upd.run(it.phonetic || '', it.meaning || '', it.ru_meaning || '', it.example || '', it.example2 || '', it.image || '📝', it.level || '', it.lang || 'en', it.category || '', w);
+        upd.run(it.phonetic || '', it.meaning || '', it.ru_meaning || '', it.example || '', it.example2 || '', it.image || '📝', it.level || '', it.lang || 'en', it.category || '', it.zh_reading || '', it.fr_word || '', it.fr_reading || '', it.phrases || '', w);
         updated++;
       } else {
-        ins.run(w, it.phonetic || '', it.meaning || '', it.ru_meaning || '', it.example || '', it.example2 || '', it.image || '📝', it.level || '', it.lang || 'en', it.category || '');
+        ins.run(w, it.phonetic || '', it.meaning || '', it.ru_meaning || '', it.example || '', it.example2 || '', it.image || '📝', it.level || '', it.lang || 'en', it.category || '', it.zh_reading || '', it.fr_word || '', it.fr_reading || '', it.phrases || '');
         added++;
       }
     }

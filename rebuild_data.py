@@ -710,6 +710,88 @@ def update_images():
         ok = d.get("ok")
         print(f"[{'OK' if ok else 'FAIL'}] {word} -> {fname[:30]}...")
 
+# ==================== PART 4: 三语读法精选词库 ====================
+# 每条词含：英语音标(phonetic) / 中文拼音(zh_reading) / 法语词+法语音标(fr_word+fr_reading)
+#          以及 2 条以上金典短语(phrases)。category 为词性，用于查单词筛选。
+MULTI_WORDS = [
+    # ---- 生活日常 ----
+    ("water", "/ˈwɔːtər/", "水", "shuǐ", "eau", "/o/", "名词", ["Water under the bridge.", "Like water off a duck's back."], "💧"),
+    ("fire", "/ˈfaɪər/", "火", "huǒ", "feu", "/fø/", "名词", ["Fight fire with fire.", "Out of the frying pan into the fire."], "🔥"),
+    ("home", "/hoʊm/", "家", "jiā", "maison", "/mɛzɔ̃/", "名词", ["Home is where the heart is.", "Make yourself at home."], "🏠"),
+    ("food", "/fuːd/", "食物", "shí wù", "nourriture", "/nuʁityʁ/", "名词", ["Food for thought."], "🍲"),
+    ("time", "/taɪm/", "时间", "shí jiān", "temps", "/tɑ̃/", "名词", ["Time is money.", "A stitch in time saves nine."], "⏰"),
+    ("friend", "/frend/", "朋友", "péng you", "ami", "/ami/", "名词", ["A friend in need is a friend indeed.", "Make friends with others."], "👫"),
+    ("love", "/lʌv/", "爱", "ài", "aimer", "/ɛme/", "动词", ["Fall in love.", "Love at first sight."], "❤️"),
+    ("health", "/helθ/", "健康", "jiàn kāng", "santé", "/sɑ̃te/", "名词", ["Health is wealth."], "💪"),
+    # ---- 学习工作 ----
+    ("book", "/bʊk/", "书", "shū", "livre", "/livʁ/", "名词", ["Don't judge a book by its cover.", "By the book."], "📖"),
+    ("teacher", "/ˈtiːtʃər/", "老师", "lǎo shī", "professeur", "/pʁɔfesœʁ/", "名词", ["Teacher's pet."], "👩‍🏫"),
+    ("knowledge", "/ˈnɒlɪdʒ/", "知识", "zhī shi", "connaissances", "/kɔnɛsɑ̃s/", "名词", ["Knowledge is power."], "🧠"),
+    ("work", "/wɜːrk/", "工作", "gōng zuò", "travailler", "/tʁavaje/", "动词", ["All in a day's work.", "Work like a horse."], "💼"),
+    ("success", "/səkˈses/", "成功", "chéng gōng", "succès", "/syksɛ/", "名词", ["Success breeds success."], "🏆"),
+    ("idea", "/aɪˈdɪə/", "想法", "xiǎng fǎ", "idée", "/ide/", "名词", ["Bright idea.", "Put ideas into action."], "💡"),
+    ("problem", "/ˈprɒbləm/", "问题", "wèn tí", "problème", "/pʁɔblɛm/", "名词", ["No problem.", "Face the problem."], "❓"),
+    # ---- 商务沟通 ----
+    ("meeting", "/ˈmiːtɪŋ/", "会议", "huì yì", "réunion", "/ʁeynjɔ̃/", "名词", ["Call a meeting."], "📅"),
+    ("money", "/ˈmʌni/", "钱", "qián", "argent", "/aʁʒɑ̃/", "名词", ["Money talks.", "Time is money."], "💰"),
+    ("price", "/praɪs/", "价格", "jià gé", "prix", "/pʁi/", "名词", ["At any price.", "Price tag."], "🏷️"),
+    ("contract", "/ˈkɒntrækt/", "合同", "hé tong", "contrat", "/kɔ̃tʁa/", "名词", ["Sign a contract."], "📝"),
+    ("market", "/ˈmɑːrkɪt/", "市场", "shì chǎng", "marché", "/maʁʃe/", "名词", ["Play the market."], "🛒"),
+    ("customer", "/ˈkʌstəmər/", "客户", "kè hù", "client", "/klijɑ̃/", "名词", ["Customer is king."], "🧑‍💼"),
+    ("partner", "/ˈpɑːrtnər/", "伙伴", "huǒ bàn", "partenaire", "/paʁtənɛʁ/", "名词", ["Business partner."], "🤝"),
+    # ---- 旅游出行 ----
+    ("travel", "/ˈtrævəl/", "旅行", "lǚ xíng", "voyager", "/vwajaʒe/", "动词", ["Travel broadens the mind."], "✈️"),
+    ("hotel", "/hoʊˈtel/", "酒店", "jiǔ diàn", "hôtel", "/otɛl/", "名词", ["Book a hotel."], "🏨"),
+    ("airport", "/ˈeərpɔːrt/", "机场", "jī chǎng", "aéroport", "/aɛʁɔpɔʁ/", "名词", ["At the airport."], "🛫"),
+    ("ticket", "/ˈtɪkɪt/", "票", "piào", "billet", "/bijɛ/", "名词", ["One-way ticket."], "🎫"),
+    ("map", "/mæp/", "地图", "dì tú", "carte", "/kaʁt/", "名词", ["Read a map."], "🗺️"),
+    ("language", "/ˈlæŋɡwɪdʒ/", "语言", "yǔ yán", "langue", "/lɑ̃ɡ/", "名词", ["Speak the language."], "🗣️"),
+    # ---- 情感社交 ----
+    ("happy", "/ˈhæpi/", "快乐", "kuài lè", "heureux", "/øʁø/", "形容词", ["Happy go lucky.", "Make someone happy."], "😊"),
+    ("peace", "/piːs/", "和平", "hé píng", "paix", "/pɛ/", "名词", ["Peace of mind.", "Make peace."], "🕊️"),
+    ("hope", "/hoʊp/", "希望", "xī wàng", "espérer", "/ɛspʁe/", "动词", ["Hope for the best.", "There is hope."], "🌟"),
+    ("dream", "/driːm/", "梦想", "mèng xiǎng", "rêve", "/ʁɛv/", "名词", ["Dream big.", "Sweet dream."], "💭"),
+    ("courage", "/ˈkʌrɪdʒ/", "勇气", "yǒng qì", "courage", "/kuʁaʒ/", "名词", ["Take courage."], "🦁"),
+    ("trust", "/trʌst/", "信任", "xìn rèn", "confiance", "/kɔ̃fjɑ̃s/", "名词", ["Trust in yourself."], "🤝"),
+    # ---- 自然科技 ----
+    ("sun", "/sʌn/", "太阳", "tài yáng", "soleil", "/sɔlɛj/", "名词", ["Under the sun."], "☀️"),
+    ("star", "/stɑːr/", "星星", "xīng xing", "étoile", "/etwal/", "名词", ["Reach for the stars.", "See stars."], "⭐"),
+    ("tree", "/triː/", "树", "shù", "arbre", "/aʁbʁ/", "名词", ["Family tree."], "🌳"),
+    ("computer", "/kəmˈpjuːtər/", "电脑", "diàn nǎo", "ordinateur", "/ɔʁdinatœʁ/", "名词", ["On the computer."], "💻"),
+    ("internet", "/ˈɪntərnet/", "互联网", "hù lián wǎng", "internet", "/ɛ̃tɛʁnɛt/", "名词", ["Surf the internet."], "🌐"),
+    ("phone", "/foʊn/", "手机", "shǒu jī", "téléphone", "/telefɔn/", "名词", ["On the phone."], "📱"),
+    ("light", "/laɪt/", "光", "guāng", "lumière", "/lymjɛʁ/", "名词", ["See the light.", "Light at the end of the tunnel."], "💡"),
+    ("world", "/wɜːrld/", "世界", "shì jiè", "monde", "/mɔ̃d/", "名词", ["Around the world.", "World wide."], "🌍"),
+    # ---- 美食 ----
+    ("bread", "/bred/", "面包", "miàn bāo", "pain", "/pɛ̃/", "名词", ["Bread and butter.", "Daily bread."], "🍞"),
+    ("coffee", "/ˈkɒfi/", "咖啡", "kā fēi", "café", "/kafe/", "名词", ["Wake up and smell the coffee."], "☕"),
+    ("tea", "/tiː/", "茶", "chá", "thé", "/te/", "名词", ["Not for all the tea in China."], "🍵"),
+    ("rice", "/raɪs/", "米饭", "mǐ fàn", "riz", "/ʁi/", "名词", ["Rice bowl."], "🍚"),
+    ("egg", "/eɡ/", "蛋", "dàn", "œuf", "/œf/", "名词", ["Good egg.", "Walk on eggshells."], "🥚"),
+]
+
+def import_multi_words():
+    print(f"\n=== Importing {len(MULTI_WORDS)} Multilingual Words ===")
+    batch = []
+    for w in MULTI_WORDS:
+        word, phonetic, meaning, zh_reading, fr_word, fr_reading, category, phrases, image = w
+        batch.append({
+            "word": word,
+            "phonetic": phonetic,
+            "meaning": meaning,
+            "zh_reading": zh_reading,
+            "fr_word": fr_word,
+            "fr_reading": fr_reading,
+            "category": category,
+            "phrases": json.dumps(phrases, ensure_ascii=False),
+            "image": image,
+            "level": "",
+            "lang": "en"
+        })
+    r = s.post(f"{BASE}/api/admin/words", json={"words": batch})
+    d = r.json()
+    print(f"[{'OK' if d.get('ok') else 'FAIL'}] Added: {d.get('added',0)}, Updated: {d.get('updated',0)}")
+
 if __name__ == "__main__":
     token = login()
     if not token:
@@ -718,8 +800,10 @@ if __name__ == "__main__":
 
     publish_knowledge()
     import_words()
+    import_multi_words()
     update_images()
 
     print("\n=== ALL DONE ===")
-    print(f"Total words: {len(ALL_WORDS)}")
+    print(f"Total words (old): {len(ALL_WORDS)}")
+    print(f"Total multilingual words: {len(MULTI_WORDS)}")
     print(f"Total images mapped: {len(IMG_MAP)}")
