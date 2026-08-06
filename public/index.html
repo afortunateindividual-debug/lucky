@@ -396,7 +396,7 @@
     .guide-tag{font-size:11px;color:#fff;background:var(--pri);padding:1px 8px;border-radius:8px;font-weight:600;}
     .u-input{padding:10px 14px;border:1px solid var(--border);border-radius:10px;font-size:14px;outline:none;width:100%;box-sizing:border-box;transition:.2s;}
     .u-input:focus{border-color:var(--pri);box-shadow:0 0 0 3px rgba(74,144,226,.12);}
-    /* ========== 课程市场 — 可学习类目（仿句游英语） ========== */
+    /* ========== 课程卡片 / 课程列表样式 ========== */
     .mk-page{padding:0;}
     .mk-header{text-align:center;padding:28px 0 16px;}
     .mk-header h2{font-size:24px;font-weight:800;color:#111827;margin-bottom:6px;}
@@ -724,7 +724,6 @@
             </div>
             <div class="nav-group">
                 <div class="nav-group-label">学习工具</div>
-                <div class="navi" data-page="market" onclick="navigateTo('market')"><span class="navi-ic">🛒</span> 课程市场</div>
                 <div class="navi" data-page="guide" onclick="navigateTo('guide')"><span class="navi-ic">🧭</span> 课程向导</div>
                 <div class="navi" data-page="lookup" onclick="navigateTo('lookup')"><span class="navi-ic">🔍</span> 查单词</div>
                 <div class="navi" data-page="knowledge" onclick="navigateTo('knowledge')"><span class="navi-ic">💡</span> 知识库</div>
@@ -1132,50 +1131,7 @@
             </div>
         </div>
 
-        <div class="pg" id="pg-market"><div class="page-body mk-page">
-            <div class="mk-header">
-                <h2>📚 课程市场</h2>
-                <p>精选优质课程体系，满足你的多元化学习需求</p>
-            </div>
-            <div class="mk-search-wrap">
-                <span class="mk-search-ic">🔍</span>
-                <input id="courseSearch" class="mk-search" placeholder="搜索适合你的全新课程…" oninput="onCourseSearch()">
-            </div>
-            <div class="mk-filter-row" id="mkCatFilter">
-                <button class="mk-ftab ${AppState.mkCat==='all'?'on':''}" data-mkcat="all" onclick="setMkCat('all')">全部</button>
-                <button class="mk-ftab ${AppState.mkCat==='grammar'?'on':''}" data-mkcat="grammar" onclick="setMkCat('grammar')">📐 句型语法</button>
-                <button class="mk-ftab ${AppState.mkCat==='mistake'?'on':''}" data-mkcat="mistake" onclick="setMkCat('mistake')">❌ 易错词句</button>
-            </div>
-            <div class="mk-filter-row" id="mkLangFilter">
-                <button class="mk-ftab ${AppState.marketLang==='all'?'on':''}" data-lang="all" onclick="setMarketLang('all')">全部语言</button>
-                <button class="mk-ftab ${AppState.marketLang==='en'?'on':''}" data-lang="en" onclick="setMarketLang('en')">🇬🇧 英语</button>
-                <button class="mk-ftab ${AppState.marketLang==='zh'?'on':''}" data-lang="zh" onclick="setMarketLang('zh')">🀄 中文</button>
-            </div>
-            <div class="mk-filter-row" id="mkLevelFilter">
-                <button class="mk-ftab ${!AppState.mkLevel?'on':''}" data-mklvl="" onclick="setMkLevel('')">全部难度</button>
-                <button class="mk-ftab ${AppState.mkLevel==='零基础'?'on':''}" data-mklvl="零基础" onclick="setMkLevel('零基础')">0基础</button>
-                <button class="mk-ftab ${AppState.mkLevel==='小学'?'on':''}" data-mklvl="小学" onclick="setMkLevel('小学')">双语动漫</button>
-                <button class="mk-ftab ${AppState.mkLevel===''初中'?'on':''}" data-mklvl="初中" onclick="setMkLevel('初中')">课本同步</button>
-                <button class="mk-ftab ${AppState.mkLevel==='高中'?'on':''}" data-mklvl="高中" onclick="setMkLevel('高中')">面试备考</button>
-                <button class="mk-ftab ${AppState.mkLevel=='大学'?'on':''}" data-mklvl="大学" onclick="setMkLevel('大学')">职场商务</button>
-                <button class="mk-ftab ${AppState.mkLevel==='雅思'?'on':''}" data-mklvl="雅思" onclick="setMkLevel('雅思')">小语种</button>
-            </div>
-            <div class="mk-stats" id="mkStats">共找到 <b>0</b> 门课程</div>
-            <div class="quick-entry-grid" id="quickEntries">
-                <div class="quick-entry qe-grammar" onclick="navigateTo('knowledge')">
-                    <div class="quick-entry-ic">📐</div><div class="quick-entry-title">各类句型语法点</div>
-                    <div class="quick-entry-desc">语法图解·发音技巧<br>文化知识·学习方法</div>
-                    <div class="quick-entry-count" id="qgCount">-- 篇</div>
-                </div>
-                <div class="quick-entry qe-mistake" onclick="navigateTo('mistakes')">
-                    <div class="quick-entry-ic">❌</div><div class="quick-entry-title">易错词句</div>
-                    <div class="quick-entry-desc">智能错因分析<br>针对性强化练习</div>
-                    <div class="quick-entry-count" id="qmCount">-- 题</div>
-                </div>
-            </div>
-            <div id="courseList" class="cat-grid"></div>
-        </div></div>
-        <div class="pg" id="pg-guide"><div class="page-header"><div class="page-title">🧭 课程向导</div></div><div class="page-body" id="guideBody"><div class="card"><p style="text-align:center;padding:40px;color:var(--gray);">加载中…</p></div></div></div>
+                <div class="pg" id="pg-guide"><div class="page-header"><div class="page-title">🧭 课程向导</div></div><div class="page-body" id="guideBody"><div class="card"><p style="text-align:center;padding:40px;color:var(--gray);">加载中…</p></div></div></div>
         <div class="pg" id="pg-mistakes"><div class="page-header"><div class="page-title">❌ 错题本</div></div><div class="page-body"><div class="card"><p style="text-align:center;padding:40px;color:var(--gray);">错题本 — 深色主题，智能错因分析与针对性练习</p></div></div></div>
         <div class="pg" id="pg-lookup"><div class="page-header"><div class="page-title">🔍 查单词</div></div><div class="page-body">
             <div class="card" style="margin-bottom:16px;"><input id="dictSearch" class="u-input" placeholder="🔍 输入单词查询释义、音标、例句…" oninput="onDictSearch()"></div>
@@ -1256,7 +1212,7 @@
         <!-- 课程详情页 -->
         <div class="pg" id="pg-course-detail">
             <div class="page-header">
-                <button class="btn-ghost" onclick="navigateTo('market')">← 返回市场</button>
+                <button class="btn-ghost" onclick="navigateTo('guide')">← 返回课程向导</button>
                 <div class="page-title">课程详情</div>
             </div>
             <div class="page-body" id="courseDetailBody">
@@ -1370,9 +1326,6 @@ const AppState = {
     currentCourse: null,            // 当前查看的课程详情 { id, lang }
     currentLessons: null,           // 当前课程章节列表（含 content）
     currentLessonId: null,          // 当前打开查看的章节 id
-    marketLang: 'all',              // 课程市场语言筛选：all/en/zh
-    mkCat: 'all',                     // 市场类目筛选：all/grammar/mistake
-    mkLevel: '',                     // 市场难度筛选：空=全部
     vocabCourseId: null,            // 当前选中的课程（course 模式）
     practice: { courseId: null, sentences: [], idx: 0, mode: 'dictation', quizzes: [], quizIdx: 0 },  // 句子练习状态（mode: dictation/choice/listen）
     user: {
@@ -1587,7 +1540,6 @@ function navigateTo(page) {
     const pg = document.getElementById(`pg-${page}`);
     if (pg) pg.classList.add('on');
     if (page === 'home') renderHome();
-    if (page === 'market') renderCourses();
     if (page === 'lookup') renderLookup();
     if (page === 'knowledge') renderKnowledge();
     if (page === 'admin') renderAdmin();
@@ -1773,7 +1725,6 @@ function renderMistakes() {
 //  BUSINESS PAGES (真实 API)
 // ============================================================
 let _searchTimer;
-function onCourseSearch(){ clearTimeout(_searchTimer); _searchTimer = setTimeout(renderCourses, 250); }
 function onDictSearch(){ clearTimeout(_searchTimer); _searchTimer = setTimeout(renderLookup, 250); }
 function setDictCat(c){ AppState.dictCat = c; renderLookup(); }
 
@@ -1824,89 +1775,6 @@ async function renderHome() {
     } catch (e) {
         list.innerHTML = '<p style="color:var(--gray);padding:20px;">加载失败，请确认后端已启动</p>';
     }
-}
-function setMarketLang(lang) {
-    AppState.marketLang = lang;
-    document.querySelectorAll('#mkLangFilter .mk-ftab').forEach(b => b.classList.toggle('on', b.dataset.lang === lang));
-    renderCourses();
-}
-function setMkCat(cat) {
-    AppState.mkCat = cat;
-    document.querySelectorAll('#mkCatFilter .mk-ftab').forEach(b => b.classList.toggle('on', b.dataset.mkcat === cat));
-    renderCourses();
-}
-function setMkLevel(lvl) {
-    AppState.mkLevel = lvl;
-    document.querySelectorAll('#mkLevelFilter .mk-ftab').forEach(b => b.classList.toggle('on', b.dataset.mklvl === lvl));
-    renderCourses();
-}
-async function renderCourses() {
-    var list = document.getElementById('courseList');
-    if (!list) return;
-    list.innerHTML = '<p style="color:var(--gray);padding:40px;text-align:center;">加载中…</p>';
-    try {
-        var q = (document.getElementById('courseSearch').value || '').trim();
-        var params = new URLSearchParams();
-        if (q) params.set('q', q);
-        if (AppState.marketLang && AppState.marketLang !== 'all') params.set('lang', AppState.marketLang);
-        if (AppState.mkLevel) params.set('level', AppState.mkLevel);
-        var qs = params.toString();
-        var data = await apiGet('/api/courses' + (qs ? '?' + qs : ''));
-        var courses = data.courses || [];
-
-        // 类目筛选（前端过滤）
-        if (AppState.mkCat === 'grammar') {
-            courses = courses.filter(function(c) { return c.category === '语法' || c.category === '拼读' || c.tags.indexOf('语法') >= 0; });
-        } else if (AppState.mkCat === 'mistake') {
-            courses = courses.filter(function(c) { return c.category === '应试' || c.tags.indexOf('技巧') >= 0 || c.tags.indexOf('应试') >= 0; });
-        }
-
-        // Update stats
-        var statsEl = document.getElementById('mkStats');
-        if (statsEl) statsEl.innerHTML = '共找到 <b>' + courses.length + '</b> 门课程';
-
-        // Update quick entry counts
-        fetchQuickCounts();
-
-        if (!courses.length) {
-            list.innerHTML = '<p style="color:var(--gray);padding:40px;text-align:center;">没有找到相关课程，试试切换筛选条件</p>';
-            return;
-        }
-
-        // 渐变色循环
-        var gradients = ['cg-blue','cg-green','cg-orange','cg-purple','cg-pink','cg-red','cg-teal','cg-yellow','cg-indigo','cg-cyan','cg-lime','cg-slate'];
-        list.innerHTML = courses.map(function(c, idx) {
-            var g = gradients[idx % gradients.length];
-            var tagCls = c.price > 0 ? 'paid' : 'free';
-            var tagText = c.price > 0 ? ('\u00a5' + c.price) : '\u514d\u8d39';
-            var hotTag = c.views > 1500 ? '<span class="cat-tag hot">\u70ed</span>' : '';
-            return '<div class="cat-card" onclick="openCourseDetail(' + c.id + ')">' +
-                '<div class="cat-cover ' + g + '" style="position:relative;overflow:hidden;">' +
-                    '<div class="cat-cover-bg"></div>' +
-                    (isCoverImg(c.cover) ? coverImgTag(c.cover) : '<span>' + (c.cover || '\ud83d\udcdc') + '</span>') +
-                    '<span class="cat-tag ' + tagCls + '">' + tagText + '</span>' +
-                    hotTag +
-                '</div>' +
-                '<div class="cat-body">' +
-                    '<div class="cat-title">' + escHtml(c.title) + '</div>' +
-                    '<div class="cat-meta"><span>\ud83d\udcbc ' + (c.level || '') + '</span><span>\ud83d\udcc5 ' + (c.lessons_count || 0) + '\u8282</span></div>' +
-                    '<div class="cat-meta" style="margin-top:4px;"><span>\ud83d\udc41 ' + (c.views || 0) + '\u4eba\u5df2\u52a0\u5165</span></div>' +
-                '</div></div>';
-        }).join('');
-    } catch (e) {
-        list.innerHTML = '<p style="color:var(--err);padding:40px;text-align:center;">\u52a0\u8f7d\u5931\u8d25\uff0c\u8bf7\u786e\u8ba4\u540e\u7aef\u5df2\u542f\u52a8</p>';
-    }
-}
-
-// Fetch counts for quick entries
-async function fetchQuickCounts() {
-    try {
-        var kData = await apiGet('/api/knowledge');
-        var qgEl = document.getElementById('qgCount');
-        if (qgEl) qgEl.textContent = (kData.articles || []).length + ' \u7bc7';
-        var qmEl = document.getElementById('qmCount');
-        if (qmEl) qmEl.textContent = '-- \u9898';
-    } catch(e) {}
 }
 
 // Helper: escape HTML
@@ -2060,7 +1928,7 @@ async function renderAdmin() {
     <div class="admin-intro">
       <div>
         <div class="admin-intro-t">🛠 内容管理</div>
-        <div class="admin-intro-d">自助上传与管理课程、章节与知识库，支持多格式智能拆解。内容创建后即时同步到课程市场与知识库。</div>
+        <div class="admin-intro-d">自助上传与管理课程、章节与知识库，支持多格式智能拆解。内容创建后即时同步到主页推荐与知识库。</div>
       </div>
       <div class="admin-stats">
         <div class="admin-stat"><b>${courseCount}</b><span>课程</span></div>
@@ -2160,7 +2028,7 @@ async function renderAdmin() {
       ` : ''}
       <div id="adminManage" class="admin-manage"></div>
     </div>
-    <p class="admin-tip">提示：添加后立即可在「课程市场 / 知识库」看到。词汇与对话请按上方格式填写，一行一条。</p>
+    <p class="admin-tip">提示：添加后立即可在「主页推荐 / 知识库」看到。词汇与对话请按上方格式填写，一行一条。</p>
   `;
   renderAdminManage();
 }
@@ -2523,7 +2391,7 @@ async function renderMyCourses() {
         }
         html += '</div>';
         if (!courses.length) {
-            html += '<div class="card"><p style="padding:30px;text-align:center;color:var(--gray);">还没有加入课程，去课程市场看看吧～</p></div>';
+            html += '<div class="card"><p style="padding:30px;text-align:center;color:var(--gray);">还没有加入课程，去课程向导看看吧～</p></div>';
         } else {
             html += '<h3 style="font-size:16px;font-weight:700;margin:20px 0 12px;">全部课程</h3><div class="biz-grid">';
             html += courses.map(c => `
@@ -2862,7 +2730,7 @@ function renderReaderSentence() {
     if (progEl) progEl.textContent = (ReaderState.idx + 1) + ' / ' + ReaderState.sentences.length;
 }
 
-/* escHtml moved to renderCourses section above */
+/* escHtml 工具函数（见下方定义） */
 
 function splitWords(text) {
     if (!text) return [];
@@ -3035,7 +2903,7 @@ async function loadPractice(courseId) {
 }
 function backFromPractice() {
     if (AppState.practice.courseId && AppState.currentCourse) navigateTo('course-detail');
-    else navigateTo('market');
+    else navigateTo('guide');
 }
 function renderPractice() {
     const wrap = document.getElementById('practiceBody');
