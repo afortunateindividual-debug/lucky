@@ -1822,7 +1822,8 @@ app.post('/api/admin/words', (req, res) => {
   const arr = Array.isArray(req.body && req.body.words) ? req.body.words : [];
   if (!arr.length) return res.status(400).json({ error: '缺少单词数据' });
   const ins = db.prepare('INSERT INTO words (word, phonetic, meaning, ru_meaning, example, example2, image, level, lang, category, zh_reading, fr_word, fr_reading, phrases) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)');
-  const upd = db.prepare('UPDATE words SET phonetic=?,meaning=?,ru_meaning=?,example=?,example2=?,image=?,level=?,lang=?,category=?,zh_reading=?,fr_word=?,fr_reading=?,phrases=? WHERE word=?');
+  const selOne = db.prepare('SELECT * FROM words WHERE id=?');
+  const upd = db.prepare('UPDATE words SET phonetic=?,meaning=?,ru_meaning=?,example=?,example2=?,image=?,level=?,lang=?,category=?,zh_reading=?,fr_word=?,fr_reading=?,phrases=? WHERE id=?');
   let added = 0, updated = 0;
   const tx = db.transaction(() => {
     for (const it of arr) {
@@ -1832,7 +1833,25 @@ app.post('/api/admin/words', (req, res) => {
       const key = w.toLowerCase();
       const exist = db.prepare('SELECT id FROM words WHERE LOWER(word)=?').get(key);
       if (exist) {
-        upd.run(it.phonetic || '', it.meaning || '', it.ru_meaning || '', it.example || '', it.example2 || '', it.image || '📝', it.level || '', it.lang || 'en', it.category || '', it.zh_reading || '', it.fr_word || '', it.fr_reading || '', it.phrases || '', w);
+        const cur = selOne.get(exist.id);
+        // 非破坏性更新：本次请求未提供三语字段时保留已有值，避免 import_words 覆盖 import_multi_words 写入的三语数据
+        const zh = (it.zh_reading !== undefined && it.zh_reading !== '') ? it.zh_reading : (cur.zh_reading || '');
+        const fr = (it.fr_word !== undefined && it.fr_word !== '') ? it.fr_word : (cur.fr_word || '');
+        const frp = (it.fr_reading !== undefined && it.fr_reading !== '') ? it.fr_reading : (cur.fr_reading || '');
+        const ph = (it.phrases !== undefined && it.phrases !== '') ? it.phrases : (cur.phrases || '');
+        upd.run(
+          it.phonetic || cur.phonetic || '',
+          it.meaning || cur.meaning || '',
+          it.ru_meaning || cur.ru_meaning || '',
+          it.example || cur.example || '',
+          it.example2 || cur.example2 || '',
+          it.image || cur.image || '📝',
+          it.level || cur.level || '',
+          it.lang || cur.lang || 'en',
+          it.category || cur.category || '',
+          zh, fr, frp, ph,
+          exist.id
+        );
         updated++;
       } else {
         ins.run(w, it.phonetic || '', it.meaning || '', it.ru_meaning || '', it.example || '', it.example2 || '', it.image || '📝', it.level || '', it.lang || 'en', it.category || '', it.zh_reading || '', it.fr_word || '', it.fr_reading || '', it.phrases || '');
