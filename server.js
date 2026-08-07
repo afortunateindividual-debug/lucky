@@ -190,6 +190,27 @@ db.exec(`CREATE TABLE IF NOT EXISTS practice_quizzes (
 
 // ---------- 课程主题内容（真实差异化章节材料，中英文通用） ----------
 // 英文：dialogue[{en,zh}]  vocab[{w,ph,zh}]  ；中文：dialogue[{zh,py,en}]  vocab[{w,ph,zh}]（w=汉字 ph=拼音 zh=英文释义）
+// 分类通用内容：当某课程没有精确 COURSE_THEMES 时，按 category 生成非空章节（对话/词汇/语法/技巧），避免空壳
+const GENERIC_BY_CATEGORY = {
+  '拼读': { dialogues:[{en:'The cat sat on the map.',zh:'猫坐在地图上。'},{en:'A big pig digs in the mud.',zh:'大猪在泥里挖。'}], vocab:[{w:'cat',ph:'/kæt/',zh:'猫',pos:'名词'},{w:'map',ph:'/mæp/',zh:'地图',pos:'名词'},{w:'pig',ph:'/pɪɡ/',zh:'猪',pos:'名词'},{w:'sun',ph:'/sʌn/',zh:'太阳',pos:'名词'},{w:'box',ph:'/bɒks/',zh:'盒子',pos:'名词'}], grammar:'CVC 结构：辅音+元音+辅音，先发首音再滑到尾音。', tip:'用押韵词对练，建立音形对应最快。' },
+  '口语': { dialogues:[{en:'How are you today?',zh:'你今天好吗？'},{en:'Could you say that again, please?',zh:'能再说一遍吗？'}], vocab:[{w:'please',ph:'/pliːz/',zh:'请',pos:'其他'},{w:'thanks',ph:'/θæŋks/',zh:'谢谢',pos:'其他'},{w:'sorry',ph:'/ˈsɒri/',zh:'抱歉',pos:'其他'},{w:'help',ph:'/help/',zh:'帮助',pos:'动词'},{w:'friend',ph:'/frend/',zh:'朋友',pos:'名词'}], grammar:'礼貌用语：Could you / Would you mind + 动词原形。', tip:'每天用 5 个口语短句和真人对话或录音跟读。' },
+  '发音': { dialogues:[{en:'Please repeat after me.',zh:'请跟我读。'},{en:'Slow down, I cannot follow.',zh:'慢一点，我跟不上。'}], vocab:[{w:'sound',ph:'/saʊnd/',zh:'声音',pos:'名词'},{w:'mouth',ph:'/maʊθ/',zh:'嘴',pos:'名词'},{w:'tongue',ph:'/tʌŋ/',zh:'舌头',pos:'名词'},{w:'stress',ph:'/stres/',zh:'重音',pos:'名词'},{w:'rhythm',ph:'/ˈrɪðəm/',zh:'节奏',pos:'名词'}], grammar:'单词重音位置改变词义（如 record 名词前重、动词后重）。', tip:'录下自己的发音对比原声，最容易发现差距。' },
+  '语法': { dialogues:[{en:'She has finished her homework.',zh:'她已经做完作业了。'},{en:'If it rains, we will stay home.',zh:'如果下雨我们就待在家。'}], vocab:[{w:'because',ph:'/bɪˈkɒz/',zh:'因为',pos:'连词'},{w:'although',ph:'/ɔːlˈðəʊ/',zh:'虽然',pos:'连词'},{w:'unless',ph:'/ənˈles/',zh:'除非',pos:'连词'},{w:'whether',ph:'/ˈweðə/',zh:'是否',pos:'连词'},{w:'while',ph:'/waɪl/',zh:'当…时',pos:'连词'}], grammar:'状语从句：时间/条件/让步，注意主从句时态呼应。', tip:'每学一个语法点，造 3 个自己的句子巩固。' },
+  '阅读': { dialogues:[{en:'What does this paragraph mainly talk about?',zh:'这段主要讲什么？'},{en:'I guess the answer from the context.',zh:'我根据上下文猜答案。'}], vocab:[{w:'paragraph',ph:'/ˈpærəɡrɑːf/',zh:'段落',pos:'名词'},{w:'main',ph:'/meɪn/',zh:'主要的',pos:'形容词'},{w:'context',ph:'/ˈkɒntekst/',zh:'上下文',pos:'名词'},{w:'detail',ph:'/ˈdiːteɪl/',zh:'细节',pos:'名词'},{w:'guess',ph:'/ɡes/',zh:'猜测',pos:'动词'}], grammar:'skim（略读）抓主旨，scan（扫读）找细节。', tip:'先读题再读文，定位快、正确率高。' },
+  '词汇': { dialogues:[{en:'What does this word mean?',zh:'这个词是什么意思？'},{en:'Can you use it in a sentence?',zh:'能用在句子里吗？'}], vocab:[{w:'memory',ph:'/ˈmeməri/',zh:'记忆',pos:'名词'},{w:'review',ph:'/rɪˈvjuː/',zh:'复习',pos:'动词'},{w:'repeat',ph:'/rɪˈpiːt/',zh:'重复',pos:'动词'},{w:'daily',ph:'/ˈdeɪli/',zh:'每日的',pos:'形容词'},{w:'list',ph:'/lɪst/',zh:'列表',pos:'名词'}], grammar:'词根词缀记忆法：前缀表方向，后缀表词性。', tip:'按遗忘曲线间隔复习，记忆最牢。' },
+  '应试': { dialogues:[{en:'Read the whole passage first.',zh:'先通读全文。'},{en:'Pay attention to the key words.',zh:'注意关键词。'}], vocab:[{w:'passage',ph:'/ˈpæsɪdʒ/',zh:'文章',pos:'名词'},{w:'keyword',ph:'/ˈkiːwɜːd/',zh:'关键词',pos:'名词'},{w:'score',ph:'/skɔː/',zh:'分数',pos:'名词'},{w:'strategy',ph:'/ˈstrætədʒi/',zh:'策略',pos:'名词'},{w:'practice',ph:'/ˈpræktɪs/',zh:'练习',pos:'名词'}], grammar:'先主旨后细节，排除绝对化选项。', tip:'真题限时训练，培养考试节奏感。' },
+  '写作': { dialogues:[{en:'Could you check my essay?',zh:'能帮我看下作文吗？'},{en:'Please make it more formal.',zh:'请写得更正式些。'}], vocab:[{w:'essay',ph:'/ˈeseɪ/',zh:'作文',pos:'名词'},{w:'formal',ph:'/ˈfɔːml/',zh:'正式的',pos:'形容词'},{w:'paragraph',ph:'/ˈpærəɡrɑːf/',zh:'段落',pos:'名词'},{w:'topic',ph:'/ˈtɒpɪk/',zh:'主题',pos:'名词'},{w:'clear',ph:'/klɪə/',zh:'清晰的',pos:'形容词'}], grammar:'总分总结构：开头点题、中间展开、结尾升华。', tip:'背 5 个万能句型，考试直接套。' },
+  '文化': { dialogues:[{en:'That slang is so cool!',zh:'那个俚语太酷了！'},{en:'What does that expression mean?',zh:'那个表达什么意思？'}], vocab:[{w:'slang',ph:'/slæŋ/',zh:'俚语',pos:'名词'},{w:'expression',ph:'/ɪkˈspreʃn/',zh:'表达',pos:'名词'},{w:'idiom',ph:'/ˈɪdiəm/',zh:'习语',pos:'名词'},{w:'custom',ph:'/ˈkʌstəm/',zh:'习俗',pos:'名词'},{w:'trend',ph:'/trend/',zh:'潮流',pos:'名词'}], grammar:'习语不能逐字翻译，要整体理解。', tip:'看原版影视剧，在地道语境里记表达。' },
+  '综合': { dialogues:[{en:'Let us review what we learned.',zh:'我们复习一下学过的内容。'},{en:'Any questions about today’s lesson?',zh:'今天的内容有疑问吗？'}], vocab:[{w:'review',ph:'/rɪˈvjuː/',zh:'复习',pos:'动词'},{w:'lesson',ph:'/ˈlesn/',zh:'课',pos:'名词'},{w:'improve',ph:'/ɪmˈpruːv/',zh:'提高',pos:'动词'},{w:'daily',ph:'/ˈdeɪli/',zh:'每日的',pos:'形容词'},{w:'goal',ph:'/ɡəʊl/',zh:'目标',pos:'名词'}], grammar:'综合运用：听说读写交替训练，避免偏科。', tip:'每天固定 20 分钟，比周末突击更有效。' },
+  '商务': { dialogues:[{en:'Let us schedule a meeting.',zh:'我们安排个会议吧。'},{en:'I will follow up by email.',zh:'我会邮件跟进。'}], vocab:[{w:'meeting',ph:'/ˈmiːtɪŋ/',zh:'会议',pos:'名词'},{w:'schedule',ph:'/ˈʃedjuːl/',zh:'安排',pos:'动词'},{w:'client',ph:'/ˈklaɪənt/',zh:'客户',pos:'名词'},{w:'report',ph:'/rɪˈpɔːt/',zh:'报告',pos:'名词'},{w:'agree',ph:'/əˈɡriː/',zh:'同意',pos:'动词'}], grammar:'商务沟通：清晰、简洁、有行动项（action item）。', tip:'邮件三要素：主题、要点、下一步。' },
+  '基础': { dialogues:[{en:'I am a beginner.',zh:'我是初学者。'},{en:'Please speak slowly.',zh:'请说慢一点。'}], vocab:[{w:'beginner',ph:'/bɪˈɡɪnə/',zh:'初学者',pos:'名词'},{w:'slowly',ph:'/ˈsləʊli/',zh:'缓慢地',pos:'副词'},{w:'easy',ph:'/ˈiːzi/',zh:'容易的',pos:'形容词'},{w:'start',ph:'/stɑːt/',zh:'开始',pos:'动词'},{w:'learn',ph:'/lɜːn/',zh:'学习',pos:'动词'}], grammar:'先掌握最高频 100 词，覆盖日常八成场景。', tip:'从和自己的生活相关的词开始记。' },
+  '教材同步': { dialogues:[{en:'Open your book to page 10.',zh:'把书翻到第10页。'},{en:'Let us read the text together.',zh:'我们一起读课文。'}], vocab:[{w:'text',ph:'/tekst/',zh:'课文',pos:'名词'},{w:'page',ph:'/peɪdʒ/',zh:'页',pos:'名词'},{w:'unit',ph:'/ˈjuːnɪt/',zh:'单元',pos:'名词'},{w:'exercise',ph:'/ˈeksəsaɪz/',zh:'练习',pos:'名词'},{w:'word',ph:'/wɜːd/',zh:'单词',pos:'名词'}], grammar:'按单元主题串联词汇与句型，循序渐进。', tip:'课前预习生词，课后再做配套练习。' },
+  '场景': { dialogues:[{en:'Where is the nearest bank?',zh:'最近的银行在哪儿？'},{en:'I would like to order coffee.',zh:'我想点杯咖啡。'}], vocab:[{w:'bank',ph:'/bæŋk/',zh:'银行',pos:'名词'},{w:'order',ph:'/ˈɔːdə/',zh:'点单',pos:'动词'},{w:'near',ph:'/nɪə/',zh:'附近',pos:'介词'},{w:'help',ph:'/help/',zh:'帮助',pos:'动词'},{w:'need',ph:'/niːd/',zh:'需要',pos:'动词'}], grammar:'问路与点单：疑问词 + 名词/动词，礼貌加 please。', tip:'把出行高频场景各背 5 句，实战不慌。' },
+  '听力': { dialogues:[{en:'Could you play it again?',zh:'能再放一遍吗？'},{en:'I caught the main idea.',zh:'我抓住了大意。'}], vocab:[{w:'listen',ph:'/ˈlɪsn/',zh:'听',pos:'动词'},{w:'repeat',ph:'/rɪˈpiːt/',zh:'重复',pos:'动词'},{w:'idea',ph:'/aɪˈdɪə/',zh:'意思',pos:'名词'},{w:'slow',ph:'/sləʊ/',zh:'慢的',pos:'形容词'},{w:'clear',ph:'/klɪə/',zh:'清晰的',pos:'形容词'}], grammar:'精听三遍：盲听→看文听→跟读。', tip:'从慢速材料起步，逐步切常速。' }
+};
+function genericTheme(c) {
+  return GENERIC_BY_CATEGORY[c.category] || GENERIC_BY_CATEGORY['综合'];
+}
 const COURSE_THEMES = {
   '新课标高中英语必修一': {
     dialogues: [{ en: 'Welcome back to school, everyone.', zh: '欢迎大家回到学校。' }, { en: 'Could you tell me your summer plan?', zh: '你能告诉我你的暑假计划吗？' }],
@@ -1241,7 +1262,7 @@ function buildLessons(theme) {
 
 // ---------- 种子数据（库为空时插入示例） ----------
 function seedIfEmpty() {
-  if (db.prepare('SELECT COUNT(*) c FROM courses').get().c > 0) return;
+  const firstRun = db.prepare('SELECT COUNT(*) c FROM courses').get().c === 0;
 
   const courses = [
     { title: '新课标高中英语必修一', cover: '📘', level: '高中', category: '教材同步', lang: 'en', description: '紧扣新课标，逐课精讲词汇语法，配套听说读写训练。', tags: ['新课标', '教材'], price: 0, views: 1280, author: 'PolyLingua AI', lessons: 6 },
@@ -1259,7 +1280,29 @@ function seedIfEmpty() {
     { title: '旅游汉语轻松说', cover: '🏯', level: '入门', category: '场景', lang: 'zh', description: '出国旅游、景点购物、餐厅点单，最常用的汉语开口就说。', tags: ['汉语', '旅游'], price: 0, views: 860, author: 'PolyLingua AI', lessons: 6 },
     { title: '日常中文口语', cover: '💬', level: '入门', category: '口语', lang: 'zh', description: '从打招呼到约朋友，老外也能聊的中文日常对话。', tags: ['汉语', '口语'], price: 0, views: 1102, author: 'Lucky老师', lessons: 6 },
     { title: 'HSK1汉字与语法基础', cover: '🀄', level: 'HSK1', category: '基础', lang: 'zh', description: '系统学150核心词与基本句式，打好汉语根基。', tags: ['HSK', '基础'], price: 29, views: 540, author: 'PolyLingua AI', lessons: 6 },
-    { title: '外贸商务英语开口沟通实战陪跑', cover: '💼', level: '职场', category: '商务', lang: 'en', description: '为零基础外贸新人打造的12周开口陪跑：从第一次见客户到独立完成外贸全流程英语沟通。', tags: ['外贸','商务'], price: 2980, views: 320, author: 'PolyLingua AI', lessons: 12 }
+    { title: '外贸商务英语开口沟通实战陪跑', cover: '💼', level: '职场', category: '商务', lang: 'en', description: '为零基础外贸新人打造的12周开口陪跑：从第一次见客户到独立完成外贸全流程英语沟通。', tags: ['外贸','商务'], price: 2980, views: 320, author: 'PolyLingua AI', lessons: 12 },
+    { title: '英语字母与自然拼读启蒙', cover: '🔤', level: '零基础', category: '拼读', lang: 'en', description: '从 Aa 到 Zz，建立字母与发音的初印象。', tags: ['字母','拼读'], price: 0, views: 1500, author: 'PolyLingua AI', lessons: 6 },
+    { title: '零基础日常问候速成', cover: '👋', level: '零基础', category: '口语', lang: 'en', description: 'Hello / Thanks / Sorry，十句打通陌生人破冰。', tags: ['问候','口语'], price: 0, views: 1200, author: 'Lucky老师', lessons: 6 },
+    { title: '英语发音基础课', cover: '🗣️', level: '零基础', category: '发音', lang: 'en', description: '元音辅音逐个练，告别中式发音。', tags: ['发音','基础'], price: 0, views: 980, author: 'PolyLingua AI', lessons: 6 },
+    { title: '小学英语语法入门', cover: '📐', level: '小学', category: '语法', lang: 'en', description: 'be 动词、名词单复数、一般现在时，打牢地基。', tags: ['语法','小学'], price: 0, views: 1600, author: 'Lucky老师', lessons: 6 },
+    { title: '少儿英语故事阅读', cover: '📖', level: '小学', category: '阅读', lang: 'en', description: '用分级读物培养语感，在故事里学单词。', tags: ['阅读','故事'], price: 0, views: 1400, author: 'Lucky老师', lessons: 6 },
+    { title: '初中核心词汇突破', cover: '📚', level: '初中', category: '词汇', lang: 'en', description: '中考高频词分类记忆，配例句不枯燥。', tags: ['词汇','初中'], price: 0, views: 1300, author: 'PolyLingua AI', lessons: 6 },
+    { title: '初中英语完形填空技巧', cover: '🧩', level: '初中', category: '应试', lang: 'en', description: '上下文逻辑加固定搭配，完形稳拿分。', tags: ['完形','技巧'], price: 0, views: 1100, author: 'Lucky老师', lessons: 6 },
+    { title: '高中英语阅读理解攻略', cover: '👁️', level: '高中', category: '阅读', lang: 'en', description: '速读定位加长难句拆解，阅读不再怕。', tags: ['阅读','高中'], price: 0, views: 1250, author: 'PolyLingua AI', lessons: 6 },
+    { title: '高考英语书面表达（作文）', cover: '✍️', level: '高中', category: '写作', lang: 'en', description: '应用文模板加高级句型，作文冲高分。', tags: ['作文','高考'], price: 0, views: 1080, author: 'Lucky老师', lessons: 6 },
+    { title: '考研英语核心词汇与长难句', cover: '🎓', level: '大学', category: '词汇', lang: 'en', description: '考研高频词加真题长难句精读。', tags: ['考研','词汇'], price: 0, views: 900, author: 'PolyLingua AI', lessons: 6 },
+    { title: '专四专八词汇精讲', cover: '📚', level: '大学', category: '词汇', lang: 'en', description: '英语专业四级八级核心词系统突破。', tags: ['专四','专八'], price: 0, views: 760, author: 'PolyLingua AI', lessons: 6 },
+    { title: '英语俚语与流行语天天学', cover: '💬', level: '实用', category: '文化', lang: 'en', description: 'native 才懂的俚语，让口语更地道。', tags: ['俚语','文化'], price: 0, views: 1560, author: 'Lucky老师', lessons: 6 },
+    { title: '用英文歌学英语', cover: '🎵', level: '实用', category: '文化', lang: 'en', description: '在旋律里记单词、练听力、学发音。', tags: ['歌曲','听力'], price: 0, views: 1420, author: 'Lucky老师', lessons: 6 },
+    { title: '外企面试英语通关', cover: '💼', level: '职场', category: '口语', lang: 'en', description: '自我介绍加行为面试加反问，拿 offer。', tags: ['面试','职场'], price: 0, views: 880, author: '外籍考官Tom', lessons: 6 },
+    { title: '职场口语900句', cover: '💬', level: '职场', category: '口语', lang: 'en', description: '会议、邮件、汇报、社交全覆盖。', tags: ['职场','口语'], price: 0, views: 1020, author: '外籍考官Tom', lessons: 6 },
+    { title: '托福口语与写作训练', cover: '🎯', level: '雅思', category: '口语', lang: 'en', description: '独立与综合任务模板，逻辑与语料双补。', tags: ['托福','口语'], price: 0, views: 640, author: '外籍考官Tom', lessons: 6 },
+    { title: 'PTE学术英语冲刺', cover: '📊', level: '雅思', category: '综合', lang: 'en', description: '机器评分偏好训练，高分应答策略。', tags: ['PTE','学术'], price: 0, views: 520, author: 'PolyLingua AI', lessons: 6 },
+    { title: '英语语法系统课（零到进阶）', cover: '📐', level: '综合', category: '语法', lang: 'en', description: '从词法到句法，搭建完整语法框架。', tags: ['语法','系统'], price: 0, views: 1180, author: 'PolyLingua AI', lessons: 6 },
+    { title: '英语发音矫正训练', cover: '🗣️', level: '综合', category: '发音', lang: 'en', description: '常见发音误区逐个纠，说得准才听得懂。', tags: ['发音','矫正'], price: 0, views: 960, author: 'PolyLingua AI', lessons: 6 },
+    { title: 'HSK2日常交际汉语', cover: '🀄', level: '入门', category: '口语', lang: 'zh', description: '购物、就医、约会场景，流利的中文日常对话。', tags: ['HSK2','口语'], price: 0, views: 480, author: 'PolyLingua AI', lessons: 6 },
+    { title: 'HSK3工作与生活汉语', cover: '🀄', level: '入门', category: '综合', lang: 'zh', description: '处理工作邮件、安排旅行等实务汉语。', tags: ['HSK3','综合'], price: 0, views: 360, author: 'PolyLingua AI', lessons: 6 },
+    { title: '商务汉语轻松上手', cover: '💼', level: '入门', category: '商务', lang: 'zh', description: '会议、谈判、宴请，职场汉语一把抓。', tags: ['商务','汉语'], price: 0, views: 420, author: 'PolyLingua AI', lessons: 6 }
   ];
   const insC = db.prepare('INSERT INTO courses (title, cover, level, category, lang, description, tags, price, views, author, lessons_count) VALUES (?,?,?,?,?,?,?,?,?,?,?)');
   courses.forEach(c => {
@@ -1267,6 +1310,7 @@ function seedIfEmpty() {
     if (ex.c === 0) insC.run(c.title, c.cover, c.level, c.category, c.lang, c.description, JSON.stringify(c.tags), c.price, c.views, c.author, c.lessons);
   });
 
+  if (firstRun) {
   const words = [
     { word: 'Apple', phonetic: '/ˈæpl/', meaning: '苹果', example: 'I eat an apple every day.', image: '🍎', level: '小学', lang: 'en' },
     { word: 'Vocabulary', phonetic: '/vəˈkæbjələri/', meaning: '词汇', example: 'Reading books expands your vocabulary.', image: '📝', level: '初中', lang: 'en' },
@@ -1307,32 +1351,26 @@ function seedIfEmpty() {
   ];
   const insK = db.prepare('INSERT INTO knowledge (title, summary, cover, tag, content) VALUES (?,?,?,?,?)');
   knowledge.forEach(k => insK.run(k.title, k.summary, k.cover, k.tag, k.content));
+  }
 }
 seedIfEmpty();
 
 // ---------- 内容种子（章节 / 句子练习，独立于课程种子，库已存在也能补种） ----------
 function seedContent() {
-  // 每门课由主题生成 6 章真实内容（含对话/词汇/语法/技巧）
-  if (db.prepare('SELECT COUNT(*) c FROM course_lessons').get().c === 0) {
+  // 每门课由主题生成章节（含对话/词汇/语法/技巧）；增量补种：已生成章节的课跳过，新课自动补
+  {
     const courses = db.prepare('SELECT id, title FROM courses ORDER BY id').all();
     const insL = db.prepare('INSERT INTO course_lessons (course_id, seq, title, subtitle, content) VALUES (?,?,?,?,?)');
     courses.forEach(c => {
       if (db.prepare('SELECT COUNT(*) c FROM course_lessons WHERE course_id=?').get(c.id).c > 0) return;
-      const theme = COURSE_THEMES[c.title];
-      const lessons = theme ? buildLessons(theme) : [
-        { t: '词汇与发音', s: '掌握本课核心词汇与地道发音', content: { dialogue: [], vocab: [], grammar: '', tip: '' } },
-        { t: '核心句型精讲', s: '拆解高频实用句型结构', content: { dialogue: [], vocab: [], grammar: '', tip: '' } },
-        { t: '听说实战训练', s: '跟读模仿，强化语感', content: { dialogue: [], vocab: [], grammar: '', tip: '' } },
-        { t: '语法难点突破', s: '攻克易错语法点', content: { dialogue: [], vocab: [], grammar: '', tip: '' } },
-        { t: '情景对话演练', s: '在真实场景中运用所学', content: { dialogue: [], vocab: [], grammar: '', tip: '' } },
-        { t: '综合测评与复习', s: '查漏补缺，巩固提升', content: { dialogue: [], vocab: [], grammar: '', tip: '' } }
-      ];
+      const theme = COURSE_THEMES[c.title] || genericTheme(c);
+      const lessons = buildLessons(theme);
       lessons.forEach((lt, i) => insL.run(c.id, i + 1, lt.t, lt.s, JSON.stringify(lt.content)));
     });
   }
 
-  // 句子听写练习池（含语法成分标注），英文+中文
-  if (db.prepare('SELECT COUNT(*) c FROM practice_sentences').get().c === 0) {
+  // 句子听写练习池（含语法成分标注），英文+中文；增量补种，已存在的课跳过
+  {
     const zhPool = [
       { sentence: '你好，很高兴认识你。', translation: 'Hello, nice to meet you.', tokens: [{w:'你好',tag:'问候'},{w:'很高兴',tag:'态度'},{w:'认识',tag:'动词'},{w:'你',tag:'宾语'}], lang: 'zh' },
       { sentence: '我想点一杯茶。', translation: 'I would like a cup of tea.', tokens: [{w:'我',tag:'主语'},{w:'想',tag:'能愿'},{w:'点',tag:'动词'},{w:'一杯茶',tag:'宾语'}], lang: 'zh' },
@@ -1360,6 +1398,7 @@ function seedContent() {
     const insS = db.prepare('INSERT INTO practice_sentences (course_id, seq, sentence, translation, tokens, lang) VALUES (?,?,?,?,?,?)');
     const courses = db.prepare('SELECT id, lang FROM courses ORDER BY id').all();
     courses.forEach((c, ci) => {
+      if (db.prepare('SELECT COUNT(*) c FROM practice_sentences WHERE course_id=?').get(c.id).c > 0) return;
       const pool = c.lang === 'zh' ? zhPool : enPool;
       for (let k = 0; k < 3; k++) {
         const s = pool[(ci * 3 + k) % pool.length];
@@ -1368,8 +1407,8 @@ function seedContent() {
     });
   }
 
-  // 练习题（选择题 + 听力题），英文+中文
-  if (db.prepare('SELECT COUNT(*) c FROM practice_quizzes').get().c === 0) {
+  // 练习题（选择题 + 听力题），英文+中文；增量补种，已存在的课跳过
+  {
     const zhSrc = [
       { s: '你好，很高兴认识你。', t: 'Hello, nice to meet you.' },
       { s: '我想点一杯茶。', t: 'I would like a cup of tea.' },
@@ -1398,6 +1437,7 @@ function seedContent() {
     const shuffle = (arr) => { const a = arr.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
     const insQ = db.prepare('INSERT INTO practice_quizzes (course_id, type, question, prompt, options, answer, explain, seq, lang) VALUES (?,?,?,?,?,?,?,?,?)');
     courses.forEach((c, ci) => {
+      if (db.prepare('SELECT COUNT(*) c FROM practice_quizzes WHERE course_id=?').get(c.id).c > 0) return;
       const src = c.lang === 'zh' ? zhSrc : enSrc;
       for (let k = 0; k < 4; k++) {
         const item = src[(ci * 3 + k) % src.length];
@@ -1472,6 +1512,15 @@ const app = express();
 app.use(express.json({ limit: '8mb' }));
 app.use(express.static(path.join(__dirname, 'public')));
 
+// ---------- 新用户预置「我的课程」（幂等：已加入则跳过） ----------
+function presetUserCourses(uid) {
+  const recs = ['零基础成人英语', '小学英语口语启蒙', '旅游英语随手说', '日常中文口语', '英语发音基础课', '职场口语900句'];
+  const ins = db.prepare("INSERT OR IGNORE INTO user_courses (user_id, course_id, progress, joined_at) VALUES (?, ?, 0, datetime('now','localtime'))");
+  recs.forEach(t => {
+    const c = db.prepare('SELECT id FROM courses WHERE title=?').get(t);
+    if (c) ins.run(uid, c.id);
+  });
+}
 // ---------- 注册 ----------
 app.post('/api/register', (req, res) => {
   const { nickname, phone, password } = req.body || {};
@@ -1495,6 +1544,7 @@ app.post('/api/register', (req, res) => {
   db.prepare(
     "INSERT INTO sessions (token, user_id, expires_at) VALUES (?, ?, datetime('now','localtime', '+30 days'))"
   ).run(token, user.id);
+  presetUserCourses(user.id);
   res.json({ token, user: publicUser(user) });
 });
 
@@ -1517,6 +1567,7 @@ app.post('/api/login', (req, res) => {
   db.prepare(
     "INSERT INTO sessions (token, user_id, expires_at) VALUES (?, ?, datetime('now','localtime', '+30 days'))"
   ).run(token, user.id);
+  if (db.prepare('SELECT COUNT(*) c FROM user_courses WHERE user_id=?').get(user.id).c === 0) presetUserCourses(user.id);
   res.json({ token, user: publicUser(user) });
 });
 
@@ -1813,6 +1864,38 @@ app.post('/api/admin/knowledge', (req, res) => {
   if (!b.title) return res.status(400).json({ error: '缺少文章标题' });
   db.prepare('INSERT INTO knowledge (title, summary, cover, tag, content) VALUES (?,?,?,?,?)').run(b.title, b.summary || '', b.cover || '💡', b.tag || '', b.content || '');
   res.json({ ok: true });
+});
+
+// 批量 upsert 课程（按 title 匹配）：直接补数据，绕过部署重置
+app.post('/api/admin/courses', (req, res) => {
+  const uid = getUid(req);
+  if (!uid) return res.status(401).json({ error: '请先登录' });
+  const arr = Array.isArray(req.body && req.body.courses) ? req.body.courses : [];
+  if (!arr.length) return res.status(400).json({ error: '缺少课程数据' });
+  const ins = db.prepare('INSERT INTO courses (title, cover, level, category, lang, description, tags, price, views, author, lessons_count) VALUES (?,?,?,?,?,?,?,?,?,?,?)');
+  const selT = db.prepare('SELECT * FROM courses WHERE title=?');
+  const upd = db.prepare('UPDATE courses SET cover=?, level=?, category=?, lang=?, description=?, tags=?, price=?, views=?, author=?, lessons_count=? WHERE title=?');
+  let added = 0, updated = 0;
+  const tx = db.transaction(() => {
+    for (const it of arr) {
+      if (!it || !it.title) continue;
+      const t = String(it.title).trim();
+      if (!t) continue;
+      const exist = selT.get(t);
+      const cover = it.cover || '📚', level = it.level || '', category = it.category || '', lang = it.lang || 'en',
+            desc = it.description || '', tags = JSON.stringify(it.tags || []), price = it.price || 0,
+            views = it.views || 0, author = it.author || 'PolyLingua AI', lessons = it.lessons_count || 6;
+      if (exist) {
+        upd.run(cover, level, category, lang, desc, tags, price, views, author, lessons, t);
+        updated++;
+      } else {
+        ins.run(t, cover, level, category, lang, desc, tags, price, views, author, lessons);
+        added++;
+      }
+    }
+  });
+  tx();
+  res.json({ ok: true, added, updated });
 });
 
 // ---------- 内容管理：批量导入单词库（按词性分类） ----------

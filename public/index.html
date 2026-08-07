@@ -1884,7 +1884,7 @@ async function renderGuide() {
     try {
         const data = await apiGet('/api/courses');
         const all = data.courses || [];
-        const groups = ['零基础','小学','初中','高中','大学','实用','职场','雅思','综合'];
+        const groups = ['零基础','小学','初中','高中','大学','实用','职场','雅思','综合','入门','HSK1'];
         const matched = groups.filter(g => all.some(c => c.level === g));
         if (!matched.length) { body.innerHTML = '<p style=\'color:var(--gray);padding:20px;\'>暂无课程</p>'; return; }
         let html = '<p style=\'color:var(--gray);font-size:13px;margin-bottom:8px;\'>根据你的水平，为你精选以下系列课程。点击任意课程查看详情并开始学习。</p>';
