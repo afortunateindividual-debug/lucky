@@ -303,6 +303,41 @@ const COURSE_THEMES = {
     grammar: '"是"字句：A 是 B。否定用"不是"。"很"表程度：很有意思。',
     tip: 'HSK1 需掌握 150 词、基本句式，配合笔画书写记忆更牢。'
   },
+  '课堂展示与演讲英语': {
+    dialogues: [
+      { en: 'Good morning, everyone. Let\'s get started.', zh: '大家早上好，我们开始吧。' },
+      { en: 'Today, I\'m going to talk about...', zh: '今天我将要讲的主题是……' },
+      { en: 'First of all, let me introduce myself.', zh: '首先，请允许我做一下自我介绍。' },
+      { en: 'Here\'s the outline of my presentation.', zh: '这是我本次展示的提纲。' },
+      { en: 'My presentation will be divided into three parts.', zh: '我的展示将分为三个部分。' },
+      { en: 'Let\'s begin with the background.', zh: '让我们从背景开始讲起。' },
+      { en: 'As you can see on this slide...', zh: '正如大家在这页幻灯片上看到的……' },
+      { en: 'This chart shows...', zh: '这张图表展示了……' },
+      { en: 'Now let\'s move on to the next point.', zh: '现在我们进入下一个要点。' },
+      { en: 'Before I move on, does anyone have any questions?', zh: '在我继续之前，有人有问题吗？' },
+      { en: 'This part might be a bit complex, so I\'ll explain it step by step.', zh: '这部分可能有点复杂，我会一步步解释。' }
+    ],
+    vocab: [
+      { w: 'presentation', ph: '/ˌpreznˈteɪʃn/', zh: '演示，展示', pos: '名词', phrases: ['Here is the outline of my presentation.', 'My presentation will be divided into three parts.'] },
+      { w: 'speaker', ph: '/ˈspiːkə(r)/', zh: '发言人，演讲者', pos: '名词', phrases: ['The speaker gave a great presentation.', 'Each speaker has five minutes.'] },
+      { w: 'audience', ph: '/ˈɔːdiəns/', zh: '听众，观众', pos: '名词', phrases: ['The audience was very engaged.', 'Address your audience directly.'] },
+      { w: 'introduce', ph: '/ˌɪntrəˈdjuːs/', zh: '介绍，引入', pos: '动词', phrases: ['First of all, let me introduce myself.', 'Let me introduce our next speaker.'] },
+      { w: 'topic', ph: '/ˈtɒpɪk/', zh: '主题，话题', pos: '名词', phrases: ['Today I am going to talk about this topic.', 'The topic of today\'s discussion is...'] },
+      { w: 'structure', ph: '/ˈstrʌktʃə(r)/', zh: '结构，框架', pos: '名词', phrases: ['A clear structure helps the audience follow.', 'The presentation has a logical structure.'] },
+      { w: 'section', ph: '/ˈsekʃn/', zh: '部分，章节', pos: '名词', phrases: ['This section covers the background.', 'Move on to the next section.'] },
+      { w: 'transition', ph: '/trænˈzɪʃn/', zh: '过渡，转折', pos: '名词', phrases: ['Use smooth transitions between points.', 'Now let us transition to the next topic.'] },
+      { w: 'example', ph: '/ɪɡˈzɑːmpl/', zh: '例子，实例', pos: '名词', phrases: ['For example, let us look at this case.', 'This is a good example of...'] },
+      { w: 'highlight', ph: '/ˈhaɪlaɪt/', zh: '强调，重点', pos: '动词/名词', phrases: ['I would like to highlight this key finding.', 'The highlight of the presentation was...'] },
+      { w: 'slide', ph: '/slaɪd/', zh: '幻灯片', pos: '名词', phrases: ['As you can see on this slide...', 'Please look at the next slide.'] },
+      { w: 'visual', ph: '/ˈvɪʒuəl/', zh: '视觉的；视觉材料', pos: '形容词/名词', phrases: ['Use visual aids to support your points.', 'Visuals help the audience understand better.'] },
+      { w: 'chart', ph: '/tʃɑːt/', zh: '图表', pos: '名词', phrases: ['This chart shows the growth trend.', 'Let us look at this bar chart.'] },
+      { w: 'data', ph: '/ˈdeɪtə/', zh: '数据', pos: '名词', phrases: ['The data supports our conclusion.', 'Based on the data we collected...'] },
+      { w: 'outline', ph: '/ˈaʊtlaɪn/', zh: '提纲，大纲', pos: '名词', phrases: ['Here is the outline of my presentation.', 'Follow the outline to stay organized.'] },
+      { w: 'conclude', ph: '/kənˈkluːd/', zh: '总结，结束', pos: '动词', phrases: ['To conclude, let me summarize...', 'We conclude that...'] }
+    ],
+    grammar: '展示结构四步法：① 开场（greeting + self-intro + agenda）② 主体（background → key points → evidence/data）③ 过渡（transition phrases 连接各部分）④ 结尾（summary + Q&A）。每部分用信号词引导：First / Next / Finally / In conclusion。',
+    tip: '练习方法：先背熟 11 个核心句型，再对着镜子或录音练完整流程。每次展示前写好提纲卡片，控制节奏不超时。'
+  },
 '外贸商务英语开口沟通实战陪跑': {
   "dialogues": [],
   "vocab": [],
@@ -1297,6 +1332,7 @@ function seedIfEmpty() {
     { title: '用英文歌学英语', cover: '🎵', level: '实用', category: '文化', lang: 'en', description: '在旋律里记单词、练听力、学发音。', tags: ['歌曲','听力'], price: 0, views: 1420, author: 'Lucky老师', lessons: 6 },
     { title: '外企面试英语通关', cover: '💼', level: '职场', category: '口语', lang: 'en', description: '自我介绍加行为面试加反问，拿 offer。', tags: ['面试','职场'], price: 0, views: 880, author: '外籍考官Tom', lessons: 6 },
     { title: '职场口语900句', cover: '💬', level: '职场', category: '口语', lang: 'en', description: '会议、邮件、汇报、社交全覆盖。', tags: ['职场','口语'], price: 0, views: 1020, author: '外籍考官Tom', lessons: 6 },
+    { title: '课堂展示与演讲英语', cover: '🎤', level: '大学', category: '口语', lang: 'en', description: '开场白、逻辑衔接、图表讲解、结尾问答，课堂/会议展示全流程实战句型与对话。来源：口语900句 App。', tags: ['口语900句','展示','演讲','职场'], price: 0, views: 860, author: 'PolyLingua AI', lessons: 6 },
     { title: '托福口语与写作训练', cover: '🎯', level: '雅思', category: '口语', lang: 'en', description: '独立与综合任务模板，逻辑与语料双补。', tags: ['托福','口语'], price: 0, views: 640, author: '外籍考官Tom', lessons: 6 },
     { title: 'PTE学术英语冲刺', cover: '📊', level: '雅思', category: '综合', lang: 'en', description: '机器评分偏好训练，高分应答策略。', tags: ['PTE','学术'], price: 0, views: 520, author: 'PolyLingua AI', lessons: 6 },
     { title: '英语语法系统课（零到进阶）', cover: '📐', level: '综合', category: '语法', lang: 'en', description: '从词法到句法，搭建完整语法框架。', tags: ['语法','系统'], price: 0, views: 1180, author: 'PolyLingua AI', lessons: 6 },
