@@ -9,3 +9,5 @@ _seedtest/
 _v6.html
 .env
 .DS_Store
+__pycache__/
+fetch_err.log

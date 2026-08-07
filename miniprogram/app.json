@@ -1,0 +1,29 @@
+{
+  "pages": [
+    "pages/index/index",
+    "pages/lookup/lookup",
+    "pages/guide/guide",
+    "pages/course-detail/course-detail",
+    "pages/mycourses/mycourses"
+  ],
+  "window": {
+    "navigationBarTitleText": "PolyLingua AI",
+    "navigationBarBackgroundColor": "#4a7dff",
+    "navigationBarTextStyle": "white",
+    "backgroundColor": "#f2f4f8"
+  },
+  "tabBar": {
+    "color": "#888888",
+    "selectedColor": "#4a7dff",
+    "backgroundColor": "#ffffff",
+    "borderStyle": "black",
+    "list": [
+      { "pagePath": "pages/index/index", "text": "首页" },
+      { "pagePath": "pages/lookup/lookup", "text": "查单词" },
+      { "pagePath": "pages/guide/guide", "text": "课程向导" },
+      { "pagePath": "pages/mycourses/mycourses", "text": "我的课程" }
+    ]
+  },
+  "style": "v2",
+  "sitemapLocation": "sitemap.json"
+}

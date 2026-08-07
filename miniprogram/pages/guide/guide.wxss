@@ -1,0 +1,8 @@
+.page-title { font-size:36rpx; font-weight:700; padding:24rpx 28rpx 8rpx; color:#222; }
+.stage-head { font-size:28rpx; font-weight:600; color:#4a7dff; padding:20rpx 28rpx 4rpx; }
+.course { display:flex; align-items:center; }
+.course-cover { font-size:56rpx; margin-right:24rpx; }
+.course-body { flex:1; }
+.course-title { font-size:30rpx; font-weight:600; }
+.course-desc { font-size:24rpx; color:#888; margin-top:6rpx; line-height:1.4;
+  display:-webkit-box; -webkit-box-orient:vertical; -webkit-line-clamp:2; overflow:hidden; }

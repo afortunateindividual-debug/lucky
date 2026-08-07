@@ -1,0 +1,16 @@
+<view class="page-title">课程向导</view>
+<block wx:for="{{groups}}" wx:key="stage" wx:for-item="g">
+  <view class="stage-head">{{g.stage}}</view>
+  <view wx:for="{{g.list}}" wx:for-item="c" wx:key="id" class="card course" data-id="{{c.id}}" bindtap="openCourse">
+    <view class="course-cover">{{c.cover}}</view>
+    <view class="course-body">
+      <view class="course-title">{{c.title}}</view>
+      <view class="course-desc">{{c.description}}</view>
+      <view class="row" style="margin-top:10rpx;">
+        <text class="tag">{{c.level}}</text>
+        <text class="tag" wx:if="{{c.category}}">{{c.category}}</text>
+      </view>
+    </view>
+  </view>
+</block>
+<view wx:if="{{groups.length === 0}}" class="muted" style="text-align:center;padding:60rpx;">课程加载中…</view>

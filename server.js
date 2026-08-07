@@ -50,6 +50,7 @@ try { db.exec(`ALTER TABLE course_lessons ADD COLUMN content TEXT DEFAULT '[]'`)
 try { db.exec(`ALTER TABLE practice_quizzes ADD COLUMN lang TEXT DEFAULT 'en'`); } catch (e) {}
 try { db.exec(`ALTER TABLE words ADD COLUMN lang TEXT DEFAULT 'en'`); } catch (e) {}
 try { db.exec(`ALTER TABLE practice_sentences ADD COLUMN lang TEXT DEFAULT 'en'`); } catch (e) {}
+try { db.exec(`ALTER TABLE users ADD COLUMN openid TEXT`); } catch (e) {}
 
 db.exec(`CREATE TABLE IF NOT EXISTS sessions (
   token TEXT PRIMARY KEY,
@@ -1569,6 +1570,41 @@ app.post('/api/login', (req, res) => {
   ).run(token, user.id);
   if (db.prepare('SELECT COUNT(*) c FROM user_courses WHERE user_id=?').get(user.id).c === 0) presetUserCourses(user.id);
   res.json({ token, user: publicUser(user) });
+});
+
+// ---------- 微信小程序登录（wx.login → openid） ----------
+app.post('/api/wx/login', async (req, res) => {
+  const { code } = req.body || {};
+  if (!code) return res.status(400).json({ message: '缺少登录凭证 code' });
+  const APPID = process.env.WX_APPID;
+  const SECRET = process.env.WX_APPSECRET;
+  if (!APPID || !SECRET) {
+    return res.status(400).json({ message: '服务器未配置微信登录（请在环境变量设置 WX_APPID / WX_APPSECRET）' });
+  }
+  try {
+    const url = `https://api.weixin.qq.com/sns/jscode2session?appid=${APPID}&secret=${SECRET}&js_code=${encodeURIComponent(code)}&grant_type=authorization_code`;
+    const r = await fetch(url);
+    const data = await r.json();
+    if (data.errcode) {
+      return res.status(401).json({ message: '微信登录失败', detail: data.errmsg || ('errcode ' + data.errcode) });
+    }
+    const openid = data.openid;
+    if (!openid) return res.status(401).json({ message: '微信未返回 openid' });
+    let user = db.prepare('SELECT * FROM users WHERE openid = ?').get(openid);
+    if (!user) {
+      const nick = '微信用户' + openid.slice(-4);
+      const info = db.prepare("INSERT INTO users (nickname, openid, role, created_at) VALUES (?,?,?,datetime('now','localtime'))").run(nick, openid, 'free');
+      user = db.prepare('SELECT * FROM users WHERE id = ?').get(info.lastInsertRowid);
+      presetUserCourses(user.id);
+    } else {
+      db.prepare("UPDATE users SET last_login = datetime('now','localtime'), last_ip = ? WHERE id = ?").run(req.ip, user.id);
+    }
+    const token = newToken();
+    db.prepare("INSERT INTO sessions (token, user_id, expires_at) VALUES (?, ?, datetime('now','localtime', '+30 days'))").run(token, user.id);
+    res.json({ token, user: publicUser(user) });
+  } catch (e) {
+    res.status(502).json({ message: '微信登录请求异常', detail: String(e) });
+  }
 });
 
 // ---------- 拉取资料（需登录） ----------

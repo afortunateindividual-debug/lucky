@@ -1,0 +1,16 @@
+<view class="page-title">我的课程</view>
+<view wx:if="{{loading}}" class="muted" style="text-align:center;padding:40rpx;">加载中…</view>
+<block wx:elif="{{courses.length}}">
+  <view wx:for="{{courses}}" wx:key="id" class="card course" data-id="{{c.id}}" bindtap="openCourse" wx:for-item="c">
+    <view class="course-cover">{{c.cover}}</view>
+    <view class="course-body">
+      <view class="course-title">{{c.title}}</view>
+      <view class="muted">进度 {{c.progress || 0}}%</view>
+    </view>
+    <view class="entry-arrow">›</view>
+  </view>
+</block>
+<view wx:else class="empty">
+  <view class="empty-ic">📚</view>
+  <view class="muted">还没有加入课程，去「课程向导」挑一门吧</view>
+</view>

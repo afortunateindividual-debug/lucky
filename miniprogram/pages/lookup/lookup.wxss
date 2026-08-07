@@ -1,0 +1,17 @@
+.search-bar { display:flex; padding:20rpx; align-items:center; }
+.search-input { flex:1; background:#fff; border-radius:40rpx; padding:16rpx 28rpx; font-size:28rpx; }
+.search-btn { margin-left:16rpx; background:#4a7dff; color:#fff; border-radius:40rpx; font-size:26rpx; padding:0 30rpx; line-height:64rpx; height:64rpx; }
+.word-head { display:flex; justify-content:space-between; align-items:center; }
+.word-text { font-size:40rpx; font-weight:700; color:#222; }
+.word-img { font-size:56rpx; }
+.pron { display:flex; align-items:center; margin-top:12rpx; }
+.lang-tag { font-size:22rpx; color:#fff; background:#4a7dff; border-radius:8rpx; padding:2rpx 12rpx; margin-right:14rpx; }
+.lang-tag.zh { background:#ff8a3d; }
+.lang-tag.fr { background:#2bb673; }
+.phon { font-size:28rpx; color:#444; }
+.speak { margin-left:14rpx; font-size:30rpx; }
+.mean { margin-top:10rpx; color:#555; font-size:28rpx; }
+.phrases { margin-top:20rpx; border-top:1rpx solid #eee; padding-top:16rpx; }
+.phrases-title { font-size:26rpx; color:#4a7dff; font-weight:600; margin-bottom:10rpx; }
+.phrase { display:flex; justify-content:space-between; align-items:center; padding:10rpx 0; }
+.phrase-text { font-size:26rpx; color:#444; flex:1; }

@@ -1,0 +1,8 @@
+.page-title { font-size:36rpx; font-weight:700; padding:24rpx 28rpx 8rpx; color:#222; }
+.course { display:flex; align-items:center; }
+.course-cover { font-size:56rpx; margin-right:24rpx; }
+.course-body { flex:1; }
+.course-title { font-size:30rpx; font-weight:600; }
+.entry-arrow { font-size:40rpx; color:#ccc; }
+.empty { text-align:center; padding:100rpx 40rpx; }
+.empty-ic { font-size:90rpx; }

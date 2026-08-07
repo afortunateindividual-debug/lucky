@@ -1,0 +1,47 @@
+<view class="hero">
+  <view class="hero-logo">🌐</view>
+  <view class="hero-title">PolyLingua AI</view>
+  <view class="hero-sub">学语言 · 连世界</view>
+</view>
+
+<view class="card">
+  <block wx:if="{{!loggedIn}}">
+    <view class="muted" style="margin-bottom:20rpx;">登录后即可同步你的课程与学习进度</view>
+    <button class="btn-primary" bindtap="onWxLogin">微信一键登录</button>
+  </block>
+  <block wx:else>
+    <view class="row between">
+      <view>
+        <view style="font-size:32rpx;font-weight:600;">{{user.nickname}}</view>
+        <view class="muted">角色：{{user.role}}</view>
+      </view>
+      <view class="tag" bindtap="onLogout">退出</view>
+    </view>
+  </block>
+</view>
+
+<view class="section-title" style="margin:24rpx 24rpx 0;">核心功能</view>
+<view class="card entry" bindtap="goLookup">
+  <view class="entry-ic">🔍</view>
+  <view class="entry-body">
+    <view class="entry-t">查单词</view>
+    <view class="muted">英 / 中 / 法 三语读法 + 金典短语朗读</view>
+  </view>
+  <view class="entry-arrow">›</view>
+</view>
+<view class="card entry" bindtap="goGuide">
+  <view class="entry-ic">🧭</view>
+  <view class="entry-body">
+    <view class="entry-t">课程向导</view>
+    <view class="muted">38 门精选课程，按阶段浏览</view>
+  </view>
+  <view class="entry-arrow">›</view>
+</view>
+<view class="card entry" bindtap="goMy">
+  <view class="entry-ic">📚</view>
+  <view class="entry-body">
+    <view class="entry-t">我的课程</view>
+    <view class="muted">已加入的课程与学习进度</view>
+  </view>
+  <view class="entry-arrow">›</view>
+</view>

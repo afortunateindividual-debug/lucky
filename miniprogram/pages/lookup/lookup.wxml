@@ -1,0 +1,42 @@
+<view class="search-bar">
+  <input class="search-input" placeholder="输入英文/中文单词，如 water" value="{{q}}" bindinput="onInput" bindconfirm="onSearch" confirm-type="search" />
+  <button class="search-btn" bindtap="onSearch">搜索</button>
+</view>
+
+<view wx:if="{{loading}}" class="muted" style="text-align:center;padding:40rpx;">查询中…</view>
+
+<block wx:for="{{results}}" wx:key="id" wx:for-item="w">
+  <view class="card word-card">
+    <view class="word-head">
+      <text class="word-text">{{w.word}}</text>
+      <text class="word-img">{{w.image}}</text>
+    </view>
+    <view class="pron">
+      <text class="lang-tag">英</text>
+      <text class="phon">{{w.phonetic}}</text>
+      <text class="speak" data-text="{{w.word}}" data-lang="en" bindtap="speak">🔊</text>
+    </view>
+    <view class="mean">{{w.meaning}}</view>
+
+    <view wx:if="{{w.zh_reading}}" class="pron">
+      <text class="lang-tag zh">中</text>
+      <text class="phon">{{w.zh_reading}}</text>
+      <text class="speak" data-text="{{w.zh_reading}}" data-lang="zh" bindtap="speak">🔊</text>
+    </view>
+    <view wx:if="{{w.fr_word}}" class="pron">
+      <text class="lang-tag fr">法</text>
+      <text class="phon">{{w.fr_word}} {{w.fr_reading}}</text>
+      <text class="speak" data-text="{{w.fr_word}}" data-lang="fr" bindtap="speak">🔊</text>
+    </view>
+
+    <view wx:if="{{w.phrasesArr.length}}" class="phrases">
+      <view class="phrases-title">✨ 金典短语</view>
+      <view wx:for="{{w.phrasesArr}}" wx:for-item="p" wx:key="*this" class="phrase" data-text="{{p}}" data-lang="en" bindtap="speak">
+        <text class="phrase-text">{{p}}</text>
+        <text class="speak">🔊</text>
+      </view>
+    </view>
+  </view>
+</block>
+
+<view wx:if="{{!loading && results.length === 0}}" class="muted" style="text-align:center;padding:60rpx;">没有找到相关单词，换个词试试～</view>

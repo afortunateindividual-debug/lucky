@@ -1,0 +1,49 @@
+page {
+  background: #f2f4f8;
+  color: #222;
+  font-family: -apple-system, "PingFang SC", "Helvetica Neue", Arial, sans-serif;
+  font-size: 28rpx;
+}
+
+.brand { color: #4a7dff; }
+.muted { color: #999; font-size: 24rpx; }
+.primary-bg { background: #4a7dff; }
+
+.btn-primary {
+  background: #4a7dff;
+  color: #fff;
+  border-radius: 48rpx;
+  padding: 20rpx 0;
+  text-align: center;
+  font-size: 30rpx;
+  line-height: 1.4;
+}
+.btn-primary.btn-disabled { background: #b9c8ff; }
+
+.card {
+  background: #fff;
+  border-radius: 20rpx;
+  padding: 28rpx;
+  margin: 20rpx;
+  box-shadow: 0 4rpx 16rpx rgba(0, 0, 0, 0.05);
+}
+
+.section-title {
+  font-size: 30rpx;
+  font-weight: 600;
+  color: #333;
+  margin: 8rpx 0 12rpx;
+}
+
+.tag {
+  display: inline-block;
+  background: #eef2ff;
+  color: #4a7dff;
+  font-size: 22rpx;
+  padding: 4rpx 16rpx;
+  border-radius: 20rpx;
+  margin-right: 12rpx;
+}
+
+.row { display: flex; align-items: center; }
+.between { justify-content: space-between; }

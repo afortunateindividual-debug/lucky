@@ -1,0 +1,9 @@
+.hero { text-align:center; padding:60rpx 0 36rpx; background:linear-gradient(135deg,#4a7dff,#6f9bff); color:#fff; }
+.hero-logo { font-size:80rpx; }
+.hero-title { font-size:44rpx; font-weight:700; margin-top:10rpx; }
+.hero-sub { font-size:26rpx; opacity:0.92; margin-top:6rpx; }
+.entry { display:flex; align-items:center; }
+.entry-ic { font-size:48rpx; margin-right:24rpx; }
+.entry-body { flex:1; }
+.entry-t { font-size:30rpx; font-weight:600; }
+.entry-arrow { font-size:40rpx; color:#ccc; }

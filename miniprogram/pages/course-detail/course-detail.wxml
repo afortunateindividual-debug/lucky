@@ -1,0 +1,28 @@
+<view style="padding-bottom:150rpx;">
+  <view wx:if="{{loading}}" class="muted" style="text-align:center;padding:60rpx;">加载中…</view>
+  <block wx:else>
+    <view class="card detail-head">
+      <view class="detail-cover">{{course.cover}}</view>
+      <view class="detail-title">{{course.title}}</view>
+      <view class="row" style="margin-top:10rpx;justify-content:center;">
+        <text class="tag">{{course.level}}</text>
+        <text class="tag" wx:if="{{course.category}}">{{course.category}}</text>
+      </view>
+      <view class="detail-desc">{{course.description}}</view>
+    </view>
+
+    <view class="section-title" style="margin:10rpx 28rpx;">课程章节</view>
+    <view wx:for="{{lessons}}" wx:key="id" wx:for-item="l" class="card lesson">
+      <view class="lesson-no">{{index + 1}}</view>
+      <view class="lesson-body">
+        <view class="lesson-title">{{l.title}}</view>
+        <view class="lesson-sum">{{l.subtitle}}</view>
+      </view>
+    </view>
+    <view wx:if="{{lessons.length === 0}}" class="muted" style="padding:30rpx 28rpx;">暂未生成章节内容</view>
+  </block>
+</view>
+
+<view class="footer-bar">
+  <button class="btn-primary {{joined ? 'btn-disabled' : ''}}" bindtap="onJoin">{{joined ? '已加入' : '加入课程'}}</button>
+</view>
