@@ -1287,7 +1287,8 @@ function buildLessons(theme) {
   ];
   return titles.map((tt, i) => {
     const content = { dialogue: [], vocab: [], grammar: '', tip: '' };
-    if (i === 0 || i === 5) content.vocab = v.slice(0, 5);
+    if (i === 0) content.vocab = v.slice(0, Math.ceil(v.length / 2));
+    if (i === 5) content.vocab = v.slice(Math.ceil(v.length / 2));
     if (i === 1) content.dialogue = d.slice(0, 1);
     if (i === 2 || i === 4) content.dialogue = d;
     if (i === 3 || i === 5) content.grammar = theme.grammar || '';
